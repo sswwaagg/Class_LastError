@@ -1,6 +1,8 @@
 # Class_LastError
 Adds human readable conversions of [A_LastError](https://www.autohotkey.com/docs/commands/DllCall.htm#LastError) codes.
 
+*Note:* v1 / v2 agnostic
+
 ## Usage
 
 ### Include
