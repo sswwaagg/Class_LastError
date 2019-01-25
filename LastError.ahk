@@ -2,7 +2,7 @@
 
 class LastError
 {
-	static INIT := LastError._LoadErrorTable()
+	static ERROR_TABLE := LastError._LoadErrorTable()
 
 	id[] {
 		get {
@@ -34,38 +34,6 @@ class LastError
 		}
 	}
 
-	_LoadErrorTable() {
-		LastError.ERROR_TABLE := {}
-
-		fileSelf := FileOpen(A_LineFile, "r")
-
-		while !fileSelf.AtEOF
-		{
-			line := Trim(fileSelf.ReadLine(), " `t`r`n")
-
-			if (!isParsingErrors && line == "<<<START>>>")
-			{
-				isParsingErrors := true
-				continue
-			}
-
-			if (isParsingErrors && line == "<<<END>>>")
-				break
-
-			if isParsingErrors
-			{
-				Temp := StrSplit(line, "|")
-				id := Temp[1]
-				enum := Temp[2]
-				msg := Temp[3]
-
-				LastError.ERROR_TABLE[id] := {"enum": enum, "msg": msg}
-			}
-		}
-
-		fileSelf.Close()
-	}
-
 	_FormattedCompleteInfo(id) {
 		return Format("{}`n`n{2:} (0x{2:X})`n{}", LastError.ERROR_TABLE[id].enum, id, LastError.ERROR_TABLE[id].msg)
 	}
@@ -85,2847 +53,2849 @@ class LastError
 	_MessageInfoNotFound(id, field) {
 		return Format("Requested '{:U}' could not be found for A_LastError: {}", field, id)
 	}
-}
 
-/*
-<<<START>>>
-0|ERROR_SUCCESS|The operation completed successfully.
-1|ERROR_INVALID_FUNCTION|Incorrect function.
-2|ERROR_FILE_NOT_FOUND|The system cannot find the file specified.
-3|ERROR_PATH_NOT_FOUND|The system cannot find the path specified.
-4|ERROR_TOO_MANY_OPEN_FILES|The system cannot open the file.
-5|ERROR_ACCESS_DENIED|Access is denied.
-6|ERROR_INVALID_HANDLE|The handle is invalid.
-7|ERROR_ARENA_TRASHED|The storage control blocks were destroyed.
-8|ERROR_NOT_ENOUGH_MEMORY|Not enough storage is available to process this command.
-9|ERROR_INVALID_BLOCK|The storage control block address is invalid.
-10|ERROR_BAD_ENVIRONMENT|The environment is incorrect.
-11|ERROR_BAD_FORMAT|An attempt was made to load a program with an incorrect format.
-12|ERROR_INVALID_ACCESS|The access code is invalid.
-13|ERROR_INVALID_DATA|The data is invalid.
-14|ERROR_OUTOFMEMORY|Not enough storage is available to complete this operation.
-15|ERROR_INVALID_DRIVE|The system cannot find the drive specified.
-16|ERROR_CURRENT_DIRECTORY|The directory cannot be removed.
-17|ERROR_NOT_SAME_DEVICE|The system cannot move the file to a different disk drive.
-18|ERROR_NO_MORE_FILES|There are no more files.
-19|ERROR_WRITE_PROTECT|The media is write protected.
-20|ERROR_BAD_UNIT|The system cannot find the device specified.
-21|ERROR_NOT_READY|The device is not ready.
-22|ERROR_BAD_COMMAND|The device does not recognize the command.
-23|ERROR_CRC|Data error (cyclic redundancy check).
-24|ERROR_BAD_LENGTH|The program issued a command but the command length is incorrect.
-25|ERROR_SEEK|The drive cannot locate a specific area or track on the disk.
-26|ERROR_NOT_DOS_DISK|The specified disk or diskette cannot be accessed.
-27|ERROR_SECTOR_NOT_FOUND|The drive cannot find the sector requested.
-28|ERROR_OUT_OF_PAPER|The printer is out of paper.
-29|ERROR_WRITE_FAULT|The system cannot write to the specified device.
-30|ERROR_READ_FAULT|The system cannot read from the specified device.
-31|ERROR_GEN_FAILURE|A device attached to the system is not functioning.
-32|ERROR_SHARING_VIOLATION|The process cannot access the file because it is being used by another process.
-33|ERROR_LOCK_VIOLATION|The process cannot access the file because another process has locked a portion of the file.
-34|ERROR_WRONG_DISK|The wrong diskette is in the drive. Insert `%2 (Volume Serial Number: `%3) into drive `%1.
-36|ERROR_SHARING_BUFFER_EXCEEDED|Too many files opened for sharing.
-38|ERROR_HANDLE_EOF|Reached the end of the file.
-39|ERROR_HANDLE_DISK_FULL|The disk is full.
-50|ERROR_NOT_SUPPORTED|The request is not supported.
-51|ERROR_REM_NOT_LIST|Windows cannot find the network path. Verify that the network path is correct and the destination computer is not busy or turned off. If Windows still cannot find the network path, contact your network administrator.
-52|ERROR_DUP_NAME|You were not connected because a duplicate name exists on the network. If joining a domain, go to System in Control Panel to change the computer name and try again. If joining a workgroup, choose another workgroup name.
-53|ERROR_BAD_NETPATH|The network path was not found.
-54|ERROR_NETWORK_BUSY|The network is busy.
-55|ERROR_DEV_NOT_EXIST|The specified network resource or device is no longer available.
-56|ERROR_TOO_MANY_CMDS|The network BIOS command limit has been reached.
-57|ERROR_ADAP_HDW_ERR|A network adapter hardware error occurred.
-58|ERROR_BAD_NET_RESP|The specified server cannot perform the requested operation.
-59|ERROR_UNEXP_NET_ERR|An unexpected network error occurred.
-60|ERROR_BAD_REM_ADAP|The remote adapter is not compatible.
-61|ERROR_PRINTQ_FULL|The printer queue is full.
-62|ERROR_NO_SPOOL_SPACE|Space to store the file waiting to be printed is not available on the server.
-63|ERROR_PRINT_CANCELLED|Your file waiting to be printed was deleted.
-64|ERROR_NETNAME_DELETED|The specified network name is no longer available.
-65|ERROR_NETWORK_ACCESS_DENIED|Network access is denied.
-66|ERROR_BAD_DEV_TYPE|The network resource type is not correct.
-67|ERROR_BAD_NET_NAME|The network name cannot be found.
-68|ERROR_TOO_MANY_NAMES|The name limit for the local computer network adapter card was exceeded.
-69|ERROR_TOO_MANY_SESS|The network BIOS session limit was exceeded.
-70|ERROR_SHARING_PAUSED|The remote server has been paused or is in the process of being started.
-71|ERROR_REQ_NOT_ACCEP|No more connections can be made to this remote computer at this time because there are already as many connections as the computer can accept.
-72|ERROR_REDIR_PAUSED|The specified printer or disk device has been paused.
-80|ERROR_FILE_EXISTS|The file exists.
-82|ERROR_CANNOT_MAKE|The directory or file cannot be created.
-83|ERROR_FAIL_I24|Fail on INT 24.
-84|ERROR_OUT_OF_STRUCTURES|Storage to process this request is not available.
-85|ERROR_ALREADY_ASSIGNED|The local device name is already in use.
-86|ERROR_INVALID_PASSWORD|The specified network password is not correct.
-87|ERROR_INVALID_PARAMETER|The parameter is incorrect.
-88|ERROR_NET_WRITE_FAULT|A write fault occurred on the network.
-89|ERROR_NO_PROC_SLOTS|The system cannot start another process at this time.
-100|ERROR_TOO_MANY_SEMAPHORES|Cannot create another system semaphore.
-101|ERROR_EXCL_SEM_ALREADY_OWNED|The exclusive semaphore is owned by another process.
-102|ERROR_SEM_IS_SET|The semaphore is set and cannot be closed.
-103|ERROR_TOO_MANY_SEM_REQUESTS|The semaphore cannot be set again.
-104|ERROR_INVALID_AT_INTERRUPT_TIME|Cannot request exclusive semaphores at interrupt time.
-105|ERROR_SEM_OWNER_DIED|The previous ownership of this semaphore has ended.
-106|ERROR_SEM_USER_LIMIT|Insert the diskette for drive `%1.
-107|ERROR_DISK_CHANGE|The program stopped because an alternate diskette was not inserted.
-108|ERROR_DRIVE_LOCKED|The disk is in use or locked by another process.
-109|ERROR_BROKEN_PIPE|The pipe has been ended.
-110|ERROR_OPEN_FAILED|The system cannot open the device or file specified.
-111|ERROR_BUFFER_OVERFLOW|The file name is too long.
-112|ERROR_DISK_FULL|There is not enough space on the disk.
-113|ERROR_NO_MORE_SEARCH_HANDLES|No more internal file identifiers available.
-114|ERROR_INVALID_TARGET_HANDLE|The target internal file identifier is incorrect.
-117|ERROR_INVALID_CATEGORY|The IOCTL call made by the application program is not correct.
-118|ERROR_INVALID_VERIFY_SWITCH|The verify-on-write switch parameter value is not correct.
-119|ERROR_BAD_DRIVER_LEVEL|The system does not support the command requested.
-120|ERROR_CALL_NOT_IMPLEMENTED|This function is not supported on this system.
-121|ERROR_SEM_TIMEOUT|The semaphore timeout period has expired.
-122|ERROR_INSUFFICIENT_BUFFER|The data area passed to a system call is too small.
-123|ERROR_INVALID_NAME|The filename, directory name, or volume label syntax is incorrect.
-124|ERROR_INVALID_LEVEL|The system call level is not correct.
-125|ERROR_NO_VOLUME_LABEL|The disk has no volume label.
-126|ERROR_MOD_NOT_FOUND|The specified module could not be found.
-127|ERROR_PROC_NOT_FOUND|The specified procedure could not be found.
-128|ERROR_WAIT_NO_CHILDREN|There are no child processes to wait for.
-129|ERROR_CHILD_NOT_COMPLETE|The `%1 application cannot be run in Win32 mode.
-130|ERROR_DIRECT_ACCESS_HANDLE|Attempt to use a file handle to an open disk partition for an operation other than raw disk I/O.
-131|ERROR_NEGATIVE_SEEK|An attempt was made to move the file pointer before the beginning of the file.
-132|ERROR_SEEK_ON_DEVICE|The file pointer cannot be set on the specified device or file.
-133|ERROR_IS_JOIN_TARGET|A JOIN or SUBST command cannot be used for a drive that contains previously joined drives.
-134|ERROR_IS_JOINED|An attempt was made to use a JOIN or SUBST command on a drive that has already been joined.
-135|ERROR_IS_SUBSTED|An attempt was made to use a JOIN or SUBST command on a drive that has already been substituted.
-136|ERROR_NOT_JOINED|The system tried to delete the JOIN of a drive that is not joined.
-137|ERROR_NOT_SUBSTED|The system tried to delete the substitution of a drive that is not substituted.
-138|ERROR_JOIN_TO_JOIN|The system tried to join a drive to a directory on a joined drive.
-139|ERROR_SUBST_TO_SUBST|The system tried to substitute a drive to a directory on a substituted drive.
-140|ERROR_JOIN_TO_SUBST|The system tried to join a drive to a directory on a substituted drive.
-141|ERROR_SUBST_TO_JOIN|The system tried to SUBST a drive to a directory on a joined drive.
-142|ERROR_BUSY_DRIVE|The system cannot perform a JOIN or SUBST at this time.
-143|ERROR_SAME_DRIVE|The system cannot join or substitute a drive to or for a directory on the same drive.
-144|ERROR_DIR_NOT_ROOT|The directory is not a subdirectory of the root directory.
-145|ERROR_DIR_NOT_EMPTY|The directory is not empty.
-146|ERROR_IS_SUBST_PATH|The path specified is being used in a substitute.
-147|ERROR_IS_JOIN_PATH|Not enough resources are available to process this command.
-148|ERROR_PATH_BUSY|The path specified cannot be used at this time.
-149|ERROR_IS_SUBST_TARGET|An attempt was made to join or substitute a drive for which a directory on the drive is the target of a previous substitute.
-150|ERROR_SYSTEM_TRACE|System trace information was not specified in your CONFIG.SYS file, or tracing is disallowed.
-151|ERROR_INVALID_EVENT_COUNT|The number of specified semaphore events for DosMuxSemWait is not correct.
-152|ERROR_TOO_MANY_MUXWAITERS|DosMuxSemWait did not execute; too many semaphores are already set.
-153|ERROR_INVALID_LIST_FORMAT|The DosMuxSemWait list is not correct.
-154|ERROR_LABEL_TOO_LONG|The volume label you entered exceeds the label character limit of the target file system.
-155|ERROR_TOO_MANY_TCBS|Cannot create another thread.
-156|ERROR_SIGNAL_REFUSED|The recipient process has refused the signal.
-157|ERROR_DISCARDED|The segment is already discarded and cannot be locked.
-158|ERROR_NOT_LOCKED|The segment is already unlocked.
-159|ERROR_BAD_THREADID_ADDR|The address for the thread ID is not correct.
-160|ERROR_BAD_ARGUMENTS|One or more arguments are not correct.
-161|ERROR_BAD_PATHNAME|The specified path is invalid.
-162|ERROR_SIGNAL_PENDING|A signal is already pending.
-164|ERROR_MAX_THRDS_REACHED|No more threads can be created in the system.
-167|ERROR_LOCK_FAILED|Unable to lock a region of a file.
-170|ERROR_BUSY|The requested resource is in use.
-171|ERROR_DEVICE_SUPPORT_IN_PROGRESS|Device's command support detection is in progress.
-173|ERROR_CANCEL_VIOLATION|A lock request was not outstanding for the supplied cancel region.
-174|ERROR_ATOMIC_LOCKS_NOT_SUPPORTED|The file system does not support atomic changes to the lock type.
-180|ERROR_INVALID_SEGMENT_NUMBER|The system detected a segment number that was not correct.
-182|ERROR_INVALID_ORDINAL|The operating system cannot run `%1.
-183|ERROR_ALREADY_EXISTS|Cannot create a file when that file already exists.
-186|ERROR_INVALID_FLAG_NUMBER|The flag passed is not correct.
-187|ERROR_SEM_NOT_FOUND|The specified system semaphore name was not found.
-188|ERROR_INVALID_STARTING_CODESEG|The operating system cannot run `%1.
-189|ERROR_INVALID_STACKSEG|The operating system cannot run `%1.
-190|ERROR_INVALID_MODULETYPE|The operating system cannot run `%1.
-191|ERROR_INVALID_EXE_SIGNATURE|Cannot run `%1 in Win32 mode.
-192|ERROR_EXE_MARKED_INVALID|The operating system cannot run `%1.
-193|ERROR_BAD_EXE_FORMAT|`%1 is not a valid Win32 application.
-194|ERROR_ITERATED_DATA_EXCEEDS_64k|The operating system cannot run `%1.
-195|ERROR_INVALID_MINALLOCSIZE|The operating system cannot run `%1.
-196|ERROR_DYNLINK_FROM_INVALID_RING|The operating system cannot run this application program.
-197|ERROR_IOPL_NOT_ENABLED|The operating system is not presently configured to run this application.
-198|ERROR_INVALID_SEGDPL|The operating system cannot run `%1.
-199|ERROR_AUTODATASEG_EXCEEDS_64k|The operating system cannot run this application program.
-200|ERROR_RING2SEG_MUST_BE_MOVABLE|The code segment cannot be greater than or equal to 64K.
-201|ERROR_RELOC_CHAIN_XEEDS_SEGLIM|The operating system cannot run `%1.
-202|ERROR_INFLOOP_IN_RELOC_CHAIN|The operating system cannot run `%1.
-203|ERROR_ENVVAR_NOT_FOUND|The system could not find the environment option that was entered.
-205|ERROR_NO_SIGNAL_SENT|No process in the command subtree has a signal handler.
-206|ERROR_FILENAME_EXCED_RANGE|The filename or extension is too long.
-207|ERROR_RING2_STACK_IN_USE|The ring 2 stack is in use.
-208|ERROR_META_EXPANSION_TOO_LONG|The global filename characters, * or ?, are entered incorrectly or too many global filename characters are specified.
-209|ERROR_INVALID_SIGNAL_NUMBER|The signal being posted is not correct.
-210|ERROR_THREAD_1_INACTIVE|The signal handler cannot be set.
-212|ERROR_LOCKED|The segment is locked and cannot be reallocated.
-214|ERROR_TOO_MANY_MODULES|Too many dynamic-link modules are attached to this program or dynamic-link module.
-215|ERROR_NESTING_NOT_ALLOWED|Cannot nest calls to LoadModule.
-216|ERROR_EXE_MACHINE_TYPE_MISMATCH|This version of `%1 is not compatible with the version of Windows you're running. Check your computer's system information and then contact the software publisher.
-217|ERROR_EXE_CANNOT_MODIFY_SIGNED_BINARY|The image file `%1 is signed, unable to modify.
-218|ERROR_EXE_CANNOT_MODIFY_STRONG_SIGNED_BINARY|The image file `%1 is strong signed, unable to modify.
-220|ERROR_FILE_CHECKED_OUT|This file is checked out or locked for editing by another user.
-221|ERROR_CHECKOUT_REQUIRED|The file must be checked out before saving changes.
-222|ERROR_BAD_FILE_TYPE|The file type being saved or retrieved has been blocked.
-223|ERROR_FILE_TOO_LARGE|The file size exceeds the limit allowed and cannot be saved.
-224|ERROR_FORMS_AUTH_REQUIRED|Access Denied. Before opening files in this location, you must first add the web site to your trusted sites list, browse to the web site, and select the option to login automatically.
-225|ERROR_VIRUS_INFECTED|Operation did not complete successfully because the file contains a virus or potentially unwanted software.
-226|ERROR_VIRUS_DELETED|This file contains a virus or potentially unwanted software and cannot be opened. Due to the nature of this virus or potentially unwanted software, the file has been removed from this location.
-229|ERROR_PIPE_LOCAL|The pipe is local.
-230|ERROR_BAD_PIPE|The pipe state is invalid.
-231|ERROR_PIPE_BUSY|All pipe instances are busy.
-232|ERROR_NO_DATA|The pipe is being closed.
-233|ERROR_PIPE_NOT_CONNECTED|No process is on the other end of the pipe.
-234|ERROR_MORE_DATA|More data is available.
-240|ERROR_VC_DISCONNECTED|The session was canceled.
-254|ERROR_INVALID_EA_NAME|The specified extended attribute name was invalid.
-255|ERROR_EA_LIST_INCONSISTENT|The extended attributes are inconsistent.
-258|WAIT_TIMEOUT|The wait operation timed out.
-259|ERROR_NO_MORE_ITEMS|No more data is available.
-266|ERROR_CANNOT_COPY|The copy functions cannot be used.
-267|ERROR_DIRECTORY|The directory name is invalid.
-275|ERROR_EAS_DIDNT_FIT|The extended attributes did not fit in the buffer.
-276|ERROR_EA_FILE_CORRUPT|The extended attribute file on the mounted file system is corrupt.
-277|ERROR_EA_TABLE_FULL|The extended attribute table file is full.
-278|ERROR_INVALID_EA_HANDLE|The specified extended attribute handle is invalid.
-282|ERROR_EAS_NOT_SUPPORTED|The mounted file system does not support extended attributes.
-288|ERROR_NOT_OWNER|Attempt to release mutex not owned by caller.
-298|ERROR_TOO_MANY_POSTS|Too many posts were made to a semaphore.
-299|ERROR_PARTIAL_COPY|Only part of a ReadProcessMemory or WriteProcessMemory request was completed.
-300|ERROR_OPLOCK_NOT_GRANTED|The oplock request is denied.
-301|ERROR_INVALID_OPLOCK_PROTOCOL|An invalid oplock acknowledgment was received by the system.
-302|ERROR_DISK_TOO_FRAGMENTED|The volume is too fragmented to complete this operation.
-303|ERROR_DELETE_PENDING|The file cannot be opened because it is in the process of being deleted.
-304|ERROR_INCOMPATIBLE_WITH_GLOBAL_SHORT_NAME_REGISTRY_SETTING|Short name settings may not be changed on this volume due to the global registry setting.
-305|ERROR_SHORT_NAMES_NOT_ENABLED_ON_VOLUME|Short names are not enabled on this volume.
-306|ERROR_SECURITY_STREAM_IS_INCONSISTENT|The security stream for the given volume is in an inconsistent state. Please run CHKDSK on the volume.
-307|ERROR_INVALID_LOCK_RANGE|A requested file lock operation cannot be processed due to an invalid byte range.
-308|ERROR_IMAGE_SUBSYSTEM_NOT_PRESENT|The subsystem needed to support the image type is not present.
-309|ERROR_NOTIFICATION_GUID_ALREADY_DEFINED|The specified file already has a notification GUID associated with it.
-310|ERROR_INVALID_EXCEPTION_HANDLER|An invalid exception handler routine has been detected.
-311|ERROR_DUPLICATE_PRIVILEGES|Duplicate privileges were specified for the token.
-312|ERROR_NO_RANGES_PROCESSED|No ranges for the specified operation were able to be processed.
-313|ERROR_NOT_ALLOWED_ON_SYSTEM_FILE|Operation is not allowed on a file system internal file.
-314|ERROR_DISK_RESOURCES_EXHAUSTED|The physical resources of this disk have been exhausted.
-315|ERROR_INVALID_TOKEN|The token representing the data is invalid.
-316|ERROR_DEVICE_FEATURE_NOT_SUPPORTED|The device does not support the command feature.
-317|ERROR_MR_MID_NOT_FOUND|The system cannot find message text for message number 0x`%1 in the message file for `%2.
-318|ERROR_SCOPE_NOT_FOUND|The scope specified was not found.
-319|ERROR_UNDEFINED_SCOPE|The Central Access Policy specified is not defined on the target machine.
-320|ERROR_INVALID_CAP|The Central Access Policy obtained from Active Directory is invalid.
-321|ERROR_DEVICE_UNREACHABLE|The device is unreachable.
-322|ERROR_DEVICE_NO_RESOURCES|The target device has insufficient resources to complete the operation.
-323|ERROR_DATA_CHECKSUM_ERROR|A data integrity checksum error occurred. Data in the file stream is corrupt.
-324|ERROR_INTERMIXED_KERNEL_EA_OPERATION|An attempt was made to modify both a KERNEL and normal Extended Attribute (EA) in the same operation.
-326|ERROR_FILE_LEVEL_TRIM_NOT_SUPPORTED|Device does not support file-level TRIM.
-327|ERROR_OFFSET_ALIGNMENT_VIOLATION|The command specified a data offset that does not align to the device's granularity/alignment.
-328|ERROR_INVALID_FIELD_IN_PARAMETER_LIST|The command specified an invalid field in its parameter list.
-329|ERROR_OPERATION_IN_PROGRESS|An operation is currently in progress with the device.
-330|ERROR_BAD_DEVICE_PATH|An attempt was made to send down the command via an invalid path to the target device.
-331|ERROR_TOO_MANY_DESCRIPTORS|The command specified a number of descriptors that exceeded the maximum supported by the device.
-332|ERROR_SCRUB_DATA_DISABLED|Scrub is disabled on the specified file.
-333|ERROR_NOT_REDUNDANT_STORAGE|The storage device does not provide redundancy.
-334|ERROR_RESIDENT_FILE_NOT_SUPPORTED|An operation is not supported on a resident file.
-335|ERROR_COMPRESSED_FILE_NOT_SUPPORTED|An operation is not supported on a compressed file.
-336|ERROR_DIRECTORY_NOT_SUPPORTED|An operation is not supported on a directory.
-337|ERROR_NOT_READ_FROM_COPY|The specified copy of the requested data could not be read.
-350|ERROR_FAIL_NOACTION_REBOOT|No action was taken as a system reboot is required.
-351|ERROR_FAIL_SHUTDOWN|The shutdown operation failed.
-352|ERROR_FAIL_RESTART|The restart operation failed.
-353|ERROR_MAX_SESSIONS_REACHED|The maximum number of sessions has been reached.
-400|ERROR_THREAD_MODE_ALREADY_BACKGROUND|The thread is already in background processing mode.
-401|ERROR_THREAD_MODE_NOT_BACKGROUND|The thread is not in background processing mode.
-402|ERROR_PROCESS_MODE_ALREADY_BACKGROUND|The process is already in background processing mode.
-403|ERROR_PROCESS_MODE_NOT_BACKGROUND|The process is not in background processing mode.
-487|ERROR_INVALID_ADDRESS|Attempt to access invalid address.
-500|ERROR_USER_PROFILE_LOAD|User profile cannot be loaded.
-534|ERROR_ARITHMETIC_OVERFLOW|Arithmetic result exceeded 32 bits.
-535|ERROR_PIPE_CONNECTED|There is a process on other end of the pipe.
-536|ERROR_PIPE_LISTENING|Waiting for a process to open the other end of the pipe.
-537|ERROR_VERIFIER_STOP|Application verifier has found an error in the current process.
-538|ERROR_ABIOS_ERROR|An error occurred in the ABIOS subsystem.
-539|ERROR_WX86_WARNING|A warning occurred in the WX86 subsystem.
-540|ERROR_WX86_ERROR|An error occurred in the WX86 subsystem.
-541|ERROR_TIMER_NOT_CANCELED|An attempt was made to cancel or set a timer that has an associated APC and the subject thread is not the thread that originally set the timer with an associated APC routine.
-542|ERROR_UNWIND|Unwind exception code.
-543|ERROR_BAD_STACK|An invalid or unaligned stack was encountered during an unwind operation.
-544|ERROR_INVALID_UNWIND_TARGET|An invalid unwind target was encountered during an unwind operation.
-545|ERROR_INVALID_PORT_ATTRIBUTES|Invalid Object Attributes specified to NtCreatePort or invalid Port Attributes specified to NtConnectPort
-546|ERROR_PORT_MESSAGE_TOO_LONG|Length of message passed to NtRequestPort or NtRequestWaitReplyPort was longer than the maximum message allowed by the port.
-547|ERROR_INVALID_QUOTA_LOWER|An attempt was made to lower a quota limit below the current usage.
-548|ERROR_DEVICE_ALREADY_ATTACHED|An attempt was made to attach to a device that was already attached to another device.
-549|ERROR_INSTRUCTION_MISALIGNMENT|An attempt was made to execute an instruction at an unaligned address and the host system does not support unaligned instruction references.
-550|ERROR_PROFILING_NOT_STARTED|Profiling not started.
-551|ERROR_PROFILING_NOT_STOPPED|Profiling not stopped.
-552|ERROR_COULD_NOT_INTERPRET|The passed ACL did not contain the minimum required information.
-553|ERROR_PROFILING_AT_LIMIT|The number of active profiling objects is at the maximum and no more may be started.
-554|ERROR_CANT_WAIT|Used to indicate that an operation cannot continue without blocking for I/O.
-555|ERROR_CANT_TERMINATE_SELF|Indicates that a thread attempted to terminate itself by default (called NtTerminateThread with <strong>NULL</strong>) and it was the last thread in the current process.
-556|ERROR_UNEXPECTED_MM_CREATE_ERR|If an MM error is returned which is not defined in the standard FsRtl filter, it is converted to one of the following errors which is guaranteed to be in the filter. In this case information is lost, however, the filter correctly handles the exception.
-557|ERROR_UNEXPECTED_MM_MAP_ERROR|If an MM error is returned which is not defined in the standard FsRtl filter, it is converted to one of the following errors which is guaranteed to be in the filter. In this case information is lost, however, the filter correctly handles the exception.
-558|ERROR_UNEXPECTED_MM_EXTEND_ERR|If an MM error is returned which is not defined in the standard FsRtl filter, it is converted to one of the following errors which is guaranteed to be in the filter. In this case information is lost, however, the filter correctly handles the exception.
-559|ERROR_BAD_FUNCTION_TABLE|A malformed function table was encountered during an unwind operation.
-560|ERROR_NO_GUID_TRANSLATION|Indicates that an attempt was made to assign protection to a file system file or directory and one of the SIDs in the security descriptor could not be translated into a GUID that could be stored by the file system. This causes the protection attempt to fail, which may cause a file creation attempt to fail.
-561|ERROR_INVALID_LDT_SIZE|Indicates that an attempt was made to grow an LDT by setting its size, or that the size was not an even number of selectors.
-563|ERROR_INVALID_LDT_OFFSET|Indicates that the starting value for the LDT information was not an integral multiple of the selector size.
-564|ERROR_INVALID_LDT_DESCRIPTOR|Indicates that the user supplied an invalid descriptor when trying to set up Ldt descriptors.
-565|ERROR_TOO_MANY_THREADS|Indicates a process has too many threads to perform the requested action. For example, assignment of a primary token may only be performed when a process has zero or one threads.
-566|ERROR_THREAD_NOT_IN_PROCESS|An attempt was made to operate on a thread within a specific process, but the thread specified is not in the process specified.
-567|ERROR_PAGEFILE_QUOTA_EXCEEDED|Page file quota was exceeded.
-568|ERROR_LOGON_SERVER_CONFLICT|The Netlogon service cannot start because another Netlogon service running in the domain conflicts with the specified role.
-569|ERROR_SYNCHRONIZATION_REQUIRED|The SAM database on a Windows Server is significantly out of synchronization with the copy on the Domain Controller. A complete synchronization is required.
-570|ERROR_NET_OPEN_FAILED|The NtCreateFile API failed. This error should never be returned to an application, it is a place holder for the Windows Lan Manager Redirector to use in its internal error mapping routines.
-571|ERROR_IO_PRIVILEGE_FAILED|{Privilege Failed} The I/O permissions for the process could not be changed.
-572|ERROR_CONTROL_C_EXIT|{Application Exit by CTRL+C} The application terminated as a result of a CTRL+C.
-573|ERROR_MISSING_SYSTEMFILE|{Missing System File} The required system file `%hs is bad or missing.
-574|ERROR_UNHANDLED_EXCEPTION|{Application Error} The exception `%s.
-575|ERROR_APP_INIT_FAILURE|{Application Error} The application was unable to start correctly.
-576|ERROR_PAGEFILE_CREATE_FAILED|{Unable to Create Paging File} The creation of the paging file `%hs failed (`%lx). The requested size was `%ld.
-577|ERROR_INVALID_IMAGE_HASH|Windows cannot verify the digital signature for this file. A recent hardware or software change might have installed a file that is signed incorrectly or damaged, or that might be malicious software from an unknown source.
-578|ERROR_NO_PAGEFILE|{No Paging File Specified} No paging file was specified in the system configuration.
-579|ERROR_ILLEGAL_FLOAT_CONTEXT|{EXCEPTION} A real-mode application issued a floating-point instruction and floating-point hardware is not present.
-580|ERROR_NO_EVENT_PAIR|An event pair synchronization operation was performed using the thread specific client/server event pair object, but no event pair object was associated with the thread.
-581|ERROR_DOMAIN_CTRLR_CONFIG_ERROR|A Windows Server has an incorrect configuration.
-582|ERROR_ILLEGAL_CHARACTER|An illegal character was encountered. For a multi-byte character set this includes a lead byte without a succeeding trail byte. For the Unicode character set this includes the characters 0xFFFF and 0xFFFE.
-583|ERROR_UNDEFINED_CHARACTER|The Unicode character is not defined in the Unicode character set installed on the system.
-584|ERROR_FLOPPY_VOLUME|The paging file cannot be created on a floppy diskette.
-585|ERROR_BIOS_FAILED_TO_CONNECT_INTERRUPT|The system BIOS failed to connect a system interrupt to the device or bus for which the device is connected.
-586|ERROR_BACKUP_CONTROLLER|This operation is only allowed for the Primary Domain Controller of the domain.
-587|ERROR_MUTANT_LIMIT_EXCEEDED|An attempt was made to acquire a mutant such that its maximum count would have been exceeded.
-588|ERROR_FS_DRIVER_REQUIRED|A volume has been accessed for which a file system driver is required that has not yet been loaded.
-589|ERROR_CANNOT_LOAD_REGISTRY_FILE|{Registry File Failure} The registry cannot load the hive (file): `%hs or its log or alternate. It is corrupt, absent, or not writable.
-590|ERROR_DEBUG_ATTACH_FAILED|{Unexpected Failure in `nDebugActiveProcess} An unexpected failure occurred while processing a <strong>DebugActiveProcess</strong> API request. You may choose OK to terminate the process, or Cancel to ignore the error.
-591|ERROR_SYSTEM_PROCESS_TERMINATED|{Fatal System Error} The `%hs system process terminated unexpectedly with a status of 0x`%08x.
-592|ERROR_DATA_NOT_ACCEPTED|{Data Not Accepted} The TDI client could not handle the data received during an indication.
-593|ERROR_VDM_HARD_ERROR|NTVDM encountered a hard error.
-594|ERROR_DRIVER_CANCEL_TIMEOUT|{Cancel Timeout} The driver `%hs failed to complete a cancelled I/O request in the allotted time.
-595|ERROR_REPLY_MESSAGE_MISMATCH|{Reply Message Mismatch} An attempt was made to reply to an LPC message, but the thread specified by the client ID in the message was not waiting on that message.
-596|ERROR_LOST_WRITEBEHIND_DATA|{Delayed Write Failed} Windows was unable to save all the data for the file `%hs. The data has been lost. This error may be caused by a failure of your computer hardware or network connection. Please try to save this file elsewhere.
-597|ERROR_CLIENT_SERVER_PARAMETERS_INVALID|The parameter(s) passed to the server in the client/server shared memory window were invalid. Too much data may have been put in the shared memory window.
-598|ERROR_NOT_TINY_STREAM|The stream is not a tiny stream.
-599|ERROR_STACK_OVERFLOW_READ|The request must be handled by the stack overflow code.
-600|ERROR_CONVERT_TO_LARGE|Internal OFS status codes indicating how an allocation operation is handled. Either it is retried after the containing onode is moved or the extent stream is converted to a large stream.
-601|ERROR_FOUND_OUT_OF_SCOPE|The attempt to find the object found an object matching by ID on the volume but it is out of the scope of the handle used for the operation.
-602|ERROR_ALLOCATE_BUCKET|The bucket array must be grown. Retry transaction after doing so.
-603|ERROR_MARSHALL_OVERFLOW|The user/kernel marshalling buffer has overflowed.
-604|ERROR_INVALID_VARIANT|The supplied variant structure contains invalid data.
-605|ERROR_BAD_COMPRESSION_BUFFER|The specified buffer contains ill-formed data.
-606|ERROR_AUDIT_FAILED|{Audit Failed} An attempt to generate a security audit failed.
-607|ERROR_TIMER_RESOLUTION_NOT_SET|The timer resolution was not previously set by the current process.
-608|ERROR_INSUFFICIENT_LOGON_INFO|There is insufficient account information to log you on.
-609|ERROR_BAD_DLL_ENTRYPOINT|{Invalid DLL Entrypoint} The dynamic link library `%hs is not written correctly. The stack pointer has been left in an inconsistent state. The entrypoint should be declared as WINAPI or STDCALL. Select YES to fail the DLL load. Select NO to continue execution. Selecting NO may cause the application to operate incorrectly.
-610|ERROR_BAD_SERVICE_ENTRYPOINT|{Invalid Service Callback Entrypoint} The `%hs service is not written correctly. The stack pointer has been left in an inconsistent state. The callback entrypoint should be declared as WINAPI or STDCALL. Selecting OK will cause the service to continue operation. However, the service process may operate incorrectly.
-611|ERROR_IP_ADDRESS_CONFLICT1|There is an IP address conflict with another system on the network.
-612|ERROR_IP_ADDRESS_CONFLICT2|There is an IP address conflict with another system on the network.
-613|ERROR_REGISTRY_QUOTA_LIMIT|{Low On Registry Space} The system has reached the maximum size allowed for the system part of the registry. Additional storage requests will be ignored.
-614|ERROR_NO_CALLBACK_ACTIVE|A callback return system service cannot be executed when no callback is active.
-615|ERROR_PWD_TOO_SHORT|The password provided is too short to meet the policy of your user account. Please choose a longer password.
-616|ERROR_PWD_TOO_RECENT|The policy of your user account does not allow you to change passwords too frequently. This is done to prevent users from changing back to a familiar, but potentially discovered, password. If you feel your password has been compromised then please contact your administrator immediately to have a new one assigned.
-617|ERROR_PWD_HISTORY_CONFLICT|You have attempted to change your password to one that you have used in the past. The policy of your user account does not allow this. Please select a password that you have not previously used.
-618|ERROR_UNSUPPORTED_COMPRESSION|The specified compression format is unsupported.
-619|ERROR_INVALID_HW_PROFILE|The specified hardware profile configuration is invalid.
-620|ERROR_INVALID_PLUGPLAY_DEVICE_PATH|The specified Plug and Play registry device path is invalid.
-621|ERROR_QUOTA_LIST_INCONSISTENT|The specified quota list is internally inconsistent with its descriptor.
-622|ERROR_EVALUATION_EXPIRATION|{Windows Evaluation Notification} The evaluation period for this installation of Windows has expired. This system will shutdown in 1 hour. To restore access to this installation of Windows, please upgrade this installation using a licensed distribution of this product.
-623|ERROR_ILLEGAL_DLL_RELOCATION|{Illegal System DLL Relocation} The system DLL `%hs was relocated in memory. The application will not run properly. The relocation occurred because the DLL `%hs occupied an address range reserved for Windows system DLLs. The vendor supplying the DLL should be contacted for a new DLL.
-624|ERROR_DLL_INIT_FAILED_LOGOFF|{DLL Initialization Failed} The application failed to initialize because the window station is shutting down.
-625|ERROR_VALIDATE_CONTINUE|The validation process needs to continue on to the next step.
-626|ERROR_NO_MORE_MATCHES|There are no more matches for the current index enumeration.
-627|ERROR_RANGE_LIST_CONFLICT|The range could not be added to the range list because of a conflict.
-628|ERROR_SERVER_SID_MISMATCH|The server process is running under a SID different than that required by client.
-629|ERROR_CANT_ENABLE_DENY_ONLY|A group marked use for deny only cannot be enabled.
-630|ERROR_FLOAT_MULTIPLE_FAULTS|{EXCEPTION} Multiple floating point faults.
-631|ERROR_FLOAT_MULTIPLE_TRAPS|{EXCEPTION} Multiple floating point traps.
-632|ERROR_NOINTERFACE|The requested interface is not supported.
-633|ERROR_DRIVER_FAILED_SLEEP|{System Standby Failed} The driver `%hs does not support standby mode. Updating this driver may allow the system to go to standby mode.
-634|ERROR_CORRUPT_SYSTEM_FILE|The system file `%1 has become corrupt and has been replaced.
-635|ERROR_COMMITMENT_MINIMUM|{Virtual Memory Minimum Too Low} Your system is low on virtual memory. Windows is increasing the size of your virtual memory paging file. During this process, memory requests for some applications may be denied. For more information, see Help.
-636|ERROR_PNP_RESTART_ENUMERATION|A device was removed so enumeration must be restarted.
-637|ERROR_SYSTEM_IMAGE_BAD_SIGNATURE|{Fatal System Error} The system image `%s is not properly signed. The file has been replaced with the signed file. The system has been shut down.
-638|ERROR_PNP_REBOOT_REQUIRED|Device will not start without a reboot.
-639|ERROR_INSUFFICIENT_POWER|There is not enough power to complete the requested operation.
-640|ERROR_MULTIPLE_FAULT_VIOLATION|ERROR_MULTIPLE_FAULT_VIOLATION
-641|ERROR_SYSTEM_SHUTDOWN|The system is in the process of shutting down.
-642|ERROR_PORT_NOT_SET|An attempt to remove a processes DebugPort was made, but a port was not already associated with the process.
-643|ERROR_DS_VERSION_CHECK_FAILURE|This version of Windows is not compatible with the behavior version of directory forest, domain or domain controller.
-644|ERROR_RANGE_NOT_FOUND|The specified range could not be found in the range list.
-646|ERROR_NOT_SAFE_MODE_DRIVER|The driver was not loaded because the system is booting into safe mode.
-647|ERROR_FAILED_DRIVER_ENTRY|The driver was not loaded because it failed its initialization call.
-648|ERROR_DEVICE_ENUMERATION_ERROR|The &quot;`%hs&quot; encountered an error while applying power or reading the device configuration. This may be caused by a failure of your hardware or by a poor connection.
-649|ERROR_MOUNT_POINT_NOT_RESOLVED|The create operation failed because the name contained at least one mount point which resolves to a volume to which the specified device object is not attached.
-650|ERROR_INVALID_DEVICE_OBJECT_PARAMETER|The device object parameter is either not a valid device object or is not attached to the volume specified by the file name.
-651|ERROR_MCA_OCCURED|A Machine Check Error has occurred. Please check the system eventlog for additional information.
-652|ERROR_DRIVER_DATABASE_ERROR|There was error [`%2] processing the driver database.
-653|ERROR_SYSTEM_HIVE_TOO_LARGE|System hive size has exceeded its limit.
-654|ERROR_DRIVER_FAILED_PRIOR_UNLOAD|The driver could not be loaded because a previous version of the driver is still in memory.
-655|ERROR_VOLSNAP_PREPARE_HIBERNATE|{Volume Shadow Copy Service} Please wait while the Volume Shadow Copy Service prepares volume `%hs for hibernation.
-656|ERROR_HIBERNATION_FAILURE|The system has failed to hibernate (The error code is `%hs). Hibernation will be disabled until the system is restarted.
-657|ERROR_PWD_TOO_LONG|The password provided is too long to meet the policy of your user account. Please choose a shorter password.
-665|ERROR_FILE_SYSTEM_LIMITATION|The requested operation could not be completed due to a file system limitation.
-668|ERROR_ASSERTION_FAILURE|An assertion failure has occurred.
-669|ERROR_ACPI_ERROR|An error occurred in the ACPI subsystem.
-670|ERROR_WOW_ASSERTION|WOW Assertion Error.
-671|ERROR_PNP_BAD_MPS_TABLE|A device is missing in the system BIOS MPS table. This device will not be used. Please contact your system vendor for system BIOS update.
-672|ERROR_PNP_TRANSLATION_FAILED|A translator failed to translate resources.
-673|ERROR_PNP_IRQ_TRANSLATION_FAILED|A IRQ translator failed to translate resources.
-674|ERROR_PNP_INVALID_ID|Driver `%2 returned invalid ID for a child device (`%3).
-675|ERROR_WAKE_SYSTEM_DEBUGGER|{Kernel Debugger Awakened} the system debugger was awakened by an interrupt.
-676|ERROR_HANDLES_CLOSED|{Handles Closed} Handles to objects have been automatically closed as a result of the requested operation.
-677|ERROR_EXTRANEOUS_INFORMATION|{Too Much Information} The specified access control list (ACL) contained more information than was expected.
-678|ERROR_RXACT_COMMIT_NECESSARY|This warning level status indicates that the transaction state already exists for the registry sub-tree, but that a transaction commit was previously aborted. The commit has NOT been completed, but has not been rolled back either (so it may still be committed if desired).
-679|ERROR_MEDIA_CHECK|{Media Changed} The media may have changed.
-680|ERROR_GUID_SUBSTITUTION_MADE|{GUID Substitution} During the translation of a global identifier (GUID) to a Windows security ID (SID), no administratively-defined GUID prefix was found. A substitute prefix was used, which will not compromise system security. However, this may provide a more restrictive access than intended.
-681|ERROR_STOPPED_ON_SYMLINK|The create operation stopped after reaching a symbolic link.
-682|ERROR_LONGJUMP|A long jump has been executed.
-683|ERROR_PLUGPLAY_QUERY_VETOED|The Plug and Play query operation was not successful.
-684|ERROR_UNWIND_CONSOLIDATE|A frame consolidation has been executed.
-685|ERROR_REGISTRY_HIVE_RECOVERED|{Registry Hive Recovered} Registry hive (file): `%hs was corrupted and it has been recovered. Some data might have been lost.
-686|ERROR_DLL_MIGHT_BE_INSECURE|The application is attempting to run executable code from the module `%hs. This may be insecure. An alternative, `%hs, is available. Should the application use the secure module `%hs?
-687|ERROR_DLL_MIGHT_BE_INCOMPATIBLE|The application is loading executable code from the module `%hs. This is secure, but may be incompatible with previous releases of the operating system. An alternative, `%hs, is available. Should the application use the secure module `%hs?
-688|ERROR_DBG_EXCEPTION_NOT_HANDLED|Debugger did not handle the exception.
-689|ERROR_DBG_REPLY_LATER|Debugger will reply later.
-690|ERROR_DBG_UNABLE_TO_PROVIDE_HANDLE|Debugger cannot provide handle.
-691|ERROR_DBG_TERMINATE_THREAD|Debugger terminated thread.
-692|ERROR_DBG_TERMINATE_PROCESS|Debugger terminated process.
-693|ERROR_DBG_CONTROL_C|Debugger got control C.
-694|ERROR_DBG_PRINTEXCEPTION_C|Debugger printed exception on control C.
-695|ERROR_DBG_RIPEXCEPTION|Debugger received RIP exception.
-696|ERROR_DBG_CONTROL_BREAK|Debugger received control break.
-697|ERROR_DBG_COMMAND_EXCEPTION|Debugger command communication exception.
-698|ERROR_OBJECT_NAME_EXISTS|{Object Exists} An attempt was made to create an object and the object name already existed.
-699|ERROR_THREAD_WAS_SUSPENDED|{Thread Suspended} A thread termination occurred while the thread was suspended. The thread was resumed, and termination proceeded.
-700|ERROR_IMAGE_NOT_AT_BASE|{Image Relocated} An image file could not be mapped at the address specified in the image file. Local fixups must be performed on this image.
-701|ERROR_RXACT_STATE_CREATED|This informational level status indicates that a specified registry sub-tree transaction state did not yet exist and had to be created.
-702|ERROR_SEGMENT_NOTIFICATION|{Segment Load} A virtual DOS machine (VDM) is loading, unloading, or moving an MS-DOS or Win16 program segment image. An exception is raised so a debugger can load, unload or track symbols and breakpoints within these 16-bit segments.
-703|ERROR_BAD_CURRENT_DIRECTORY|{Invalid Current Directory} The process cannot switch to the startup current directory `%hs. Select OK to set current directory to `%hs, or select CANCEL to exit.
-704|ERROR_FT_READ_RECOVERY_FROM_BACKUP|{Redundant Read} To satisfy a read request, the NT fault-tolerant file system successfully read the requested data from a redundant copy. This was done because the file system encountered a failure on a member of the fault-tolerant volume, but was unable to reassign the failing area of the device.
-705|ERROR_FT_WRITE_RECOVERY|{Redundant Write} To satisfy a write request, the NT fault-tolerant file system successfully wrote a redundant copy of the information. This was done because the file system encountered a failure on a member of the fault-tolerant volume, but was not able to reassign the failing area of the device.
-706|ERROR_IMAGE_MACHINE_TYPE_MISMATCH|{Machine Type Mismatch} The image file `%hs is valid, but is for a machine type other than the current machine. Select OK to continue, or CANCEL to fail the DLL load.
-707|ERROR_RECEIVE_PARTIAL|{Partial Data Received} The network transport returned partial data to its client. The remaining data will be sent later.
-708|ERROR_RECEIVE_EXPEDITED|{Expedited Data Received} The network transport returned data to its client that was marked as expedited by the remote system.
-709|ERROR_RECEIVE_PARTIAL_EXPEDITED|{Partial Expedited Data Received} The network transport returned partial data to its client and this data was marked as expedited by the remote system. The remaining data will be sent later.
-710|ERROR_EVENT_DONE|{TDI Event Done} The TDI indication has completed successfully.
-711|ERROR_EVENT_PENDING|{TDI Event Pending} The TDI indication has entered the pending state.
-712|ERROR_CHECKING_FILE_SYSTEM|Checking file system on `%wZ.
-713|ERROR_FATAL_APP_EXIT|{Fatal Application Exit} `%hs.
-714|ERROR_PREDEFINED_HANDLE|The specified registry key is referenced by a predefined handle.
-715|ERROR_WAS_UNLOCKED|{Page Unlocked} The page protection of a locked page was changed to 'No Access' and the page was unlocked from memory and from the process.
-716|ERROR_SERVICE_NOTIFICATION|`%hs
-717|ERROR_WAS_LOCKED|{Page Locked} One of the pages to lock was already locked.
-718|ERROR_LOG_HARD_ERROR|Application popup: `%1 : `%2
-719|ERROR_ALREADY_WIN32|ERROR_ALREADY_WIN32
-720|ERROR_IMAGE_MACHINE_TYPE_MISMATCH_EXE|{Machine Type Mismatch} The image file `%hs is valid, but is for a machine type other than the current machine.
-721|ERROR_NO_YIELD_PERFORMED|A yield execution was performed and no thread was available to run.
-722|ERROR_TIMER_RESUME_IGNORED|The resumable flag to a timer API was ignored.
-723|ERROR_ARBITRATION_UNHANDLED|The arbiter has deferred arbitration of these resources to its parent.
-724|ERROR_CARDBUS_NOT_SUPPORTED|The inserted CardBus device cannot be started because of a configuration error on &quot;`%hs&quot;.
-725|ERROR_MP_PROCESSOR_MISMATCH|The CPUs in this multiprocessor system are not all the same revision level. To use all processors the operating system restricts itself to the features of the least capable processor in the system. Should problems occur with this system, contact the CPU manufacturer to see if this mix of processors is supported.
-726|ERROR_HIBERNATED|The system was put into hibernation.
-727|ERROR_RESUME_HIBERNATION|The system was resumed from hibernation.
-728|ERROR_FIRMWARE_UPDATED|Windows has detected that the system firmware (BIOS) was updated [previous firmware date = `%2, current firmware date `%3].
-729|ERROR_DRIVERS_LEAKING_LOCKED_PAGES|A device driver is leaking locked I/O pages causing system degradation. The system has automatically enabled tracking code in order to try and catch the culprit.
-730|ERROR_WAKE_SYSTEM|The system has awoken.
-731|ERROR_WAIT_1|ERROR_WAIT_1
-732|ERROR_WAIT_2|ERROR_WAIT_2
-733|ERROR_WAIT_3|ERROR_WAIT_3
-734|ERROR_WAIT_63|ERROR_WAIT_63
-735|ERROR_ABANDONED_WAIT_0|ERROR_ABANDONED_WAIT_0
-736|ERROR_ABANDONED_WAIT_63|ERROR_ABANDONED_WAIT_63
-737|ERROR_USER_APC|ERROR_USER_APC
-738|ERROR_KERNEL_APC|ERROR_KERNEL_APC
-739|ERROR_ALERTED|ERROR_ALERTED
-740|ERROR_ELEVATION_REQUIRED|The requested operation requires elevation.
-741|ERROR_REPARSE|A reparse should be performed by the Object Manager since the name of the file resulted in a symbolic link.
-742|ERROR_OPLOCK_BREAK_IN_PROGRESS|An open/create operation completed while an oplock break is underway.
-743|ERROR_VOLUME_MOUNTED|A new volume has been mounted by a file system.
-744|ERROR_RXACT_COMMITTED|This success level status indicates that the transaction state already exists for the registry sub-tree, but that a transaction commit was previously aborted. The commit has now been completed.
-745|ERROR_NOTIFY_CLEANUP|This indicates that a notify change request has been completed due to closing the handle which made the notify change request.
-746|ERROR_PRIMARY_TRANSPORT_CONNECT_FAILED|{Connect Failure on Primary Transport} An attempt was made to connect to the remote server `%hs on the primary transport, but the connection failed. The computer WAS able to connect on a secondary transport.
-747|ERROR_PAGE_FAULT_TRANSITION|Page fault was a transition fault.
-748|ERROR_PAGE_FAULT_DEMAND_ZERO|Page fault was a demand zero fault.
-749|ERROR_PAGE_FAULT_COPY_ON_WRITE|Page fault was a demand zero fault.
-750|ERROR_PAGE_FAULT_GUARD_PAGE|Page fault was a demand zero fault.
-751|ERROR_PAGE_FAULT_PAGING_FILE|Page fault was satisfied by reading from a secondary storage device.
-752|ERROR_CACHE_PAGE_LOCKED|Cached page was locked during operation.
-753|ERROR_CRASH_DUMP|Crash dump exists in paging file.
-754|ERROR_BUFFER_ALL_ZEROS|Specified buffer contains all zeros.
-755|ERROR_REPARSE_OBJECT|A reparse should be performed by the Object Manager since the name of the file resulted in a symbolic link.
-756|ERROR_RESOURCE_REQUIREMENTS_CHANGED|The device has succeeded a query-stop and its resource requirements have changed.
-757|ERROR_TRANSLATION_COMPLETE|The translator has translated these resources into the global space and no further translations should be performed.
-758|ERROR_NOTHING_TO_TERMINATE|A process being terminated has no threads to terminate.
-759|ERROR_PROCESS_NOT_IN_JOB|The specified process is not part of a job.
-760|ERROR_PROCESS_IN_JOB|The specified process is part of a job.
-761|ERROR_VOLSNAP_HIBERNATE_READY|{Volume Shadow Copy Service} The system is now ready for hibernation.
-762|ERROR_FSFILTER_OP_COMPLETED_SUCCESSFULLY|A file system or file system filter driver has successfully completed an FsFilter operation.
-763|ERROR_INTERRUPT_VECTOR_ALREADY_CONNECTED|The specified interrupt vector was already connected.
-764|ERROR_INTERRUPT_STILL_CONNECTED|The specified interrupt vector is still connected.
-765|ERROR_WAIT_FOR_OPLOCK|An operation is blocked waiting for an oplock.
-766|ERROR_DBG_EXCEPTION_HANDLED|Debugger handled exception.
-767|ERROR_DBG_CONTINUE|Debugger continued.
-768|ERROR_CALLBACK_POP_STACK|An exception occurred in a user mode callback and the kernel callback frame should be removed.
-769|ERROR_COMPRESSION_DISABLED|Compression is disabled for this volume.
-770|ERROR_CANTFETCHBACKWARDS|The data provider cannot fetch backwards through a result set.
-771|ERROR_CANTSCROLLBACKWARDS|The data provider cannot scroll backwards through a result set.
-772|ERROR_ROWSNOTRELEASED|The data provider requires that previously fetched data is released before asking for more data.
-773|ERROR_BAD_ACCESSOR_FLAGS|The data provider was not able to interpret the flags set for a column binding in an accessor.
-774|ERROR_ERRORS_ENCOUNTERED|One or more errors occurred while processing the request.
-775|ERROR_NOT_CAPABLE|The implementation is not capable of performing the request.
-776|ERROR_REQUEST_OUT_OF_SEQUENCE|The client of a component requested an operation which is not valid given the state of the component instance.
-777|ERROR_VERSION_PARSE_ERROR|A version number could not be parsed.
-778|ERROR_BADSTARTPOSITION|The iterator's start position is invalid.
-779|ERROR_MEMORY_HARDWARE|The hardware has reported an uncorrectable memory error.
-780|ERROR_DISK_REPAIR_DISABLED|The attempted operation required self healing to be enabled.
-781|ERROR_INSUFFICIENT_RESOURCE_FOR_SPECIFIED_SHARED_SECTION_SIZE|The Desktop heap encountered an error while allocating session memory. There is more information in the system event log.
-782|ERROR_SYSTEM_POWERSTATE_TRANSITION|The system power state is transitioning from `%2 to `%3.
-783|ERROR_SYSTEM_POWERSTATE_COMPLEX_TRANSITION|The system power state is transitioning from `%2 to `%3 but could enter `%4.
-784|ERROR_MCA_EXCEPTION|A thread is getting dispatched with MCA EXCEPTION because of MCA.
-785|ERROR_ACCESS_AUDIT_BY_POLICY|Access to `%1 is monitored by policy rule `%2.
-786|ERROR_ACCESS_DISABLED_NO_SAFER_UI_BY_POLICY|Access to `%1 has been restricted by your Administrator by policy rule `%2.
-787|ERROR_ABANDON_HIBERFILE|A valid hibernation file has been invalidated and should be abandoned.
-788|ERROR_LOST_WRITEBEHIND_DATA_NETWORK_DISCONNECTED|{Delayed Write Failed} Windows was unable to save all the data for the file `%hs; the data has been lost. This error may be caused by network connectivity issues. Please try to save this file elsewhere.
-789|ERROR_LOST_WRITEBEHIND_DATA_NETWORK_SERVER_ERROR|{Delayed Write Failed} Windows was unable to save all the data for the file `%hs; the data has been lost. This error was returned by the server on which the file exists. Please try to save this file elsewhere.
-790|ERROR_LOST_WRITEBEHIND_DATA_LOCAL_DISK_ERROR|{Delayed Write Failed} Windows was unable to save all the data for the file `%hs; the data has been lost. This error may be caused if the device has been removed or the media is write-protected.
-791|ERROR_BAD_MCFG_TABLE|The resources required for this device conflict with the MCFG table.
-792|ERROR_DISK_REPAIR_REDIRECTED|The volume repair could not be performed while it is online. Please schedule to take the volume offline so that it can be repaired.
-793|ERROR_DISK_REPAIR_UNSUCCESSFUL|The volume repair was not successful.
-794|ERROR_CORRUPT_LOG_OVERFULL|One of the volume corruption logs is full. Further corruptions that may be detected won't be logged.
-795|ERROR_CORRUPT_LOG_CORRUPTED|One of the volume corruption logs is internally corrupted and needs to be recreated. The volume may contain undetected corruptions and must be scanned.
-796|ERROR_CORRUPT_LOG_UNAVAILABLE|One of the volume corruption logs is unavailable for being operated on.
-797|ERROR_CORRUPT_LOG_DELETED_FULL|One of the volume corruption logs was deleted while still having corruption records in them. The volume contains detected corruptions and must be scanned.
-798|ERROR_CORRUPT_LOG_CLEARED|One of the volume corruption logs was cleared by chkdsk and no longer contains real corruptions.
-799|ERROR_ORPHAN_NAME_EXHAUSTED|Orphaned files exist on the volume but could not be recovered because no more new names could be created in the recovery directory. Files must be moved from the recovery directory.
-800|ERROR_OPLOCK_SWITCHED_TO_NEW_HANDLE|The oplock that was associated with this handle is now associated with a different handle.
-801|ERROR_CANNOT_GRANT_REQUESTED_OPLOCK|An oplock of the requested level cannot be granted. An oplock of a lower level may be available.
-802|ERROR_CANNOT_BREAK_OPLOCK|The operation did not complete successfully because it would cause an oplock to be broken. The caller has requested that existing oplocks not be broken.
-803|ERROR_OPLOCK_HANDLE_CLOSED|The handle with which this oplock was associated has been closed. The oplock is now broken.
-804|ERROR_NO_ACE_CONDITION|The specified access control entry (ACE) does not contain a condition.
-805|ERROR_INVALID_ACE_CONDITION|The specified access control entry (ACE) contains an invalid condition.
-806|ERROR_FILE_HANDLE_REVOKED|Access to the specified file handle has been revoked.
-807|ERROR_IMAGE_AT_DIFFERENT_BASE|An image file was mapped at a different address from the one specified in the image file but fixups will still be automatically performed on the image.
-994|ERROR_EA_ACCESS_DENIED|Access to the extended attribute was denied.
-995|ERROR_OPERATION_ABORTED|The I/O operation has been aborted because of either a thread exit or an application request.
-996|ERROR_IO_INCOMPLETE|Overlapped I/O event is not in a signaled state.
-997|ERROR_IO_PENDING|Overlapped I/O operation is in progress.
-998|ERROR_NOACCESS|Invalid access to memory location.
-999|ERROR_SWAPERROR|Error performing inpage operation.
-1001|ERROR_STACK_OVERFLOW|Recursion too deep; the stack overflowed.
-1002|ERROR_INVALID_MESSAGE|The window cannot act on the sent message.
-1003|ERROR_CAN_NOT_COMPLETE|Cannot complete this function.
-1004|ERROR_INVALID_FLAGS|Invalid flags.
-1005|ERROR_UNRECOGNIZED_VOLUME|The volume does not contain a recognized file system. Please make sure that all required file system drivers are loaded and that the volume is not corrupted.
-1006|ERROR_FILE_INVALID|The volume for a file has been externally altered so that the opened file is no longer valid.
-1007|ERROR_FULLSCREEN_MODE|The requested operation cannot be performed in full-screen mode.
-1008|ERROR_NO_TOKEN|An attempt was made to reference a token that does not exist.
-1009|ERROR_BADDB|The configuration registry database is corrupt.
-1010|ERROR_BADKEY|The configuration registry key is invalid.
-1011|ERROR_CANTOPEN|The configuration registry key could not be opened.
-1012|ERROR_CANTREAD|The configuration registry key could not be read.
-1013|ERROR_CANTWRITE|The configuration registry key could not be written.
-1014|ERROR_REGISTRY_RECOVERED|One of the files in the registry database had to be recovered by use of a log or alternate copy. The recovery was successful.
-1015|ERROR_REGISTRY_CORRUPT|The registry is corrupted. The structure of one of the files containing registry data is corrupted, or the system's memory image of the file is corrupted, or the file could not be recovered because the alternate copy or log was absent or corrupted.
-1016|ERROR_REGISTRY_IO_FAILED|An I/O operation initiated by the registry failed unrecoverably. The registry could not read in, or write out, or flush, one of the files that contain the system's image of the registry.
-1017|ERROR_NOT_REGISTRY_FILE|The system has attempted to load or restore a file into the registry, but the specified file is not in a registry file format.
-1018|ERROR_KEY_DELETED|Illegal operation attempted on a registry key that has been marked for deletion.
-1019|ERROR_NO_LOG_SPACE|System could not allocate the required space in a registry log.
-1020|ERROR_KEY_HAS_CHILDREN|Cannot create a symbolic link in a registry key that already has subkeys or values.
-1021|ERROR_CHILD_MUST_BE_VOLATILE|Cannot create a stable subkey under a volatile parent key.
-1022|ERROR_NOTIFY_ENUM_DIR|A notify change request is being completed and the information is not being returned in the caller's buffer. The caller now needs to enumerate the files to find the changes.
-1051|ERROR_DEPENDENT_SERVICES_RUNNING|A stop control has been sent to a service that other running services are dependent on.
-1052|ERROR_INVALID_SERVICE_CONTROL|The requested control is not valid for this service.
-1053|ERROR_SERVICE_REQUEST_TIMEOUT|The service did not respond to the start or control request in a timely fashion.
-1054|ERROR_SERVICE_NO_THREAD|A thread could not be created for the service.
-1055|ERROR_SERVICE_DATABASE_LOCKED|The service database is locked.
-1056|ERROR_SERVICE_ALREADY_RUNNING|An instance of the service is already running.
-1057|ERROR_INVALID_SERVICE_ACCOUNT|The account name is invalid or does not exist, or the password is invalid for the account name specified.
-1058|ERROR_SERVICE_DISABLED|The service cannot be started, either because it is disabled or because it has no enabled devices associated with it.
-1059|ERROR_CIRCULAR_DEPENDENCY|Circular service dependency was specified.
-1060|ERROR_SERVICE_DOES_NOT_EXIST|The specified service does not exist as an installed service.
-1061|ERROR_SERVICE_CANNOT_ACCEPT_CTRL|The service cannot accept control messages at this time.
-1062|ERROR_SERVICE_NOT_ACTIVE|The service has not been started.
-1063|ERROR_FAILED_SERVICE_CONTROLLER_CONNECT|The service process could not connect to the service controller.
-1064|ERROR_EXCEPTION_IN_SERVICE|An exception occurred in the service when handling the control request.
-1065|ERROR_DATABASE_DOES_NOT_EXIST|The database specified does not exist.
-1066|ERROR_SERVICE_SPECIFIC_ERROR|The service has returned a service-specific error code.
-1067|ERROR_PROCESS_ABORTED|The process terminated unexpectedly.
-1068|ERROR_SERVICE_DEPENDENCY_FAIL|The dependency service or group failed to start.
-1069|ERROR_SERVICE_LOGON_FAILED|The service did not start due to a logon failure.
-1070|ERROR_SERVICE_START_HANG|After starting, the service hung in a start-pending state.
-1071|ERROR_INVALID_SERVICE_LOCK|The specified service database lock is invalid.
-1072|ERROR_SERVICE_MARKED_FOR_DELETE|The specified service has been marked for deletion.
-1073|ERROR_SERVICE_EXISTS|The specified service already exists.
-1074|ERROR_ALREADY_RUNNING_LKG|The system is currently running with the last-known-good configuration.
-1075|ERROR_SERVICE_DEPENDENCY_DELETED|The dependency service does not exist or has been marked for deletion.
-1076|ERROR_BOOT_ALREADY_ACCEPTED|The current boot has already been accepted for use as the last-known-good control set.
-1077|ERROR_SERVICE_NEVER_STARTED|No attempts to start the service have been made since the last boot.
-1078|ERROR_DUPLICATE_SERVICE_NAME|The name is already in use as either a service name or a service display name.
-1079|ERROR_DIFFERENT_SERVICE_ACCOUNT|The account specified for this service is different from the account specified for other services running in the same process.
-1080|ERROR_CANNOT_DETECT_DRIVER_FAILURE|Failure actions can only be set for Win32 services, not for drivers.
-1081|ERROR_CANNOT_DETECT_PROCESS_ABORT|This service runs in the same process as the service control manager. Therefore, the service control manager cannot take action if this service's process terminates unexpectedly.
-1082|ERROR_NO_RECOVERY_PROGRAM|No recovery program has been configured for this service.
-1083|ERROR_SERVICE_NOT_IN_EXE|The executable program that this service is configured to run in does not implement the service.
-1084|ERROR_NOT_SAFEBOOT_SERVICE|This service cannot be started in Safe Mode.
-1100|ERROR_END_OF_MEDIA|The physical end of the tape has been reached.
-1101|ERROR_FILEMARK_DETECTED|A tape access reached a filemark.
-1102|ERROR_BEGINNING_OF_MEDIA|The beginning of the tape or a partition was encountered.
-1103|ERROR_SETMARK_DETECTED|A tape access reached the end of a set of files.
-1104|ERROR_NO_DATA_DETECTED|No more data is on the tape.
-1105|ERROR_PARTITION_FAILURE|Tape could not be partitioned.
-1106|ERROR_INVALID_BLOCK_LENGTH|When accessing a new tape of a multivolume partition, the current block size is incorrect.
-1107|ERROR_DEVICE_NOT_PARTITIONED|Tape partition information could not be found when loading a tape.
-1108|ERROR_UNABLE_TO_LOCK_MEDIA|Unable to lock the media eject mechanism.
-1109|ERROR_UNABLE_TO_UNLOAD_MEDIA|Unable to unload the media.
-1110|ERROR_MEDIA_CHANGED|The media in the drive may have changed.
-1111|ERROR_BUS_RESET|The I/O bus was reset.
-1112|ERROR_NO_MEDIA_IN_DRIVE|No media in drive.
-1113|ERROR_NO_UNICODE_TRANSLATION|No mapping for the Unicode character exists in the target multi-byte code page.
-1114|ERROR_DLL_INIT_FAILED|A dynamic link library (DLL) initialization routine failed.
-1115|ERROR_SHUTDOWN_IN_PROGRESS|A system shutdown is in progress.
-1116|ERROR_NO_SHUTDOWN_IN_PROGRESS|Unable to abort the system shutdown because no shutdown was in progress.
-1117|ERROR_IO_DEVICE|The request could not be performed because of an I/O device error.
-1118|ERROR_SERIAL_NO_DEVICE|No serial device was successfully initialized. The serial driver will unload.
-1119|ERROR_IRQ_BUSY|Unable to open a device that was sharing an interrupt request (IRQ) with other devices. At least one other device that uses that IRQ was already opened.
-1120|ERROR_MORE_WRITES|A serial I/O operation was completed by another write to the serial port. The IOCTL_SERIAL_XOFF_COUNTER reached zero.)
-1121|ERROR_COUNTER_TIMEOUT|A serial I/O operation completed because the timeout period expired. The IOCTL_SERIAL_XOFF_COUNTER did not reach zero.)
-1122|ERROR_FLOPPY_ID_MARK_NOT_FOUND|No ID address mark was found on the floppy disk.
-1123|ERROR_FLOPPY_WRONG_CYLINDER|Mismatch between the floppy disk sector ID field and the floppy disk controller track address.
-1124|ERROR_FLOPPY_UNKNOWN_ERROR|The floppy disk controller reported an error that is not recognized by the floppy disk driver.
-1125|ERROR_FLOPPY_BAD_REGISTERS|The floppy disk controller returned inconsistent results in its registers.
-1126|ERROR_DISK_RECALIBRATE_FAILED|While accessing the hard disk, a recalibrate operation failed, even after retries.
-1127|ERROR_DISK_OPERATION_FAILED|While accessing the hard disk, a disk operation failed even after retries.
-1128|ERROR_DISK_RESET_FAILED|While accessing the hard disk, a disk controller reset was needed, but even that failed.
-1129|ERROR_EOM_OVERFLOW|Physical end of tape encountered.
-1130|ERROR_NOT_ENOUGH_SERVER_MEMORY|Not enough server storage is available to process this command.
-1131|ERROR_POSSIBLE_DEADLOCK|A potential deadlock condition has been detected.
-1132|ERROR_MAPPED_ALIGNMENT|The base address or the file offset specified does not have the proper alignment.
-1140|ERROR_SET_POWER_STATE_VETOED|An attempt to change the system power state was vetoed by another application or driver.
-1141|ERROR_SET_POWER_STATE_FAILED|The system BIOS failed an attempt to change the system power state.
-1142|ERROR_TOO_MANY_LINKS|An attempt was made to create more links on a file than the file system supports.
-1150|ERROR_OLD_WIN_VERSION|The specified program requires a newer version of Windows.
-1151|ERROR_APP_WRONG_OS|The specified program is not a Windows or MS-DOS program.
-1152|ERROR_SINGLE_INSTANCE_APP|Cannot start more than one instance of the specified program.
-1153|ERROR_RMODE_APP|The specified program was written for an earlier version of Windows.
-1154|ERROR_INVALID_DLL|One of the library files needed to run this application is damaged.
-1155|ERROR_NO_ASSOCIATION|No application is associated with the specified file for this operation.
-1156|ERROR_DDE_FAIL|An error occurred in sending the command to the application.
-1157|ERROR_DLL_NOT_FOUND|One of the library files needed to run this application cannot be found.
-1158|ERROR_NO_MORE_USER_HANDLES|The current process has used all of its system allowance of handles for Window Manager objects.
-1159|ERROR_MESSAGE_SYNC_ONLY|The message can be used only with synchronous operations.
-1160|ERROR_SOURCE_ELEMENT_EMPTY|The indicated source element has no media.
-1161|ERROR_DESTINATION_ELEMENT_FULL|The indicated destination element already contains media.
-1162|ERROR_ILLEGAL_ELEMENT_ADDRESS|The indicated element does not exist.
-1163|ERROR_MAGAZINE_NOT_PRESENT|The indicated element is part of a magazine that is not present.
-1164|ERROR_DEVICE_REINITIALIZATION_NEEDED|The indicated device requires reinitialization due to hardware errors.
-1165|ERROR_DEVICE_REQUIRES_CLEANING|The device has indicated that cleaning is required before further operations are attempted.
-1166|ERROR_DEVICE_DOOR_OPEN|The device has indicated that its door is open.
-1167|ERROR_DEVICE_NOT_CONNECTED|The device is not connected.
-1168|ERROR_NOT_FOUND|Element not found.
-1169|ERROR_NO_MATCH|There was no match for the specified key in the index.
-1170|ERROR_SET_NOT_FOUND|The property set specified does not exist on the object.
-1171|ERROR_POINT_NOT_FOUND|The point passed to GetMouseMovePoints is not in the buffer.
-1172|ERROR_NO_TRACKING_SERVICE|The tracking (workstation) service is not running.
-1173|ERROR_NO_VOLUME_ID|The Volume ID could not be found.
-1175|ERROR_UNABLE_TO_REMOVE_REPLACED|Unable to remove the file to be replaced.
-1176|ERROR_UNABLE_TO_MOVE_REPLACEMENT|Unable to move the replacement file to the file to be replaced. The file to be replaced has retained its original name.
-1177|ERROR_UNABLE_TO_MOVE_REPLACEMENT_2|Unable to move the replacement file to the file to be replaced. The file to be replaced has been renamed using the backup name.
-1178|ERROR_JOURNAL_DELETE_IN_PROGRESS|The volume change journal is being deleted.
-1179|ERROR_JOURNAL_NOT_ACTIVE|The volume change journal is not active.
-1180|ERROR_POTENTIAL_FILE_FOUND|A file was found, but it may not be the correct file.
-1181|ERROR_JOURNAL_ENTRY_DELETED|The journal entry has been deleted from the journal.
-1190|ERROR_SHUTDOWN_IS_SCHEDULED|A system shutdown has already been scheduled.
-1191|ERROR_SHUTDOWN_USERS_LOGGED_ON|The system shutdown cannot be initiated because there are other users logged on to the computer.
-1200|ERROR_BAD_DEVICE|The specified device name is invalid.
-1201|ERROR_CONNECTION_UNAVAIL|The device is not currently connected but it is a remembered connection.
-1202|ERROR_DEVICE_ALREADY_REMEMBERED|The local device name has a remembered connection to another network resource.
-1203|ERROR_NO_NET_OR_BAD_PATH|The network path was either typed incorrectly, does not exist, or the network provider is not currently available. Please try retyping the path or contact your network administrator.
-1204|ERROR_BAD_PROVIDER|The specified network provider name is invalid.
-1205|ERROR_CANNOT_OPEN_PROFILE|Unable to open the network connection profile.
-1206|ERROR_BAD_PROFILE|The network connection profile is corrupted.
-1207|ERROR_NOT_CONTAINER|Cannot enumerate a noncontainer.
-1208|ERROR_EXTENDED_ERROR|An extended error has occurred.
-1209|ERROR_INVALID_GROUPNAME|The format of the specified group name is invalid.
-1210|ERROR_INVALID_COMPUTERNAME|The format of the specified computer name is invalid.
-1211|ERROR_INVALID_EVENTNAME|The format of the specified event name is invalid.
-1212|ERROR_INVALID_DOMAINNAME|The format of the specified domain name is invalid.
-1213|ERROR_INVALID_SERVICENAME|The format of the specified service name is invalid.
-1214|ERROR_INVALID_NETNAME|The format of the specified network name is invalid.
-1215|ERROR_INVALID_SHARENAME|The format of the specified share name is invalid.
-1216|ERROR_INVALID_PASSWORDNAME|The format of the specified password is invalid.
-1217|ERROR_INVALID_MESSAGENAME|The format of the specified message name is invalid.
-1218|ERROR_INVALID_MESSAGEDEST|The format of the specified message destination is invalid.
-1219|ERROR_SESSION_CREDENTIAL_CONFLICT|Multiple connections to a server or shared resource by the same user, using more than one user name, are not allowed. Disconnect all previous connections to the server or shared resource and try again.
-1220|ERROR_REMOTE_SESSION_LIMIT_EXCEEDED|An attempt was made to establish a session to a network server, but there are already too many sessions established to that server.
-1221|ERROR_DUP_DOMAINNAME|The workgroup or domain name is already in use by another computer on the network.
-1222|ERROR_NO_NETWORK|The network is not present or not started.
-1223|ERROR_CANCELLED|The operation was canceled by the user.
-1224|ERROR_USER_MAPPED_FILE|The requested operation cannot be performed on a file with a user-mapped section open.
-1225|ERROR_CONNECTION_REFUSED|The remote computer refused the network connection.
-1226|ERROR_GRACEFUL_DISCONNECT|The network connection was gracefully closed.
-1227|ERROR_ADDRESS_ALREADY_ASSOCIATED|The network transport endpoint already has an address associated with it.
-1228|ERROR_ADDRESS_NOT_ASSOCIATED|An address has not yet been associated with the network endpoint.
-1229|ERROR_CONNECTION_INVALID|An operation was attempted on a nonexistent network connection.
-1230|ERROR_CONNECTION_ACTIVE|An invalid operation was attempted on an active network connection.
-1231|ERROR_NETWORK_UNREACHABLE|The network location cannot be reached. For information about network troubleshooting, see Windows Help.
-1232|ERROR_HOST_UNREACHABLE|The network location cannot be reached. For information about network troubleshooting, see Windows Help.
-1233|ERROR_PROTOCOL_UNREACHABLE|The network location cannot be reached. For information about network troubleshooting, see Windows Help.
-1234|ERROR_PORT_UNREACHABLE|No service is operating at the destination network endpoint on the remote system.
-1235|ERROR_REQUEST_ABORTED|The request was aborted.
-1236|ERROR_CONNECTION_ABORTED|The network connection was aborted by the local system.
-1237|ERROR_RETRY|The operation could not be completed. A retry should be performed.
-1238|ERROR_CONNECTION_COUNT_LIMIT|A connection to the server could not be made because the limit on the number of concurrent connections for this account has been reached.
-1239|ERROR_LOGIN_TIME_RESTRICTION|Attempting to log in during an unauthorized time of day for this account.
-1240|ERROR_LOGIN_WKSTA_RESTRICTION|The account is not authorized to log in from this station.
-1241|ERROR_INCORRECT_ADDRESS|The network address could not be used for the operation requested.
-1242|ERROR_ALREADY_REGISTERED|The service is already registered.
-1243|ERROR_SERVICE_NOT_FOUND|The specified service does not exist.
-1244|ERROR_NOT_AUTHENTICATED|The operation being requested was not performed because the user has not been authenticated.
-1245|ERROR_NOT_LOGGED_ON|The operation being requested was not performed because the user has not logged on to the network. The specified service does not exist.
-1246|ERROR_CONTINUE|Continue with work in progress.
-1247|ERROR_ALREADY_INITIALIZED|An attempt was made to perform an initialization operation when initialization has already been completed.
-1248|ERROR_NO_MORE_DEVICES|No more local devices.
-1249|ERROR_NO_SUCH_SITE|The specified site does not exist.
-1250|ERROR_DOMAIN_CONTROLLER_EXISTS|A domain controller with the specified name already exists.
-1251|ERROR_ONLY_IF_CONNECTED|This operation is supported only when you are connected to the server.
-1252|ERROR_OVERRIDE_NOCHANGES|The group policy framework should call the extension even if there are no changes.
-1253|ERROR_BAD_USER_PROFILE|The specified user does not have a valid profile.
-1254|ERROR_NOT_SUPPORTED_ON_SBS|This operation is not supported on a computer running Windows Server 2003 for Small Business Server.
-1255|ERROR_SERVER_SHUTDOWN_IN_PROGRESS|The server machine is shutting down.
-1256|ERROR_HOST_DOWN|The remote system is not available. For information about network troubleshooting, see Windows Help.
-1257|ERROR_NON_ACCOUNT_SID|The security identifier provided is not from an account domain.
-1258|ERROR_NON_DOMAIN_SID|The security identifier provided does not have a domain component.
-1259|ERROR_APPHELP_BLOCK|AppHelp dialog canceled thus preventing the application from starting.
-1260|ERROR_ACCESS_DISABLED_BY_POLICY|This program is blocked by group policy. For more information, contact your system administrator.
-1261|ERROR_REG_NAT_CONSUMPTION|A program attempt to use an invalid register value. Normally caused by an uninitialized register. This error is Itanium specific.
-1262|ERROR_CSCSHARE_OFFLINE|The share is currently offline or does not exist.
-1263|ERROR_PKINIT_FAILURE|The Kerberos protocol encountered an error while validating the KDC certificate during smartcard logon. There is more information in the system event log.
-1264|ERROR_SMARTCARD_SUBSYSTEM_FAILURE|The Kerberos protocol encountered an error while attempting to utilize the smartcard subsystem.
-1265|ERROR_DOWNGRADE_DETECTED|The system cannot contact a domain controller to service the authentication request. Please try again later.
-1271|ERROR_MACHINE_LOCKED|The machine is locked and cannot be shut down without the force option.
-1273|ERROR_CALLBACK_SUPPLIED_INVALID_DATA|An application-defined callback gave invalid data when called.
-1274|ERROR_SYNC_FOREGROUND_REFRESH_REQUIRED|The group policy framework should call the extension in the synchronous foreground policy refresh.
-1275|ERROR_DRIVER_BLOCKED|This driver has been blocked from loading.
-1276|ERROR_INVALID_IMPORT_OF_NON_DLL|A dynamic link library (DLL) referenced a module that was neither a DLL nor the process's executable image.
-1277|ERROR_ACCESS_DISABLED_WEBBLADE|Windows cannot open this program since it has been disabled.
-1278|ERROR_ACCESS_DISABLED_WEBBLADE_TAMPER|Windows cannot open this program because the license enforcement system has been tampered with or become corrupted.
-1279|ERROR_RECOVERY_FAILURE|A transaction recover failed.
-1280|ERROR_ALREADY_FIBER|The current thread has already been converted to a fiber.
-1281|ERROR_ALREADY_THREAD|The current thread has already been converted from a fiber.
-1282|ERROR_STACK_BUFFER_OVERRUN|The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.
-1283|ERROR_PARAMETER_QUOTA_EXCEEDED|Data present in one of the parameters is more than the function can operate on.
-1284|ERROR_DEBUGGER_INACTIVE|An attempt to do an operation on a debug object failed because the object is in the process of being deleted.
-1285|ERROR_DELAY_LOAD_FAILED|An attempt to delay-load a .dll or get a function address in a delay-loaded .dll failed.
-1286|ERROR_VDM_DISALLOWED|`%1 is a 16-bit application. You do not have permissions to execute 16-bit applications. Check your permissions with your system administrator.
-1287|ERROR_UNIDENTIFIED_ERROR|Insufficient information exists to identify the cause of failure.
-1288|ERROR_INVALID_CRUNTIME_PARAMETER|The parameter passed to a C runtime function is incorrect.
-1289|ERROR_BEYOND_VDL|The operation occurred beyond the valid data length of the file.
-1290|ERROR_INCOMPATIBLE_SERVICE_SID_TYPE|The service start failed since one or more services in the same process have an incompatible service SID type setting. A service with restricted service SID type can only coexist in the same process with other services with a restricted SID type. If the service SID type for this service was just configured, the hosting process must be restarted in order to start this service.`nOn Windows Server 2003 and Windows XP, an unrestricted service cannot coexist in the same process with other services. The service with the unrestricted service SID type must be moved to an owned process in order to start this service.
-1291|ERROR_DRIVER_PROCESS_TERMINATED|The process hosting the driver for this device has been terminated.
-1292|ERROR_IMPLEMENTATION_LIMIT|An operation attempted to exceed an implementation-defined limit.
-1293|ERROR_PROCESS_IS_PROTECTED|Either the target process, or the target thread's containing process, is a protected process.
-1294|ERROR_SERVICE_NOTIFY_CLIENT_LAGGING|The service notification client is lagging too far behind the current state of services in the machine.
-1295|ERROR_DISK_QUOTA_EXCEEDED|The requested file operation failed because the storage quota was exceeded. To free up disk space, move files to a different location or delete unnecessary files. For more information, contact your system administrator.
-1296|ERROR_CONTENT_BLOCKED|The requested file operation failed because the storage policy blocks that type of file. For more information, contact your system administrator.
-1297|ERROR_INCOMPATIBLE_SERVICE_PRIVILEGE|A privilege that the service requires to function properly does not exist in the service account configuration. You may use the Services Microsoft Management Console (MMC) snap-in (services.msc) and the Local Security Settings MMC snap-in (secpol.msc) to view the service configuration and the account configuration.
-1298|ERROR_APP_HANG|A thread involved in this operation appears to be unresponsive.
-1299|ERROR_INVALID_LABEL|Indicates a particular Security ID may not be assigned as the label of an object.
-1300|ERROR_NOT_ALL_ASSIGNED|Not all privileges or groups referenced are assigned to the caller.
-1301|ERROR_SOME_NOT_MAPPED|Some mapping between account names and security IDs was not done.
-1302|ERROR_NO_QUOTAS_FOR_ACCOUNT|No system quota limits are specifically set for this account.
-1303|ERROR_LOCAL_USER_SESSION_KEY|No encryption key is available. A well-known encryption key was returned.
-1304|ERROR_NULL_LM_PASSWORD|The password is too complex to be converted to a LAN Manager password. The LAN Manager password returned is a <strong>NULL</strong> string.
-1305|ERROR_UNKNOWN_REVISION|The revision level is unknown.
-1306|ERROR_REVISION_MISMATCH|Indicates two revision levels are incompatible.
-1307|ERROR_INVALID_OWNER|This security ID may not be assigned as the owner of this object.
-1308|ERROR_INVALID_PRIMARY_GROUP|This security ID may not be assigned as the primary group of an object.
-1309|ERROR_NO_IMPERSONATION_TOKEN|An attempt has been made to operate on an impersonation token by a thread that is not currently impersonating a client.
-1310|ERROR_CANT_DISABLE_MANDATORY|The group may not be disabled.
-1311|ERROR_NO_LOGON_SERVERS|There are currently no logon servers available to service the logon request.
-1312|ERROR_NO_SUCH_LOGON_SESSION|A specified logon session does not exist. It may already have been terminated.
-1313|ERROR_NO_SUCH_PRIVILEGE|A specified privilege does not exist.
-1314|ERROR_PRIVILEGE_NOT_HELD|A required privilege is not held by the client.
-1315|ERROR_INVALID_ACCOUNT_NAME|The name provided is not a properly formed account name.
-1316|ERROR_USER_EXISTS|The specified account already exists.
-1317|ERROR_NO_SUCH_USER|The specified account does not exist.
-1318|ERROR_GROUP_EXISTS|The specified group already exists.
-1319|ERROR_NO_SUCH_GROUP|The specified group does not exist.
-1320|ERROR_MEMBER_IN_GROUP|Either the specified user account is already a member of the specified group, or the specified group cannot be deleted because it contains a member.
-1321|ERROR_MEMBER_NOT_IN_GROUP|The specified user account is not a member of the specified group account.
-1322|ERROR_LAST_ADMIN|This operation is disallowed as it could result in an administration account being disabled, deleted or unable to log on.
-1323|ERROR_WRONG_PASSWORD|Unable to update the password. The value provided as the current password is incorrect.
-1324|ERROR_ILL_FORMED_PASSWORD|Unable to update the password. The value provided for the new password contains values that are not allowed in passwords.
-1325|ERROR_PASSWORD_RESTRICTION|Unable to update the password. The value provided for the new password does not meet the length, complexity, or history requirements of the domain.
-1326|ERROR_LOGON_FAILURE|The user name or password is incorrect.
-1327|ERROR_ACCOUNT_RESTRICTION|Account restrictions are preventing this user from signing in. For example: blank passwords aren't allowed, sign-in times are limited, or a policy restriction has been enforced.
-1328|ERROR_INVALID_LOGON_HOURS|Your account has time restrictions that keep you from signing in right now.
-1329|ERROR_INVALID_WORKSTATION|This user isn't allowed to sign in to this computer.
-1330|ERROR_PASSWORD_EXPIRED|The password for this account has expired.
-1331|ERROR_ACCOUNT_DISABLED|This user can't sign in because this account is currently disabled.
-1332|ERROR_NONE_MAPPED|No mapping between account names and security IDs was done.
-1333|ERROR_TOO_MANY_LUIDS_REQUESTED|Too many local user identifiers (LUIDs) were requested at one time.
-1334|ERROR_LUIDS_EXHAUSTED|No more local user identifiers (LUIDs) are available.
-1335|ERROR_INVALID_SUB_AUTHORITY|The subauthority part of a security ID is invalid for this particular use.
-1336|ERROR_INVALID_ACL|The access control list (ACL) structure is invalid.
-1337|ERROR_INVALID_SID|The security ID structure is invalid.
-1338|ERROR_INVALID_SECURITY_DESCR|The security descriptor structure is invalid.
-1340|ERROR_BAD_INHERITANCE_ACL|The inherited access control list (ACL) or access control entry (ACE) could not be built.
-1341|ERROR_SERVER_DISABLED|The server is currently disabled.
-1342|ERROR_SERVER_NOT_DISABLED|The server is currently enabled.
-1343|ERROR_INVALID_ID_AUTHORITY|The value provided was an invalid value for an identifier authority.
-1344|ERROR_ALLOTTED_SPACE_EXCEEDED|No more memory is available for security information updates.
-1345|ERROR_INVALID_GROUP_ATTRIBUTES|The specified attributes are invalid, or incompatible with the attributes for the group as a whole.
-1346|ERROR_BAD_IMPERSONATION_LEVEL|Either a required impersonation level was not provided, or the provided impersonation level is invalid.
-1347|ERROR_CANT_OPEN_ANONYMOUS|Cannot open an anonymous level security token.
-1348|ERROR_BAD_VALIDATION_CLASS|The validation information class requested was invalid.
-1349|ERROR_BAD_TOKEN_TYPE|The type of the token is inappropriate for its attempted use.
-1350|ERROR_NO_SECURITY_ON_OBJECT|Unable to perform a security operation on an object that has no associated security.
-1351|ERROR_CANT_ACCESS_DOMAIN_INFO|Configuration information could not be read from the domain controller, either because the machine is unavailable, or access has been denied.
-1352|ERROR_INVALID_SERVER_STATE|The security account manager (SAM) or local security authority (LSA) server was in the wrong state to perform the security operation.
-1353|ERROR_INVALID_DOMAIN_STATE|The domain was in the wrong state to perform the security operation.
-1354|ERROR_INVALID_DOMAIN_ROLE|This operation is only allowed for the Primary Domain Controller of the domain.
-1355|ERROR_NO_SUCH_DOMAIN|The specified domain either does not exist or could not be contacted.
-1356|ERROR_DOMAIN_EXISTS|The specified domain already exists.
-1357|ERROR_DOMAIN_LIMIT_EXCEEDED|An attempt was made to exceed the limit on the number of domains per server.
-1358|ERROR_INTERNAL_DB_CORRUPTION|Unable to complete the requested operation because of either a catastrophic media failure or a data structure corruption on the disk.
-1359|ERROR_INTERNAL_ERROR|An internal error occurred.
-1360|ERROR_GENERIC_NOT_MAPPED|Generic access types were contained in an access mask which should already be mapped to nongeneric types.
-1361|ERROR_BAD_DESCRIPTOR_FORMAT|A security descriptor is not in the right format (absolute or self-relative).
-1362|ERROR_NOT_LOGON_PROCESS|The requested action is restricted for use by logon processes only. The calling process has not registered as a logon process.
-1363|ERROR_LOGON_SESSION_EXISTS|Cannot start a new logon session with an ID that is already in use.
-1364|ERROR_NO_SUCH_PACKAGE|A specified authentication package is unknown.
-1365|ERROR_BAD_LOGON_SESSION_STATE|The logon session is not in a state that is consistent with the requested operation.
-1366|ERROR_LOGON_SESSION_COLLISION|The logon session ID is already in use.
-1367|ERROR_INVALID_LOGON_TYPE|A logon request contained an invalid logon type value.
-1368|ERROR_CANNOT_IMPERSONATE|Unable to impersonate using a named pipe until data has been read from that pipe.
-1369|ERROR_RXACT_INVALID_STATE|The transaction state of a registry subtree is incompatible with the requested operation.
-1370|ERROR_RXACT_COMMIT_FAILURE|An internal security database corruption has been encountered.
-1371|ERROR_SPECIAL_ACCOUNT|Cannot perform this operation on built-in accounts.
-1372|ERROR_SPECIAL_GROUP|Cannot perform this operation on this built-in special group.
-1373|ERROR_SPECIAL_USER|Cannot perform this operation on this built-in special user.
-1374|ERROR_MEMBERS_PRIMARY_GROUP|The user cannot be removed from a group because the group is currently the user's primary group.
-1375|ERROR_TOKEN_ALREADY_IN_USE|The token is already in use as a primary token.
-1376|ERROR_NO_SUCH_ALIAS|The specified local group does not exist.
-1377|ERROR_MEMBER_NOT_IN_ALIAS|The specified account name is not a member of the group.
-1378|ERROR_MEMBER_IN_ALIAS|The specified account name is already a member of the group.
-1379|ERROR_ALIAS_EXISTS|The specified local group already exists.
-1380|ERROR_LOGON_NOT_GRANTED|Logon failure: the user has not been granted the requested logon type at this computer.
-1381|ERROR_TOO_MANY_SECRETS|The maximum number of secrets that may be stored in a single system has been exceeded.
-1382|ERROR_SECRET_TOO_LONG|The length of a secret exceeds the maximum length allowed.
-1383|ERROR_INTERNAL_DB_ERROR|The local security authority database contains an internal inconsistency.
-1384|ERROR_TOO_MANY_CONTEXT_IDS|During a logon attempt, the user's security context accumulated too many security IDs.
-1385|ERROR_LOGON_TYPE_NOT_GRANTED|Logon failure: the user has not been granted the requested logon type at this computer.
-1386|ERROR_NT_CROSS_ENCRYPTION_REQUIRED|A cross-encrypted password is necessary to change a user password.
-1387|ERROR_NO_SUCH_MEMBER|A member could not be added to or removed from the local group because the member does not exist.
-1388|ERROR_INVALID_MEMBER|A new member could not be added to a local group because the member has the wrong account type.
-1389|ERROR_TOO_MANY_SIDS|Too many security IDs have been specified.
-1390|ERROR_LM_CROSS_ENCRYPTION_REQUIRED|A cross-encrypted password is necessary to change this user password.
-1391|ERROR_NO_INHERITANCE|Indicates an ACL contains no inheritable components.
-1392|ERROR_FILE_CORRUPT|The file or directory is corrupted and unreadable.
-1393|ERROR_DISK_CORRUPT|The disk structure is corrupted and unreadable.
-1394|ERROR_NO_USER_SESSION_KEY|There is no user session key for the specified logon session.
-1395|ERROR_LICENSE_QUOTA_EXCEEDED|The service being accessed is licensed for a particular number of connections. No more connections can be made to the service at this time because there are already as many connections as the service can accept.
-1396|ERROR_WRONG_TARGET_NAME|The target account name is incorrect.
-1397|ERROR_MUTUAL_AUTH_FAILED|Mutual Authentication failed. The server's password is out of date at the domain controller.
-1398|ERROR_TIME_SKEW|There is a time and/or date difference between the client and server.
-1399|ERROR_CURRENT_DOMAIN_NOT_ALLOWED|This operation cannot be performed on the current domain.
-1400|ERROR_INVALID_WINDOW_HANDLE|Invalid window handle.
-1401|ERROR_INVALID_MENU_HANDLE|Invalid menu handle.
-1402|ERROR_INVALID_CURSOR_HANDLE|Invalid cursor handle.
-1403|ERROR_INVALID_ACCEL_HANDLE|Invalid accelerator table handle.
-1404|ERROR_INVALID_HOOK_HANDLE|Invalid hook handle.
-1405|ERROR_INVALID_DWP_HANDLE|Invalid handle to a multiple-window position structure.
-1406|ERROR_TLW_WITH_WSCHILD|Cannot create a top-level child window.
-1407|ERROR_CANNOT_FIND_WND_CLASS|Cannot find window class.
-1408|ERROR_WINDOW_OF_OTHER_THREAD|Invalid window; it belongs to other thread.
-1409|ERROR_HOTKEY_ALREADY_REGISTERED|Hot key is already registered.
-1410|ERROR_CLASS_ALREADY_EXISTS|Class already exists.
-1411|ERROR_CLASS_DOES_NOT_EXIST|Class does not exist.
-1412|ERROR_CLASS_HAS_WINDOWS|Class still has open windows.
-1413|ERROR_INVALID_INDEX|Invalid index.
-1414|ERROR_INVALID_ICON_HANDLE|Invalid icon handle.
-1415|ERROR_PRIVATE_DIALOG_INDEX|Using private DIALOG window words.
-1416|ERROR_LISTBOX_ID_NOT_FOUND|The list box identifier was not found.
-1417|ERROR_NO_WILDCARD_CHARACTERS|No wildcards were found.
-1418|ERROR_CLIPBOARD_NOT_OPEN|Thread does not have a clipboard open.
-1419|ERROR_HOTKEY_NOT_REGISTERED|Hot key is not registered.
-1420|ERROR_WINDOW_NOT_DIALOG|The window is not a valid dialog window.
-1421|ERROR_CONTROL_ID_NOT_FOUND|Control ID not found.
-1422|ERROR_INVALID_COMBOBOX_MESSAGE|Invalid message for a combo box because it does not have an edit control.
-1423|ERROR_WINDOW_NOT_COMBOBOX|The window is not a combo box.
-1424|ERROR_INVALID_EDIT_HEIGHT|Height must be less than 256.
-1425|ERROR_DC_NOT_FOUND|Invalid device context (DC) handle.
-1426|ERROR_INVALID_HOOK_FILTER|Invalid hook procedure type.
-1427|ERROR_INVALID_FILTER_PROC|Invalid hook procedure.
-1428|ERROR_HOOK_NEEDS_HMOD|Cannot set nonlocal hook without a module handle.
-1429|ERROR_GLOBAL_ONLY_HOOK|This hook procedure can only be set globally.
-1430|ERROR_JOURNAL_HOOK_SET|The journal hook procedure is already installed.
-1431|ERROR_HOOK_NOT_INSTALLED|The hook procedure is not installed.
-1432|ERROR_INVALID_LB_MESSAGE|Invalid message for single-selection list box.
-1433|ERROR_SETCOUNT_ON_BAD_LB|LB_SETCOUNT sent to non-lazy list box.
-1434|ERROR_LB_WITHOUT_TABSTOPS|This list box does not support tab stops.
-1435|ERROR_DESTROY_OBJECT_OF_OTHER_THREAD|Cannot destroy object created by another thread.
-1436|ERROR_CHILD_WINDOW_MENU|Child windows cannot have menus.
-1437|ERROR_NO_SYSTEM_MENU|The window does not have a system menu.
-1438|ERROR_INVALID_MSGBOX_STYLE|Invalid message box style.
-1439|ERROR_INVALID_SPI_VALUE|Invalid system-wide (SPI_*) parameter.
-1440|ERROR_SCREEN_ALREADY_LOCKED|Screen already locked.
-1441|ERROR_HWNDS_HAVE_DIFF_PARENT|All handles to windows in a multiple-window position structure must have the same parent.
-1442|ERROR_NOT_CHILD_WINDOW|The window is not a child window.
-1443|ERROR_INVALID_GW_COMMAND|Invalid GW_* command.
-1444|ERROR_INVALID_THREAD_ID|Invalid thread identifier.
-1445|ERROR_NON_MDICHILD_WINDOW|Cannot process a message from a window that is not a multiple document interface (MDI) window.
-1446|ERROR_POPUP_ALREADY_ACTIVE|Popup menu already active.
-1447|ERROR_NO_SCROLLBARS|The window does not have scroll bars.
-1448|ERROR_INVALID_SCROLLBAR_RANGE|Scroll bar range cannot be greater than MAXLONG.
-1449|ERROR_INVALID_SHOWWIN_COMMAND|Cannot show or remove the window in the way specified.
-1450|ERROR_NO_SYSTEM_RESOURCES|Insufficient system resources exist to complete the requested service.
-1451|ERROR_NONPAGED_SYSTEM_RESOURCES|Insufficient system resources exist to complete the requested service.
-1452|ERROR_PAGED_SYSTEM_RESOURCES|Insufficient system resources exist to complete the requested service.
-1453|ERROR_WORKING_SET_QUOTA|Insufficient quota to complete the requested service.
-1454|ERROR_PAGEFILE_QUOTA|Insufficient quota to complete the requested service.
-1455|ERROR_COMMITMENT_LIMIT|The paging file is too small for this operation to complete.
-1456|ERROR_MENU_ITEM_NOT_FOUND|A menu item was not found.
-1457|ERROR_INVALID_KEYBOARD_HANDLE|Invalid keyboard layout handle.
-1458|ERROR_HOOK_TYPE_NOT_ALLOWED|Hook type not allowed.
-1459|ERROR_REQUIRES_INTERACTIVE_WINDOWSTATION|This operation requires an interactive window station.
-1460|ERROR_TIMEOUT|This operation returned because the timeout period expired.
-1461|ERROR_INVALID_MONITOR_HANDLE|Invalid monitor handle.
-1462|ERROR_INCORRECT_SIZE|Incorrect size argument.
-1463|ERROR_SYMLINK_CLASS_DISABLED|The symbolic link cannot be followed because its type is disabled.
-1464|ERROR_SYMLINK_NOT_SUPPORTED|This application does not support the current operation on symbolic links.
-1465|ERROR_XML_PARSE_ERROR|Windows was unable to parse the requested XML data.
-1466|ERROR_XMLDSIG_ERROR|An error was encountered while processing an XML digital signature.
-1467|ERROR_RESTART_APPLICATION|This application must be restarted.
-1468|ERROR_WRONG_COMPARTMENT|The caller made the connection request in the wrong routing compartment.
-1469|ERROR_AUTHIP_FAILURE|There was an AuthIP failure when attempting to connect to the remote host.
-1470|ERROR_NO_NVRAM_RESOURCES|Insufficient NVRAM resources exist to complete the requested service. A reboot might be required.
-1471|ERROR_NOT_GUI_PROCESS|Unable to finish the requested operation because the specified process is not a GUI process.
-1500|ERROR_EVENTLOG_FILE_CORRUPT|The event log file is corrupted.
-1501|ERROR_EVENTLOG_CANT_START|No event log file could be opened, so the event logging service did not start.
-1502|ERROR_LOG_FILE_FULL|The event log file is full.
-1503|ERROR_EVENTLOG_FILE_CHANGED|The event log file has changed between read operations.
-1550|ERROR_INVALID_TASK_NAME|The specified task name is invalid.
-1551|ERROR_INVALID_TASK_INDEX|The specified task index is invalid.
-1552|ERROR_THREAD_ALREADY_IN_TASK|The specified thread is already joining a task.
-1601|ERROR_INSTALL_SERVICE_FAILURE|The Windows Installer Service could not be accessed. This can occur if the Windows Installer is not correctly installed. Contact your support personnel for assistance.
-1602|ERROR_INSTALL_USEREXIT|User cancelled installation.
-1603|ERROR_INSTALL_FAILURE|Fatal error during installation.
-1604|ERROR_INSTALL_SUSPEND|Installation suspended, incomplete.
-1605|ERROR_UNKNOWN_PRODUCT|This action is only valid for products that are currently installed.
-1606|ERROR_UNKNOWN_FEATURE|Feature ID not registered.
-1607|ERROR_UNKNOWN_COMPONENT|Component ID not registered.
-1608|ERROR_UNKNOWN_PROPERTY|Unknown property.
-1609|ERROR_INVALID_HANDLE_STATE|Handle is in an invalid state.
-1610|ERROR_BAD_CONFIGURATION|The configuration data for this product is corrupt. Contact your support personnel.
-1611|ERROR_INDEX_ABSENT|Component qualifier not present.
-1612|ERROR_INSTALL_SOURCE_ABSENT|The installation source for this product is not available. Verify that the source exists and that you can access it.
-1613|ERROR_INSTALL_PACKAGE_VERSION|This installation package cannot be installed by the Windows Installer service. You must install a Windows service pack that contains a newer version of the Windows Installer service.
-1614|ERROR_PRODUCT_UNINSTALLED|Product is uninstalled.
-1615|ERROR_BAD_QUERY_SYNTAX|SQL query syntax invalid or unsupported.
-1616|ERROR_INVALID_FIELD|Record field does not exist.
-1617|ERROR_DEVICE_REMOVED|The device has been removed.
-1618|ERROR_INSTALL_ALREADY_RUNNING|Another installation is already in progress. Complete that installation before proceeding with this install.
-1619|ERROR_INSTALL_PACKAGE_OPEN_FAILED|This installation package could not be opened. Verify that the package exists and that you can access it, or contact the application vendor to verify that this is a valid Windows Installer package.
-1620|ERROR_INSTALL_PACKAGE_INVALID|This installation package could not be opened. Contact the application vendor to verify that this is a valid Windows Installer package.
-1621|ERROR_INSTALL_UI_FAILURE|There was an error starting the Windows Installer service user interface. Contact your support personnel.
-1622|ERROR_INSTALL_LOG_FAILURE|Error opening installation log file. Verify that the specified log file location exists and that you can write to it.
-1623|ERROR_INSTALL_LANGUAGE_UNSUPPORTED|The language of this installation package is not supported by your system.
-1624|ERROR_INSTALL_TRANSFORM_FAILURE|Error applying transforms. Verify that the specified transform paths are valid.
-1625|ERROR_INSTALL_PACKAGE_REJECTED|This installation is forbidden by system policy. Contact your system administrator.
-1626|ERROR_FUNCTION_NOT_CALLED|Function could not be executed.
-1627|ERROR_FUNCTION_FAILED|Function failed during execution.
-1628|ERROR_INVALID_TABLE|Invalid or unknown table specified.
-1629|ERROR_DATATYPE_MISMATCH|Data supplied is of wrong type.
-1630|ERROR_UNSUPPORTED_TYPE|Data of this type is not supported.
-1631|ERROR_CREATE_FAILED|The Windows Installer service failed to start. Contact your support personnel.
-1632|ERROR_INSTALL_TEMP_UNWRITABLE|The Temp folder is on a drive that is full or is inaccessible. Free up space on the drive or verify that you have write permission on the Temp folder.
-1633|ERROR_INSTALL_PLATFORM_UNSUPPORTED|This installation package is not supported by this processor type. Contact your product vendor.
-1634|ERROR_INSTALL_NOTUSED|Component not used on this computer.
-1635|ERROR_PATCH_PACKAGE_OPEN_FAILED|This update package could not be opened. Verify that the update package exists and that you can access it, or contact the application vendor to verify that this is a valid Windows Installer update package.
-1636|ERROR_PATCH_PACKAGE_INVALID|This update package could not be opened. Contact the application vendor to verify that this is a valid Windows Installer update package.
-1637|ERROR_PATCH_PACKAGE_UNSUPPORTED|This update package cannot be processed by the Windows Installer service. You must install a Windows service pack that contains a newer version of the Windows Installer service.
-1638|ERROR_PRODUCT_VERSION|Another version of this product is already installed. Installation of this version cannot continue. To configure or remove the existing version of this product, use Add/Remove Programs on the Control Panel.
-1639|ERROR_INVALID_COMMAND_LINE|Invalid command line argument. Consult the Windows Installer SDK for detailed command line help.
-1640|ERROR_INSTALL_REMOTE_DISALLOWED|Only administrators have permission to add, remove, or configure server software during a Terminal services remote session. If you want to install or configure software on the server, contact your network administrator.
-1641|ERROR_SUCCESS_REBOOT_INITIATED|The requested operation completed successfully. The system will be restarted so the changes can take effect.
-1642|ERROR_PATCH_TARGET_NOT_FOUND|The upgrade cannot be installed by the Windows Installer service because the program to be upgraded may be missing, or the upgrade may update a different version of the program. Verify that the program to be upgraded exists on your computer and that you have the correct upgrade.
-1643|ERROR_PATCH_PACKAGE_REJECTED|The update package is not permitted by software restriction policy.
-1644|ERROR_INSTALL_TRANSFORM_REJECTED|One or more customizations are not permitted by software restriction policy.
-1645|ERROR_INSTALL_REMOTE_PROHIBITED|The Windows Installer does not permit installation from a Remote Desktop Connection.
-1646|ERROR_PATCH_REMOVAL_UNSUPPORTED|Uninstallation of the update package is not supported.
-1647|ERROR_UNKNOWN_PATCH|The update is not applied to this product.
-1648|ERROR_PATCH_NO_SEQUENCE|No valid sequence could be found for the set of updates.
-1649|ERROR_PATCH_REMOVAL_DISALLOWED|Update removal was disallowed by policy.
-1650|ERROR_INVALID_PATCH_XML|The XML update data is invalid.
-1651|ERROR_PATCH_MANAGED_ADVERTISED_PRODUCT|Windows Installer does not permit updating of managed advertised products. At least one feature of the product must be installed before applying the update.
-1652|ERROR_INSTALL_SERVICE_SAFEBOOT|The Windows Installer service is not accessible in Safe Mode. Please try again when your computer is not in Safe Mode or you can use System Restore to return your machine to a previous good state.
-1653|ERROR_FAIL_FAST_EXCEPTION|A fail fast exception occurred. Exception handlers will not be invoked and the process will be terminated immediately.
-1654|ERROR_INSTALL_REJECTED|The app that you are trying to run is not supported on this version of Windows.
-1700|RPC_S_INVALID_STRING_BINDING|The string binding is invalid.
-1701|RPC_S_WRONG_KIND_OF_BINDING|The binding handle is not the correct type.
-1702|RPC_S_INVALID_BINDING|The binding handle is invalid.
-1703|RPC_S_PROTSEQ_NOT_SUPPORTED|The RPC protocol sequence is not supported.
-1704|RPC_S_INVALID_RPC_PROTSEQ|The RPC protocol sequence is invalid.
-1705|RPC_S_INVALID_STRING_UUID|The string universal unique identifier (UUID) is invalid.
-1706|RPC_S_INVALID_ENDPOINT_FORMAT|The endpoint format is invalid.
-1707|RPC_S_INVALID_NET_ADDR|The network address is invalid.
-1708|RPC_S_NO_ENDPOINT_FOUND|No endpoint was found.
-1709|RPC_S_INVALID_TIMEOUT|The timeout value is invalid.
-1710|RPC_S_OBJECT_NOT_FOUND|The object universal unique identifier (UUID) was not found.
-1711|RPC_S_ALREADY_REGISTERED|The object universal unique identifier (UUID) has already been registered.
-1712|RPC_S_TYPE_ALREADY_REGISTERED|The type universal unique identifier (UUID) has already been registered.
-1713|RPC_S_ALREADY_LISTENING|The RPC server is already listening.
-1714|RPC_S_NO_PROTSEQS_REGISTERED|No protocol sequences have been registered.
-1715|RPC_S_NOT_LISTENING|The RPC server is not listening.
-1716|RPC_S_UNKNOWN_MGR_TYPE|The manager type is unknown.
-1717|RPC_S_UNKNOWN_IF|The interface is unknown.
-1718|RPC_S_NO_BINDINGS|There are no bindings.
-1719|RPC_S_NO_PROTSEQS|There are no protocol sequences.
-1720|RPC_S_CANT_CREATE_ENDPOINT|The endpoint cannot be created.
-1721|RPC_S_OUT_OF_RESOURCES|Not enough resources are available to complete this operation.
-1722|RPC_S_SERVER_UNAVAILABLE|The RPC server is unavailable.
-1723|RPC_S_SERVER_TOO_BUSY|The RPC server is too busy to complete this operation.
-1724|RPC_S_INVALID_NETWORK_OPTIONS|The network options are invalid.
-1725|RPC_S_NO_CALL_ACTIVE|There are no remote procedure calls active on this thread.
-1726|RPC_S_CALL_FAILED|The remote procedure call failed.
-1727|RPC_S_CALL_FAILED_DNE|The remote procedure call failed and did not execute.
-1728|RPC_S_PROTOCOL_ERROR|A remote procedure call (RPC) protocol error occurred.
-1729|RPC_S_PROXY_ACCESS_DENIED|Access to the HTTP proxy is denied.
-1730|RPC_S_UNSUPPORTED_TRANS_SYN|The transfer syntax is not supported by the RPC server.
-1732|RPC_S_UNSUPPORTED_TYPE|The universal unique identifier (UUID) type is not supported.
-1733|RPC_S_INVALID_TAG|The tag is invalid.
-1734|RPC_S_INVALID_BOUND|The array bounds are invalid.
-1735|RPC_S_NO_ENTRY_NAME|The binding does not contain an entry name.
-1736|RPC_S_INVALID_NAME_SYNTAX|The name syntax is invalid.
-1737|RPC_S_UNSUPPORTED_NAME_SYNTAX|The name syntax is not supported.
-1739|RPC_S_UUID_NO_ADDRESS|No network address is available to use to construct a universal unique identifier (UUID).
-1740|RPC_S_DUPLICATE_ENDPOINT|The endpoint is a duplicate.
-1741|RPC_S_UNKNOWN_AUTHN_TYPE|The authentication type is unknown.
-1742|RPC_S_MAX_CALLS_TOO_SMALL|The maximum number of calls is too small.
-1743|RPC_S_STRING_TOO_LONG|The string is too long.
-1744|RPC_S_PROTSEQ_NOT_FOUND|The RPC protocol sequence was not found.
-1745|RPC_S_PROCNUM_OUT_OF_RANGE|The procedure number is out of range.
-1746|RPC_S_BINDING_HAS_NO_AUTH|The binding does not contain any authentication information.
-1747|RPC_S_UNKNOWN_AUTHN_SERVICE|The authentication service is unknown.
-1748|RPC_S_UNKNOWN_AUTHN_LEVEL|The authentication level is unknown.
-1749|RPC_S_INVALID_AUTH_IDENTITY|The security context is invalid.
-1750|RPC_S_UNKNOWN_AUTHZ_SERVICE|The authorization service is unknown.
-1751|EPT_S_INVALID_ENTRY|The entry is invalid.
-1752|EPT_S_CANT_PERFORM_OP|The server endpoint cannot perform the operation.
-1753|EPT_S_NOT_REGISTERED|There are no more endpoints available from the endpoint mapper.
-1754|RPC_S_NOTHING_TO_EXPORT|No interfaces have been exported.
-1755|RPC_S_INCOMPLETE_NAME|The entry name is incomplete.
-1756|RPC_S_INVALID_VERS_OPTION|The version option is invalid.
-1757|RPC_S_NO_MORE_MEMBERS|There are no more members.
-1758|RPC_S_NOT_ALL_OBJS_UNEXPORTED|There is nothing to unexport.
-1759|RPC_S_INTERFACE_NOT_FOUND|The interface was not found.
-1760|RPC_S_ENTRY_ALREADY_EXISTS|The entry already exists.
-1761|RPC_S_ENTRY_NOT_FOUND|The entry is not found.
-1762|RPC_S_NAME_SERVICE_UNAVAILABLE|The name service is unavailable.
-1763|RPC_S_INVALID_NAF_ID|The network address family is invalid.
-1764|RPC_S_CANNOT_SUPPORT|The requested operation is not supported.
-1765|RPC_S_NO_CONTEXT_AVAILABLE|No security context is available to allow impersonation.
-1766|RPC_S_INTERNAL_ERROR|An internal error occurred in a remote procedure call (RPC).
-1767|RPC_S_ZERO_DIVIDE|The RPC server attempted an integer division by zero.
-1768|RPC_S_ADDRESS_ERROR|An addressing error occurred in the RPC server.
-1769|RPC_S_FP_DIV_ZERO|A floating-point operation at the RPC server caused a division by zero.
-1770|RPC_S_FP_UNDERFLOW|A floating-point underflow occurred at the RPC server.
-1771|RPC_S_FP_OVERFLOW|A floating-point overflow occurred at the RPC server.
-1772|RPC_X_NO_MORE_ENTRIES|The list of RPC servers available for the binding of auto handles has been exhausted.
-1773|RPC_X_SS_CHAR_TRANS_OPEN_FAIL|Unable to open the character translation table file.
-1774|RPC_X_SS_CHAR_TRANS_SHORT_FILE|The file containing the character translation table has fewer than 512 bytes.
-1775|RPC_X_SS_IN_NULL_CONTEXT|A null context handle was passed from the client to the host during a remote procedure call.
-1777|RPC_X_SS_CONTEXT_DAMAGED|The context handle changed during a remote procedure call.
-1778|RPC_X_SS_HANDLES_MISMATCH|The binding handles passed to a remote procedure call do not match.
-1779|RPC_X_SS_CANNOT_GET_CALL_HANDLE|The stub is unable to get the remote procedure call handle.
-1780|RPC_X_NULL_REF_POINTER|A null reference pointer was passed to the stub.
-1781|RPC_X_ENUM_VALUE_OUT_OF_RANGE|The enumeration value is out of range.
-1782|RPC_X_BYTE_COUNT_TOO_SMALL|The byte count is too small.
-1783|RPC_X_BAD_STUB_DATA|The stub received bad data.
-1784|ERROR_INVALID_USER_BUFFER|The supplied user buffer is not valid for the requested operation.
-1785|ERROR_UNRECOGNIZED_MEDIA|The disk media is not recognized. It may not be formatted.
-1786|ERROR_NO_TRUST_LSA_SECRET|The workstation does not have a trust secret.
-1787|ERROR_NO_TRUST_SAM_ACCOUNT|The security database on the server does not have a computer account for this workstation trust relationship.
-1788|ERROR_TRUSTED_DOMAIN_FAILURE|The trust relationship between the primary domain and the trusted domain failed.
-1789|ERROR_TRUSTED_RELATIONSHIP_FAILURE|The trust relationship between this workstation and the primary domain failed.
-1790|ERROR_TRUST_FAILURE|The network logon failed.
-1791|RPC_S_CALL_IN_PROGRESS|A remote procedure call is already in progress for this thread.
-1792|ERROR_NETLOGON_NOT_STARTED|An attempt was made to logon, but the network logon service was not started.
-1793|ERROR_ACCOUNT_EXPIRED|The user's account has expired.
-1794|ERROR_REDIRECTOR_HAS_OPEN_HANDLES|The redirector is in use and cannot be unloaded.
-1795|ERROR_PRINTER_DRIVER_ALREADY_INSTALLED|The specified printer driver is already installed.
-1796|ERROR_UNKNOWN_PORT|The specified port is unknown.
-1797|ERROR_UNKNOWN_PRINTER_DRIVER|The printer driver is unknown.
-1798|ERROR_UNKNOWN_PRINTPROCESSOR|The print processor is unknown.
-1799|ERROR_INVALID_SEPARATOR_FILE|The specified separator file is invalid.
-1800|ERROR_INVALID_PRIORITY|The specified priority is invalid.
-1801|ERROR_INVALID_PRINTER_NAME|The printer name is invalid.
-1802|ERROR_PRINTER_ALREADY_EXISTS|The printer already exists.
-1803|ERROR_INVALID_PRINTER_COMMAND|The printer command is invalid.
-1804|ERROR_INVALID_DATATYPE|The specified datatype is invalid.
-1805|ERROR_INVALID_ENVIRONMENT|The environment specified is invalid.
-1806|RPC_S_NO_MORE_BINDINGS|There are no more bindings.
-1807|ERROR_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT|The account used is an interdomain trust account. Use your global user account or local user account to access this server.
-1808|ERROR_NOLOGON_WORKSTATION_TRUST_ACCOUNT|The account used is a computer account. Use your global user account or local user account to access this server.
-1809|ERROR_NOLOGON_SERVER_TRUST_ACCOUNT|The account used is a server trust account. Use your global user account or local user account to access this server.
-1810|ERROR_DOMAIN_TRUST_INCONSISTENT|The name or security ID (SID) of the domain specified is inconsistent with the trust information for that domain.
-1811|ERROR_SERVER_HAS_OPEN_HANDLES|The server is in use and cannot be unloaded.
-1812|ERROR_RESOURCE_DATA_NOT_FOUND|The specified image file did not contain a resource section.
-1813|ERROR_RESOURCE_TYPE_NOT_FOUND|The specified resource type cannot be found in the image file.
-1814|ERROR_RESOURCE_NAME_NOT_FOUND|The specified resource name cannot be found in the image file.
-1815|ERROR_RESOURCE_LANG_NOT_FOUND|The specified resource language ID cannot be found in the image file.
-1816|ERROR_NOT_ENOUGH_QUOTA|Not enough quota is available to process this command.
-1817|RPC_S_NO_INTERFACES|No interfaces have been registered.
-1818|RPC_S_CALL_CANCELLED|The remote procedure call was cancelled.
-1819|RPC_S_BINDING_INCOMPLETE|The binding handle does not contain all required information.
-1820|RPC_S_COMM_FAILURE|A communications failure occurred during a remote procedure call.
-1821|RPC_S_UNSUPPORTED_AUTHN_LEVEL|The requested authentication level is not supported.
-1822|RPC_S_NO_PRINC_NAME|No principal name registered.
-1823|RPC_S_NOT_RPC_ERROR|The error specified is not a valid Windows RPC error code.
-1824|RPC_S_UUID_LOCAL_ONLY|A UUID that is valid only on this computer has been allocated.
-1825|RPC_S_SEC_PKG_ERROR|A security package specific error occurred.
-1826|RPC_S_NOT_CANCELLED|Thread is not canceled.
-1827|RPC_X_INVALID_ES_ACTION|Invalid operation on the encoding/decoding handle.
-1828|RPC_X_WRONG_ES_VERSION|Incompatible version of the serializing package.
-1829|RPC_X_WRONG_STUB_VERSION|Incompatible version of the RPC stub.
-1830|RPC_X_INVALID_PIPE_OBJECT|The RPC pipe object is invalid or corrupted.
-1831|RPC_X_WRONG_PIPE_ORDER|An invalid operation was attempted on an RPC pipe object.
-1832|RPC_X_WRONG_PIPE_VERSION|Unsupported RPC pipe version.
-1833|RPC_S_COOKIE_AUTH_FAILED|HTTP proxy server rejected the connection because the cookie authentication failed.
-1898|RPC_S_GROUP_MEMBER_NOT_FOUND|The group member was not found.
-1899|EPT_S_CANT_CREATE|The endpoint mapper database entry could not be created.
-1900|RPC_S_INVALID_OBJECT|The object universal unique identifier (UUID) is the nil UUID.
-1901|ERROR_INVALID_TIME|The specified time is invalid.
-1902|ERROR_INVALID_FORM_NAME|The specified form name is invalid.
-1903|ERROR_INVALID_FORM_SIZE|The specified form size is invalid.
-1904|ERROR_ALREADY_WAITING|The specified printer handle is already being waited on.
-1905|ERROR_PRINTER_DELETED|The specified printer has been deleted.
-1906|ERROR_INVALID_PRINTER_STATE|The state of the printer is invalid.
-1907|ERROR_PASSWORD_MUST_CHANGE|The user's password must be changed before signing in.
-1908|ERROR_DOMAIN_CONTROLLER_NOT_FOUND|Could not find the domain controller for this domain.
-1909|ERROR_ACCOUNT_LOCKED_OUT|The referenced account is currently locked out and may not be logged on to.
-1910|OR_INVALID_OXID|The object exporter specified was not found.
-1911|OR_INVALID_OID|The object specified was not found.
-1912|OR_INVALID_SET|The object resolver set specified was not found.
-1913|RPC_S_SEND_INCOMPLETE|Some data remains to be sent in the request buffer.
-1914|RPC_S_INVALID_ASYNC_HANDLE|Invalid asynchronous remote procedure call handle.
-1915|RPC_S_INVALID_ASYNC_CALL|Invalid asynchronous RPC call handle for this operation.
-1916|RPC_X_PIPE_CLOSED|The RPC pipe object has already been closed.
-1917|RPC_X_PIPE_DISCIPLINE_ERROR|The RPC call completed before all pipes were processed.
-1918|RPC_X_PIPE_EMPTY|No more data is available from the RPC pipe.
-1919|ERROR_NO_SITENAME|No site name is available for this machine.
-1920|ERROR_CANT_ACCESS_FILE|The file cannot be accessed by the system.
-1921|ERROR_CANT_RESOLVE_FILENAME|The name of the file cannot be resolved by the system.
-1922|RPC_S_ENTRY_TYPE_MISMATCH|The entry is not of the expected type.
-1923|RPC_S_NOT_ALL_OBJS_EXPORTED|Not all object UUIDs could be exported to the specified entry.
-1924|RPC_S_INTERFACE_NOT_EXPORTED|Interface could not be exported to the specified entry.
-1925|RPC_S_PROFILE_NOT_ADDED|The specified profile entry could not be added.
-1926|RPC_S_PRF_ELT_NOT_ADDED|The specified profile element could not be added.
-1927|RPC_S_PRF_ELT_NOT_REMOVED|The specified profile element could not be removed.
-1928|RPC_S_GRP_ELT_NOT_ADDED|The group element could not be added.
-1929|RPC_S_GRP_ELT_NOT_REMOVED|The group element could not be removed.
-1930|ERROR_KM_DRIVER_BLOCKED|The printer driver is not compatible with a policy enabled on your computer that blocks NT 4.0 drivers.
-1931|ERROR_CONTEXT_EXPIRED|The context has expired and can no longer be used.
-1932|ERROR_PER_USER_TRUST_QUOTA_EXCEEDED|The current user's delegated trust creation quota has been exceeded.
-1933|ERROR_ALL_USER_TRUST_QUOTA_EXCEEDED|The total delegated trust creation quota has been exceeded.
-1934|ERROR_USER_DELETE_TRUST_QUOTA_EXCEEDED|The current user's delegated trust deletion quota has been exceeded.
-1935|ERROR_AUTHENTICATION_FIREWALL_FAILED|The computer you are signing into is protected by an authentication firewall. The specified account is not allowed to authenticate to the computer.
-1936|ERROR_REMOTE_PRINT_CONNECTIONS_BLOCKED|Remote connections to the Print Spooler are blocked by a policy set on your machine.
-1937|ERROR_NTLM_BLOCKED|Authentication failed because NTLM authentication has been disabled.
-1938|ERROR_PASSWORD_CHANGE_REQUIRED|Logon Failure: EAS policy requires that the user change their password before this operation can be performed.
-2000|ERROR_INVALID_PIXEL_FORMAT|The pixel format is invalid.
-2001|ERROR_BAD_DRIVER|The specified driver is invalid.
-2002|ERROR_INVALID_WINDOW_STYLE|The window style or class attribute is invalid for this operation.
-2003|ERROR_METAFILE_NOT_SUPPORTED|The requested metafile operation is not supported.
-2004|ERROR_TRANSFORM_NOT_SUPPORTED|The requested transformation operation is not supported.
-2005|ERROR_CLIPPING_NOT_SUPPORTED|The requested clipping operation is not supported.
-2010|ERROR_INVALID_CMM|The specified color management module is invalid.
-2011|ERROR_INVALID_PROFILE|The specified color profile is invalid.
-2012|ERROR_TAG_NOT_FOUND|The specified tag was not found.
-2013|ERROR_TAG_NOT_PRESENT|A required tag is not present.
-2014|ERROR_DUPLICATE_TAG|The specified tag is already present.
-2015|ERROR_PROFILE_NOT_ASSOCIATED_WITH_DEVICE|The specified color profile is not associated with the specified device.
-2016|ERROR_PROFILE_NOT_FOUND|The specified color profile was not found.
-2017|ERROR_INVALID_COLORSPACE|The specified color space is invalid.
-2018|ERROR_ICM_NOT_ENABLED|Image Color Management is not enabled.
-2019|ERROR_DELETING_ICM_XFORM|There was an error while deleting the color transform.
-2020|ERROR_INVALID_TRANSFORM|The specified color transform is invalid.
-2021|ERROR_COLORSPACE_MISMATCH|The specified transform does not match the bitmap's color space.
-2022|ERROR_INVALID_COLORINDEX|The specified named color index is not present in the profile.
-2023|ERROR_PROFILE_DOES_NOT_MATCH_DEVICE|The specified profile is intended for a device of a different type than the specified device.
-2108|ERROR_CONNECTED_OTHER_PASSWORD|The network connection was made successfully, but the user had to be prompted for a password other than the one originally specified.
-2109|ERROR_CONNECTED_OTHER_PASSWORD_DEFAULT|The network connection was made successfully using default credentials.
-2202|ERROR_BAD_USERNAME|The specified username is invalid.
-2250|ERROR_NOT_CONNECTED|This network connection does not exist.
-2401|ERROR_OPEN_FILES|This network connection has files open or requests pending.
-2402|ERROR_ACTIVE_CONNECTIONS|Active connections still exist.
-2404|ERROR_DEVICE_IN_USE|The device is in use by an active process and cannot be disconnected.
-3000|ERROR_UNKNOWN_PRINT_MONITOR|The specified print monitor is unknown.
-3001|ERROR_PRINTER_DRIVER_IN_USE|The specified printer driver is currently in use.
-3002|ERROR_SPOOL_FILE_NOT_FOUND|The spool file was not found.
-3003|ERROR_SPL_NO_STARTDOC|A StartDocPrinter call was not issued.
-3004|ERROR_SPL_NO_ADDJOB|An AddJob call was not issued.
-3005|ERROR_PRINT_PROCESSOR_ALREADY_INSTALLED|The specified print processor has already been installed.
-3006|ERROR_PRINT_MONITOR_ALREADY_INSTALLED|The specified print monitor has already been installed.
-3007|ERROR_INVALID_PRINT_MONITOR|The specified print monitor does not have the required functions.
-3008|ERROR_PRINT_MONITOR_IN_USE|The specified print monitor is currently in use.
-3009|ERROR_PRINTER_HAS_JOBS_QUEUED|The requested operation is not allowed when there are jobs queued to the printer.
-3010|ERROR_SUCCESS_REBOOT_REQUIRED|The requested operation is successful. Changes will not be effective until the system is rebooted.
-3011|ERROR_SUCCESS_RESTART_REQUIRED|The requested operation is successful. Changes will not be effective until the service is restarted.
-3012|ERROR_PRINTER_NOT_FOUND|No printers were found.
-3013|ERROR_PRINTER_DRIVER_WARNED|The printer driver is known to be unreliable.
-3014|ERROR_PRINTER_DRIVER_BLOCKED|The printer driver is known to harm the system.
-3015|ERROR_PRINTER_DRIVER_PACKAGE_IN_USE|The specified printer driver package is currently in use.
-3016|ERROR_CORE_DRIVER_PACKAGE_NOT_FOUND|Unable to find a core driver package that is required by the printer driver package.
-3017|ERROR_FAIL_REBOOT_REQUIRED|The requested operation failed. A system reboot is required to roll back changes made.
-3018|ERROR_FAIL_REBOOT_INITIATED|The requested operation failed. A system reboot has been initiated to roll back changes made.
-3019|ERROR_PRINTER_DRIVER_DOWNLOAD_NEEDED|The specified printer driver was not found on the system and needs to be downloaded.
-3020|ERROR_PRINT_JOB_RESTART_REQUIRED|The requested print job has failed to print. A print system update requires the job to be resubmitted.
-3021|ERROR_INVALID_PRINTER_DRIVER_MANIFEST|The printer driver does not contain a valid manifest, or contains too many manifests.
-3022|ERROR_PRINTER_NOT_SHAREABLE|The specified printer cannot be shared.
-3050|ERROR_REQUEST_PAUSED|The operation was paused.
-3950|ERROR_IO_REISSUE_AS_CACHED|Reissue the given operation as a cached IO operation.
-4000|ERROR_WINS_INTERNAL|WINS encountered an error while processing the command.
-4001|ERROR_CAN_NOT_DEL_LOCAL_WINS|The local WINS cannot be deleted.
-4002|ERROR_STATIC_INIT|The importation from the file failed.
-4003|ERROR_INC_BACKUP|The backup failed. Was a full backup done before?
-4004|ERROR_FULL_BACKUP|The backup failed. Check the directory to which you are backing the database.
-4005|ERROR_REC_NON_EXISTENT|The name does not exist in the WINS database.
-4006|ERROR_RPL_NOT_ALLOWED|Replication with a nonconfigured partner is not allowed.
-4050|PEERDIST_ERROR_CONTENTINFO_VERSION_UNSUPPORTED|The version of the supplied content information is not supported.
-4051|PEERDIST_ERROR_CANNOT_PARSE_CONTENTINFO|The supplied content information is malformed.
-4052|PEERDIST_ERROR_MISSING_DATA|The requested data cannot be found in local or peer caches.
-4053|PEERDIST_ERROR_NO_MORE|No more data is available or required.
-4054|PEERDIST_ERROR_NOT_INITIALIZED|The supplied object has not been initialized.
-4055|PEERDIST_ERROR_ALREADY_INITIALIZED|The supplied object has already been initialized.
-4056|PEERDIST_ERROR_SHUTDOWN_IN_PROGRESS|A shutdown operation is already in progress.
-4057|PEERDIST_ERROR_INVALIDATED|The supplied object has already been invalidated.
-4058|PEERDIST_ERROR_ALREADY_EXISTS|An element already exists and was not replaced.
-4059|PEERDIST_ERROR_OPERATION_NOTFOUND|Can not cancel the requested operation as it has already been completed.
-4060|PEERDIST_ERROR_ALREADY_COMPLETED|Can not perform the reqested operation because it has already been carried out.
-4061|PEERDIST_ERROR_OUT_OF_BOUNDS|An operation accessed data beyond the bounds of valid data.
-4062|PEERDIST_ERROR_VERSION_UNSUPPORTED|The requested version is not supported.
-4063|PEERDIST_ERROR_INVALID_CONFIGURATION|A configuration value is invalid.
-4064|PEERDIST_ERROR_NOT_LICENSED|The SKU is not licensed.
-4065|PEERDIST_ERROR_SERVICE_UNAVAILABLE|PeerDist Service is still initializing and will be available shortly.
-4066|PEERDIST_ERROR_TRUST_FAILURE|Communication with one or more computers will be temporarily blocked due to recent errors.
-4100|ERROR_DHCP_ADDRESS_CONFLICT|The DHCP client has obtained an IP address that is already in use on the network. The local interface will be disabled until the DHCP client can obtain a new address.
-4200|ERROR_WMI_GUID_NOT_FOUND|The GUID passed was not recognized as valid by a WMI data provider.
-4201|ERROR_WMI_INSTANCE_NOT_FOUND|The instance name passed was not recognized as valid by a WMI data provider.
-4202|ERROR_WMI_ITEMID_NOT_FOUND|The data item ID passed was not recognized as valid by a WMI data provider.
-4203|ERROR_WMI_TRY_AGAIN|The WMI request could not be completed and should be retried.
-4204|ERROR_WMI_DP_NOT_FOUND|The WMI data provider could not be located.
-4205|ERROR_WMI_UNRESOLVED_INSTANCE_REF|The WMI data provider references an instance set that has not been registered.
-4206|ERROR_WMI_ALREADY_ENABLED|The WMI data block or event notification has already been enabled.
-4207|ERROR_WMI_GUID_DISCONNECTED|The WMI data block is no longer available.
-4208|ERROR_WMI_SERVER_UNAVAILABLE|The WMI data service is not available.
-4209|ERROR_WMI_DP_FAILED|The WMI data provider failed to carry out the request.
-4210|ERROR_WMI_INVALID_MOF|The WMI MOF information is not valid.
-4211|ERROR_WMI_INVALID_REGINFO|The WMI registration information is not valid.
-4212|ERROR_WMI_ALREADY_DISABLED|The WMI data block or event notification has already been disabled.
-4213|ERROR_WMI_READ_ONLY|The WMI data item or data block is read only.
-4214|ERROR_WMI_SET_FAILURE|The WMI data item or data block could not be changed.
-4250|ERROR_NOT_APPCONTAINER|This operation is only valid in the context of an app container.
-4251|ERROR_APPCONTAINER_REQUIRED|This application can only run in the context of an app container.
-4252|ERROR_NOT_SUPPORTED_IN_APPCONTAINER|This functionality is not supported in the context of an app container.
-4253|ERROR_INVALID_PACKAGE_SID_LENGTH|The length of the SID supplied is not a valid length for app container SIDs.
-4300|ERROR_INVALID_MEDIA|The media identifier does not represent a valid medium.
-4301|ERROR_INVALID_LIBRARY|The library identifier does not represent a valid library.
-4302|ERROR_INVALID_MEDIA_POOL|The media pool identifier does not represent a valid media pool.
-4303|ERROR_DRIVE_MEDIA_MISMATCH|The drive and medium are not compatible or exist in different libraries.
-4304|ERROR_MEDIA_OFFLINE|The medium currently exists in an offline library and must be online to perform this operation.
-4305|ERROR_LIBRARY_OFFLINE|The operation cannot be performed on an offline library.
-4306|ERROR_EMPTY|The library, drive, or media pool is empty.
-4307|ERROR_NOT_EMPTY|The library, drive, or media pool must be empty to perform this operation.
-4308|ERROR_MEDIA_UNAVAILABLE|No media is currently available in this media pool or library.
-4309|ERROR_RESOURCE_DISABLED|A resource required for this operation is disabled.
-4310|ERROR_INVALID_CLEANER|The media identifier does not represent a valid cleaner.
-4311|ERROR_UNABLE_TO_CLEAN|The drive cannot be cleaned or does not support cleaning.
-4312|ERROR_OBJECT_NOT_FOUND|The object identifier does not represent a valid object.
-4313|ERROR_DATABASE_FAILURE|Unable to read from or write to the database.
-4314|ERROR_DATABASE_FULL|The database is full.
-4315|ERROR_MEDIA_INCOMPATIBLE|The medium is not compatible with the device or media pool.
-4316|ERROR_RESOURCE_NOT_PRESENT|The resource required for this operation does not exist.
-4317|ERROR_INVALID_OPERATION|The operation identifier is not valid.
-4318|ERROR_MEDIA_NOT_AVAILABLE|The media is not mounted or ready for use.
-4319|ERROR_DEVICE_NOT_AVAILABLE|The device is not ready for use.
-4320|ERROR_REQUEST_REFUSED|The operator or administrator has refused the request.
-4321|ERROR_INVALID_DRIVE_OBJECT|The drive identifier does not represent a valid drive.
-4322|ERROR_LIBRARY_FULL|Library is full. No slot is available for use.
-4323|ERROR_MEDIUM_NOT_ACCESSIBLE|The transport cannot access the medium.
-4324|ERROR_UNABLE_TO_LOAD_MEDIUM|Unable to load the medium into the drive.
-4325|ERROR_UNABLE_TO_INVENTORY_DRIVE|Unable to retrieve the drive status.
-4326|ERROR_UNABLE_TO_INVENTORY_SLOT|Unable to retrieve the slot status.
-4327|ERROR_UNABLE_TO_INVENTORY_TRANSPORT|Unable to retrieve status about the transport.
-4328|ERROR_TRANSPORT_FULL|Cannot use the transport because it is already in use.
-4329|ERROR_CONTROLLING_IEPORT|Unable to open or close the inject/eject port.
-4330|ERROR_UNABLE_TO_EJECT_MOUNTED_MEDIA|Unable to eject the medium because it is in a drive.
-4331|ERROR_CLEANER_SLOT_SET|A cleaner slot is already reserved.
-4332|ERROR_CLEANER_SLOT_NOT_SET|A cleaner slot is not reserved.
-4333|ERROR_CLEANER_CARTRIDGE_SPENT|The cleaner cartridge has performed the maximum number of drive cleanings.
-4334|ERROR_UNEXPECTED_OMID|Unexpected on-medium identifier.
-4335|ERROR_CANT_DELETE_LAST_ITEM|The last remaining item in this group or resource cannot be deleted.
-4336|ERROR_MESSAGE_EXCEEDS_MAX_SIZE|The message provided exceeds the maximum size allowed for this parameter.
-4337|ERROR_VOLUME_CONTAINS_SYS_FILES|The volume contains system or paging files.
-4338|ERROR_INDIGENOUS_TYPE|The media type cannot be removed from this library since at least one drive in the library reports it can support this media type.
-4339|ERROR_NO_SUPPORTING_DRIVES|This offline media cannot be mounted on this system since no enabled drives are present which can be used.
-4340|ERROR_CLEANER_CARTRIDGE_INSTALLED|A cleaner cartridge is present in the tape library.
-4341|ERROR_IEPORT_FULL|Cannot use the inject/eject port because it is not empty.
-4350|ERROR_FILE_OFFLINE|This file is currently not available for use on this computer.
-4351|ERROR_REMOTE_STORAGE_NOT_ACTIVE|The remote storage service is not operational at this time.
-4352|ERROR_REMOTE_STORAGE_MEDIA_ERROR|The remote storage service encountered a media error.
-4390|ERROR_NOT_A_REPARSE_POINT|The file or directory is not a reparse point.
-4391|ERROR_REPARSE_ATTRIBUTE_CONFLICT|The reparse point attribute cannot be set because it conflicts with an existing attribute.
-4392|ERROR_INVALID_REPARSE_DATA|The data present in the reparse point buffer is invalid.
-4393|ERROR_REPARSE_TAG_INVALID|The tag present in the reparse point buffer is invalid.
-4394|ERROR_REPARSE_TAG_MISMATCH|There is a mismatch between the tag specified in the request and the tag present in the reparse point.
-4400|ERROR_APP_DATA_NOT_FOUND|Fast Cache data not found.
-4401|ERROR_APP_DATA_EXPIRED|Fast Cache data expired.
-4402|ERROR_APP_DATA_CORRUPT|Fast Cache data corrupt.
-4403|ERROR_APP_DATA_LIMIT_EXCEEDED|Fast Cache data has exceeded its max size and cannot be updated.
-4404|ERROR_APP_DATA_REBOOT_REQUIRED|Fast Cache has been ReArmed and requires a reboot until it can be updated.
-4420|ERROR_SECUREBOOT_ROLLBACK_DETECTED|Secure Boot detected that rollback of protected data has been attempted.
-4421|ERROR_SECUREBOOT_POLICY_VIOLATION|The value is protected by Secure Boot policy and cannot be modified or deleted.
-4422|ERROR_SECUREBOOT_INVALID_POLICY|The Secure Boot policy is invalid.
-4423|ERROR_SECUREBOOT_POLICY_PUBLISHER_NOT_FOUND|A new Secure Boot policy did not contain the current publisher on its update list.
-4424|ERROR_SECUREBOOT_POLICY_NOT_SIGNED|The Secure Boot policy is either not signed or is signed by a non-trusted signer.
-4425|ERROR_SECUREBOOT_NOT_ENABLED|Secure Boot is not enabled on this machine.
-4426|ERROR_SECUREBOOT_FILE_REPLACED|Secure Boot requires that certain files and drivers are not replaced by other files or drivers.
-4440|ERROR_OFFLOAD_READ_FLT_NOT_SUPPORTED|The copy offload read operation is not supported by a filter.
-4441|ERROR_OFFLOAD_WRITE_FLT_NOT_SUPPORTED|The copy offload write operation is not supported by a filter.
-4442|ERROR_OFFLOAD_READ_FILE_NOT_SUPPORTED|The copy offload read operation is not supported for the file.
-4443|ERROR_OFFLOAD_WRITE_FILE_NOT_SUPPORTED|The copy offload write operation is not supported for the file.
-4500|ERROR_VOLUME_NOT_SIS_ENABLED|Single Instance Storage is not available on this volume.
-5001|ERROR_DEPENDENT_RESOURCE_EXISTS|The operation cannot be completed because other resources are dependent on this resource.
-5002|ERROR_DEPENDENCY_NOT_FOUND|The cluster resource dependency cannot be found.
-5003|ERROR_DEPENDENCY_ALREADY_EXISTS|The cluster resource cannot be made dependent on the specified resource because it is already dependent.
-5004|ERROR_RESOURCE_NOT_ONLINE|The cluster resource is not online.
-5005|ERROR_HOST_NODE_NOT_AVAILABLE|A cluster node is not available for this operation.
-5006|ERROR_RESOURCE_NOT_AVAILABLE|The cluster resource is not available.
-5007|ERROR_RESOURCE_NOT_FOUND|The cluster resource could not be found.
-5008|ERROR_SHUTDOWN_CLUSTER|The cluster is being shut down.
-5009|ERROR_CANT_EVICT_ACTIVE_NODE|A cluster node cannot be evicted from the cluster unless the node is down or it is the last node.
-5010|ERROR_OBJECT_ALREADY_EXISTS|The object already exists.
-5011|ERROR_OBJECT_IN_LIST|The object is already in the list.
-5012|ERROR_GROUP_NOT_AVAILABLE|The cluster group is not available for any new requests.
-5013|ERROR_GROUP_NOT_FOUND|The cluster group could not be found.
-5014|ERROR_GROUP_NOT_ONLINE|The operation could not be completed because the cluster group is not online.
-5015|ERROR_HOST_NODE_NOT_RESOURCE_OWNER|The operation failed because either the specified cluster node is not the owner of the resource, or the node is not a possible owner of the resource.
-5016|ERROR_HOST_NODE_NOT_GROUP_OWNER|The operation failed because either the specified cluster node is not the owner of the group, or the node is not a possible owner of the group.
-5017|ERROR_RESMON_CREATE_FAILED|The cluster resource could not be created in the specified resource monitor.
-5018|ERROR_RESMON_ONLINE_FAILED|The cluster resource could not be brought online by the resource monitor.
-5019|ERROR_RESOURCE_ONLINE|The operation could not be completed because the cluster resource is online.
-5020|ERROR_QUORUM_RESOURCE|The cluster resource could not be deleted or brought offline because it is the quorum resource.
-5021|ERROR_NOT_QUORUM_CAPABLE|The cluster could not make the specified resource a quorum resource because it is not capable of being a quorum resource.
-5022|ERROR_CLUSTER_SHUTTING_DOWN|The cluster software is shutting down.
-5023|ERROR_INVALID_STATE|The group or resource is not in the correct state to perform the requested operation.
-5024|ERROR_RESOURCE_PROPERTIES_STORED|The properties were stored but not all changes will take effect until the next time the resource is brought online.
-5025|ERROR_NOT_QUORUM_CLASS|The cluster could not make the specified resource a quorum resource because it does not belong to a shared storage class.
-5026|ERROR_CORE_RESOURCE|The cluster resource could not be deleted since it is a core resource.
-5027|ERROR_QUORUM_RESOURCE_ONLINE_FAILED|The quorum resource failed to come online.
-5028|ERROR_QUORUMLOG_OPEN_FAILED|The quorum log could not be created or mounted successfully.
-5029|ERROR_CLUSTERLOG_CORRUPT|The cluster log is corrupt.
-5030|ERROR_CLUSTERLOG_RECORD_EXCEEDS_MAXSIZE|The record could not be written to the cluster log since it exceeds the maximum size.
-5031|ERROR_CLUSTERLOG_EXCEEDS_MAXSIZE|The cluster log exceeds its maximum size.
-5032|ERROR_CLUSTERLOG_CHKPOINT_NOT_FOUND|No checkpoint record was found in the cluster log.
-5033|ERROR_CLUSTERLOG_NOT_ENOUGH_SPACE|The minimum required disk space needed for logging is not available.
-5034|ERROR_QUORUM_OWNER_ALIVE|The cluster node failed to take control of the quorum resource because the resource is owned by another active node.
-5035|ERROR_NETWORK_NOT_AVAILABLE|A cluster network is not available for this operation.
-5036|ERROR_NODE_NOT_AVAILABLE|A cluster node is not available for this operation.
-5037|ERROR_ALL_NODES_NOT_AVAILABLE|All cluster nodes must be running to perform this operation.
-5038|ERROR_RESOURCE_FAILED|A cluster resource failed.
-5039|ERROR_CLUSTER_INVALID_NODE|The cluster node is not valid.
-5040|ERROR_CLUSTER_NODE_EXISTS|The cluster node already exists.
-5041|ERROR_CLUSTER_JOIN_IN_PROGRESS|A node is in the process of joining the cluster.
-5042|ERROR_CLUSTER_NODE_NOT_FOUND|The cluster node was not found.
-5043|ERROR_CLUSTER_LOCAL_NODE_NOT_FOUND|The cluster local node information was not found.
-5044|ERROR_CLUSTER_NETWORK_EXISTS|The cluster network already exists.
-5045|ERROR_CLUSTER_NETWORK_NOT_FOUND|The cluster network was not found.
-5046|ERROR_CLUSTER_NETINTERFACE_EXISTS|The cluster network interface already exists.
-5047|ERROR_CLUSTER_NETINTERFACE_NOT_FOUND|The cluster network interface was not found.
-5048|ERROR_CLUSTER_INVALID_REQUEST|The cluster request is not valid for this object.
-5049|ERROR_CLUSTER_INVALID_NETWORK_PROVIDER|The cluster network provider is not valid.
-5050|ERROR_CLUSTER_NODE_DOWN|The cluster node is down.
-5051|ERROR_CLUSTER_NODE_UNREACHABLE|The cluster node is not reachable.
-5052|ERROR_CLUSTER_NODE_NOT_MEMBER|The cluster node is not a member of the cluster.
-5053|ERROR_CLUSTER_JOIN_NOT_IN_PROGRESS|A cluster join operation is not in progress.
-5054|ERROR_CLUSTER_INVALID_NETWORK|The cluster network is not valid.
-5056|ERROR_CLUSTER_NODE_UP|The cluster node is up.
-5057|ERROR_CLUSTER_IPADDR_IN_USE|The cluster IP address is already in use.
-5058|ERROR_CLUSTER_NODE_NOT_PAUSED|The cluster node is not paused.
-5059|ERROR_CLUSTER_NO_SECURITY_CONTEXT|No cluster security context is available.
-5060|ERROR_CLUSTER_NETWORK_NOT_INTERNAL|The cluster network is not configured for internal cluster communication.
-5061|ERROR_CLUSTER_NODE_ALREADY_UP|The cluster node is already up.
-5062|ERROR_CLUSTER_NODE_ALREADY_DOWN|The cluster node is already down.
-5063|ERROR_CLUSTER_NETWORK_ALREADY_ONLINE|The cluster network is already online.
-5064|ERROR_CLUSTER_NETWORK_ALREADY_OFFLINE|The cluster network is already offline.
-5065|ERROR_CLUSTER_NODE_ALREADY_MEMBER|The cluster node is already a member of the cluster.
-5066|ERROR_CLUSTER_LAST_INTERNAL_NETWORK|The cluster network is the only one configured for internal cluster communication between two or more active cluster nodes. The internal communication capability cannot be removed from the network.
-5067|ERROR_CLUSTER_NETWORK_HAS_DEPENDENTS|One or more cluster resources depend on the network to provide service to clients. The client access capability cannot be removed from the network.
-5068|ERROR_INVALID_OPERATION_ON_QUORUM|This operation cannot be performed on the cluster resource as it the quorum resource. You may not bring the quorum resource offline or modify its possible owners list.
-5069|ERROR_DEPENDENCY_NOT_ALLOWED|The cluster quorum resource is not allowed to have any dependencies.
-5070|ERROR_CLUSTER_NODE_PAUSED|The cluster node is paused.
-5071|ERROR_NODE_CANT_HOST_RESOURCE|The cluster resource cannot be brought online. The owner node cannot run this resource.
-5072|ERROR_CLUSTER_NODE_NOT_READY|The cluster node is not ready to perform the requested operation.
-5073|ERROR_CLUSTER_NODE_SHUTTING_DOWN|The cluster node is shutting down.
-5074|ERROR_CLUSTER_JOIN_ABORTED|The cluster join operation was aborted.
-5075|ERROR_CLUSTER_INCOMPATIBLE_VERSIONS|The cluster join operation failed due to incompatible software versions between the joining node and its sponsor.
-5076|ERROR_CLUSTER_MAXNUM_OF_RESOURCES_EXCEEDED|This resource cannot be created because the cluster has reached the limit on the number of resources it can monitor.
-5077|ERROR_CLUSTER_SYSTEM_CONFIG_CHANGED|The system configuration changed during the cluster join or form operation. The join or form operation was aborted.
-5078|ERROR_CLUSTER_RESOURCE_TYPE_NOT_FOUND|The specified resource type was not found.
-5079|ERROR_CLUSTER_RESTYPE_NOT_SUPPORTED|The specified node does not support a resource of this type. This may be due to version inconsistencies or due to the absence of the resource DLL on this node.
-5080|ERROR_CLUSTER_RESNAME_NOT_FOUND|The specified resource name is not supported by this resource DLL. This may be due to a bad (or changed) name supplied to the resource DLL.
-5081|ERROR_CLUSTER_NO_RPC_PACKAGES_REGISTERED|No authentication package could be registered with the RPC server.
-5082|ERROR_CLUSTER_OWNER_NOT_IN_PREFLIST|You cannot bring the group online because the owner of the group is not in the preferred list for the group. To change the owner node for the group, move the group.
-5083|ERROR_CLUSTER_DATABASE_SEQMISMATCH|The join operation failed because the cluster database sequence number has changed or is incompatible with the locker node. This may happen during a join operation if the cluster database was changing during the join.
-5084|ERROR_RESMON_INVALID_STATE|The resource monitor will not allow the fail operation to be performed while the resource is in its current state. This may happen if the resource is in a pending state.
-5085|ERROR_CLUSTER_GUM_NOT_LOCKER|A non locker code got a request to reserve the lock for making global updates.
-5086|ERROR_QUORUM_DISK_NOT_FOUND|The quorum disk could not be located by the cluster service.
-5087|ERROR_DATABASE_BACKUP_CORRUPT|The backed up cluster database is possibly corrupt.
-5088|ERROR_CLUSTER_NODE_ALREADY_HAS_DFS_ROOT|A DFS root already exists in this cluster node.
-5089|ERROR_RESOURCE_PROPERTY_UNCHANGEABLE|An attempt to modify a resource property failed because it conflicts with another existing property.
-5890|ERROR_CLUSTER_MEMBERSHIP_INVALID_STATE|An operation was attempted that is incompatible with the current membership state of the node.
-5891|ERROR_CLUSTER_QUORUMLOG_NOT_FOUND|The quorum resource does not contain the quorum log.
-5892|ERROR_CLUSTER_MEMBERSHIP_HALT|The membership engine requested shutdown of the cluster service on this node.
-5893|ERROR_CLUSTER_INSTANCE_ID_MISMATCH|The join operation failed because the cluster instance ID of the joining node does not match the cluster instance ID of the sponsor node.
-5894|ERROR_CLUSTER_NETWORK_NOT_FOUND_FOR_IP|A matching cluster network for the specified IP address could not be found.
-5895|ERROR_CLUSTER_PROPERTY_DATA_TYPE_MISMATCH|The actual data type of the property did not match the expected data type of the property.
-5896|ERROR_CLUSTER_EVICT_WITHOUT_CLEANUP|The cluster node was evicted from the cluster successfully, but the node was not cleaned up. To determine what cleanup steps failed and how to recover, see the Failover Clustering application event log using Event Viewer.
-5897|ERROR_CLUSTER_PARAMETER_MISMATCH|Two or more parameter values specified for a resource's properties are in conflict.
-5898|ERROR_NODE_CANNOT_BE_CLUSTERED|This computer cannot be made a member of a cluster.
-5899|ERROR_CLUSTER_WRONG_OS_VERSION|This computer cannot be made a member of a cluster because it does not have the correct version of Windows installed.
-5900|ERROR_CLUSTER_CANT_CREATE_DUP_CLUSTER_NAME|A cluster cannot be created with the specified cluster name because that cluster name is already in use. Specify a different name for the cluster.
-5901|ERROR_CLUSCFG_ALREADY_COMMITTED|The cluster configuration action has already been committed.
-5902|ERROR_CLUSCFG_ROLLBACK_FAILED|The cluster configuration action could not be rolled back.
-5903|ERROR_CLUSCFG_SYSTEM_DISK_DRIVE_LETTER_CONFLICT|The drive letter assigned to a system disk on one node conflicted with the drive letter assigned to a disk on another node.
-5904|ERROR_CLUSTER_OLD_VERSION|One or more nodes in the cluster are running a version of Windows that does not support this operation.
-5905|ERROR_CLUSTER_MISMATCHED_COMPUTER_ACCT_NAME|The name of the corresponding computer account doesn't match the Network Name for this resource.
-5906|ERROR_CLUSTER_NO_NET_ADAPTERS|No network adapters are available.
-5907|ERROR_CLUSTER_POISONED|The cluster node has been poisoned.
-5908|ERROR_CLUSTER_GROUP_MOVING|The group is unable to accept the request since it is moving to another node.
-5909|ERROR_CLUSTER_RESOURCE_TYPE_BUSY|The resource type cannot accept the request since is too busy performing another operation.
-5910|ERROR_RESOURCE_CALL_TIMED_OUT|The call to the cluster resource DLL timed out.
-5911|ERROR_INVALID_CLUSTER_IPV6_ADDRESS|The address is not valid for an IPv6 Address resource. A global IPv6 address is required, and it must match a cluster network. Compatibility addresses are not permitted.
-5912|ERROR_CLUSTER_INTERNAL_INVALID_FUNCTION|An internal cluster error occurred. A call to an invalid function was attempted.
-5913|ERROR_CLUSTER_PARAMETER_OUT_OF_BOUNDS|A parameter value is out of acceptable range.
-5914|ERROR_CLUSTER_PARTIAL_SEND|A network error occurred while sending data to another node in the cluster. The number of bytes transmitted was less than required.
-5915|ERROR_CLUSTER_REGISTRY_INVALID_FUNCTION|An invalid cluster registry operation was attempted.
-5916|ERROR_CLUSTER_INVALID_STRING_TERMINATION|An input string of characters is not properly terminated.
-5917|ERROR_CLUSTER_INVALID_STRING_FORMAT|An input string of characters is not in a valid format for the data it represents.
-5918|ERROR_CLUSTER_DATABASE_TRANSACTION_IN_PROGRESS|An internal cluster error occurred. A cluster database transaction was attempted while a transaction was already in progress.
-5919|ERROR_CLUSTER_DATABASE_TRANSACTION_NOT_IN_PROGRESS|An internal cluster error occurred. There was an attempt to commit a cluster database transaction while no transaction was in progress.
-5920|ERROR_CLUSTER_NULL_DATA|An internal cluster error occurred. Data was not properly initialized.
-5921|ERROR_CLUSTER_PARTIAL_READ|An error occurred while reading from a stream of data. An unexpected number of bytes was returned.
-5922|ERROR_CLUSTER_PARTIAL_WRITE|An error occurred while writing to a stream of data. The required number of bytes could not be written.
-5923|ERROR_CLUSTER_CANT_DESERIALIZE_DATA|An error occurred while deserializing a stream of cluster data.
-5924|ERROR_DEPENDENT_RESOURCE_PROPERTY_CONFLICT|One or more property values for this resource are in conflict with one or more property values associated with its dependent resource(s).
-5925|ERROR_CLUSTER_NO_QUORUM|A quorum of cluster nodes was not present to form a cluster.
-5926|ERROR_CLUSTER_INVALID_IPV6_NETWORK|The cluster network is not valid for an IPv6 Address resource, or it does not match the configured address.
-5927|ERROR_CLUSTER_INVALID_IPV6_TUNNEL_NETWORK|The cluster network is not valid for an IPv6 Tunnel resource. Check the configuration of the IP Address resource on which the IPv6 Tunnel resource depends.
-5928|ERROR_QUORUM_NOT_ALLOWED_IN_THIS_GROUP|Quorum resource cannot reside in the Available Storage group.
-5929|ERROR_DEPENDENCY_TREE_TOO_COMPLEX|The dependencies for this resource are nested too deeply.
-5930|ERROR_EXCEPTION_IN_RESOURCE_CALL|The call into the resource DLL raised an unhandled exception.
-5931|ERROR_CLUSTER_RHS_FAILED_INITIALIZATION|The RHS process failed to initialize.
-5932|ERROR_CLUSTER_NOT_INSTALLED|The Failover Clustering feature is not installed on this node.
-5933|ERROR_CLUSTER_RESOURCES_MUST_BE_ONLINE_ON_THE_SAME_NODE|The resources must be online on the same node for this operation.
-5934|ERROR_CLUSTER_MAX_NODES_IN_CLUSTER|A new node can not be added since this cluster is already at its maximum number of nodes.
-5935|ERROR_CLUSTER_TOO_MANY_NODES|This cluster can not be created since the specified number of nodes exceeds the maximum allowed limit.
-5936|ERROR_CLUSTER_OBJECT_ALREADY_USED|An attempt to use the specified cluster name failed because an enabled computer object with the given name already exists in the domain.
-5937|ERROR_NONCORE_GROUPS_FOUND|This cluster cannot be destroyed. It has non-core application groups which must be deleted before the cluster can be destroyed.
-5938|ERROR_FILE_SHARE_RESOURCE_CONFLICT|File share associated with file share witness resource cannot be hosted by this cluster or any of its nodes.
-5939|ERROR_CLUSTER_EVICT_INVALID_REQUEST|Eviction of this node is invalid at this time. Due to quorum requirements node eviction will result in cluster shutdown. If it is the last node in the cluster, destroy cluster command should be used.
-5940|ERROR_CLUSTER_SINGLETON_RESOURCE|Only one instance of this resource type is allowed in the cluster.
-5941|ERROR_CLUSTER_GROUP_SINGLETON_RESOURCE|Only one instance of this resource type is allowed per resource group.
-5942|ERROR_CLUSTER_RESOURCE_PROVIDER_FAILED|The resource failed to come online due to the failure of one or more provider resources.
-5943|ERROR_CLUSTER_RESOURCE_CONFIGURATION_ERROR|The resource has indicated that it cannot come online on any node.
-5944|ERROR_CLUSTER_GROUP_BUSY|The current operation cannot be performed on this group at this time.
-5945|ERROR_CLUSTER_NOT_SHARED_VOLUME|The directory or file is not located on a cluster shared volume.
-5946|ERROR_CLUSTER_INVALID_SECURITY_DESCRIPTOR|The Security Descriptor does not meet the requirements for a cluster.
-5947|ERROR_CLUSTER_SHARED_VOLUMES_IN_USE|There is one or more shared volumes resources configured in the cluster. Those resources must be moved to available storage in order for operation to succeed.
-5948|ERROR_CLUSTER_USE_SHARED_VOLUMES_API|This group or resource cannot be directly manipulated. Use shared volume APIs to perform desired operation.
-5949|ERROR_CLUSTER_BACKUP_IN_PROGRESS|Back up is in progress. Please wait for backup completion before trying this operation again.
-5950|ERROR_NON_CSV_PATH|The path does not belong to a cluster shared volume.
-5951|ERROR_CSV_VOLUME_NOT_LOCAL|The cluster shared volume is not locally mounted on this node.
-5952|ERROR_CLUSTER_WATCHDOG_TERMINATING|The cluster watchdog is terminating.
-5953|ERROR_CLUSTER_RESOURCE_VETOED_MOVE_INCOMPATIBLE_NODES|A resource vetoed a move between two nodes because they are incompatible.
-5954|ERROR_CLUSTER_INVALID_NODE_WEIGHT|The request is invalid either because node weight cannot be changed while the cluster is in disk-only quorum mode, or because changing the node weight would violate the minimum cluster quorum requirements.
-5955|ERROR_CLUSTER_RESOURCE_VETOED_CALL|The resource vetoed the call.
-5956|ERROR_RESMON_SYSTEM_RESOURCES_LACKING|Resource could not start or run because it could not reserve sufficient system resources.
-5957|ERROR_CLUSTER_RESOURCE_VETOED_MOVE_NOT_ENOUGH_RESOURCES_ON_DESTINATION|A resource vetoed a move between two nodes because the destination currently does not have enough resources to complete the operation.
-5958|ERROR_CLUSTER_RESOURCE_VETOED_MOVE_NOT_ENOUGH_RESOURCES_ON_SOURCE|A resource vetoed a move between two nodes because the source currently does not have enough resources to complete the operation.
-5959|ERROR_CLUSTER_GROUP_QUEUED|The requested operation can not be completed because the group is queued for an operation.
-5960|ERROR_CLUSTER_RESOURCE_LOCKED_STATUS|The requested operation can not be completed because a resource has locked status.
-5961|ERROR_CLUSTER_SHARED_VOLUME_FAILOVER_NOT_ALLOWED|The resource cannot move to another node because a cluster shared volume vetoed the operation.
-5962|ERROR_CLUSTER_NODE_DRAIN_IN_PROGRESS|A node drain is already in progress.`nThis value was also named <strong>ERROR_CLUSTER_NODE_EVACUATION_IN_PROGRESS</strong>
-5963|ERROR_CLUSTER_DISK_NOT_CONNECTED|Clustered storage is not connected to the node.
-5964|ERROR_DISK_NOT_CSV_CAPABLE|The disk is not configured in a way to be used with CSV. CSV disks must have at least one partition that is formatted with NTFS.
-5965|ERROR_RESOURCE_NOT_IN_AVAILABLE_STORAGE|The resource must be part of the Available Storage group to complete this action.
-5966|ERROR_CLUSTER_SHARED_VOLUME_REDIRECTED|CSVFS failed operation as volume is in redirected mode.
-5967|ERROR_CLUSTER_SHARED_VOLUME_NOT_REDIRECTED|CSVFS failed operation as volume is not in redirected mode.
-5968|ERROR_CLUSTER_CANNOT_RETURN_PROPERTIES|Cluster properties cannot be returned at this time.
-5969|ERROR_CLUSTER_RESOURCE_CONTAINS_UNSUPPORTED_DIFF_AREA_FOR_SHARED_VOLUMES|The clustered disk resource contains software snapshot diff area that are not supported for Cluster Shared Volumes.
-5970|ERROR_CLUSTER_RESOURCE_IS_IN_MAINTENANCE_MODE|The operation cannot be completed because the resource is in maintenance mode.
-5971|ERROR_CLUSTER_AFFINITY_CONFLICT|The operation cannot be completed because of cluster affinity conflicts.
-5972|ERROR_CLUSTER_RESOURCE_IS_REPLICA_VIRTUAL_MACHINE|The operation cannot be completed because the resource is a replica virtual machine.
-6000|ERROR_ENCRYPTION_FAILED|The specified file could not be encrypted.
-6001|ERROR_DECRYPTION_FAILED|The specified file could not be decrypted.
-6002|ERROR_FILE_ENCRYPTED|The specified file is encrypted and the user does not have the ability to decrypt it.
-6003|ERROR_NO_RECOVERY_POLICY|There is no valid encryption recovery policy configured for this system.
-6004|ERROR_NO_EFS|The required encryption driver is not loaded for this system.
-6005|ERROR_WRONG_EFS|The file was encrypted with a different encryption driver than is currently loaded.
-6006|ERROR_NO_USER_KEYS|There are no EFS keys defined for the user.
-6007|ERROR_FILE_NOT_ENCRYPTED|The specified file is not encrypted.
-6008|ERROR_NOT_EXPORT_FORMAT|The specified file is not in the defined EFS export format.
-6009|ERROR_FILE_READ_ONLY|The specified file is read only.
-6010|ERROR_DIR_EFS_DISALLOWED|The directory has been disabled for encryption.
-6011|ERROR_EFS_SERVER_NOT_TRUSTED|The server is not trusted for remote encryption operation.
-6012|ERROR_BAD_RECOVERY_POLICY|Recovery policy configured for this system contains invalid recovery certificate.
-6013|ERROR_EFS_ALG_BLOB_TOO_BIG|The encryption algorithm used on the source file needs a bigger key buffer than the one on the destination file.
-6014|ERROR_VOLUME_NOT_SUPPORT_EFS|The disk partition does not support file encryption.
-6015|ERROR_EFS_DISABLED|This machine is disabled for file encryption.
-6016|ERROR_EFS_VERSION_NOT_SUPPORT|A newer system is required to decrypt this encrypted file.
-6017|ERROR_CS_ENCRYPTION_INVALID_SERVER_RESPONSE|The remote server sent an invalid response for a file being opened with Client Side Encryption.
-6018|ERROR_CS_ENCRYPTION_UNSUPPORTED_SERVER|Client Side Encryption is not supported by the remote server even though it claims to support it.
-6019|ERROR_CS_ENCRYPTION_EXISTING_ENCRYPTED_FILE|File is encrypted and should be opened in Client Side Encryption mode.
-6020|ERROR_CS_ENCRYPTION_NEW_ENCRYPTED_FILE|A new encrypted file is being created and a $EFS needs to be provided.
-6021|ERROR_CS_ENCRYPTION_FILE_NOT_CSE|The SMB client requested a CSE FSCTL on a non-CSE file.
-6022|ERROR_ENCRYPTION_POLICY_DENIES_OPERATION|The requested operation was blocked by policy. For more information, contact your system administrator.
-6118|ERROR_NO_BROWSER_SERVERS_FOUND|The list of servers for this workgroup is not currently available.
-6200|SCHED_E_SERVICE_NOT_LOCALSYSTEM|The Task Scheduler service must be configured to run in the System account to function properly. Individual tasks may be configured to run in other accounts.
-6600|ERROR_LOG_SECTOR_INVALID|Log service encountered an invalid log sector.
-6601|ERROR_LOG_SECTOR_PARITY_INVALID|Log service encountered a log sector with invalid block parity.
-6602|ERROR_LOG_SECTOR_REMAPPED|Log service encountered a remapped log sector.
-6603|ERROR_LOG_BLOCK_INCOMPLETE|Log service encountered a partial or incomplete log block.
-6604|ERROR_LOG_INVALID_RANGE|Log service encountered an attempt access data outside the active log range.
-6605|ERROR_LOG_BLOCKS_EXHAUSTED|Log service user marshalling buffers are exhausted.
-6606|ERROR_LOG_READ_CONTEXT_INVALID|Log service encountered an attempt read from a marshalling area with an invalid read context.
-6607|ERROR_LOG_RESTART_INVALID|Log service encountered an invalid log restart area.
-6608|ERROR_LOG_BLOCK_VERSION|Log service encountered an invalid log block version.
-6609|ERROR_LOG_BLOCK_INVALID|Log service encountered an invalid log block.
-6610|ERROR_LOG_READ_MODE_INVALID|Log service encountered an attempt to read the log with an invalid read mode.
-6611|ERROR_LOG_NO_RESTART|Log service encountered a log stream with no restart area.
-6612|ERROR_LOG_METADATA_CORRUPT|Log service encountered a corrupted metadata file.
-6613|ERROR_LOG_METADATA_INVALID|Log service encountered a metadata file that could not be created by the log file system.
-6614|ERROR_LOG_METADATA_INCONSISTENT|Log service encountered a metadata file with inconsistent data.
-6615|ERROR_LOG_RESERVATION_INVALID|Log service encountered an attempt to erroneous allocate or dispose reservation space.
-6616|ERROR_LOG_CANT_DELETE|Log service cannot delete log file or file system container.
-6617|ERROR_LOG_CONTAINER_LIMIT_EXCEEDED|Log service has reached the maximum allowable containers allocated to a log file.
-6618|ERROR_LOG_START_OF_LOG|Log service has attempted to read or write backward past the start of the log.
-6619|ERROR_LOG_POLICY_ALREADY_INSTALLED|Log policy could not be installed because a policy of the same type is already present.
-6620|ERROR_LOG_POLICY_NOT_INSTALLED|Log policy in question was not installed at the time of the request.
-6621|ERROR_LOG_POLICY_INVALID|The installed set of policies on the log is invalid.
-6622|ERROR_LOG_POLICY_CONFLICT|A policy on the log in question prevented the operation from completing.
-6623|ERROR_LOG_PINNED_ARCHIVE_TAIL|Log space cannot be reclaimed because the log is pinned by the archive tail.
-6624|ERROR_LOG_RECORD_NONEXISTENT|Log record is not a record in the log file.
-6625|ERROR_LOG_RECORDS_RESERVED_INVALID|Number of reserved log records or the adjustment of the number of reserved log records is invalid.
-6626|ERROR_LOG_SPACE_RESERVED_INVALID|Reserved log space or the adjustment of the log space is invalid.
-6627|ERROR_LOG_TAIL_INVALID|An new or existing archive tail or base of the active log is invalid.
-6628|ERROR_LOG_FULL|Log space is exhausted.
-6629|ERROR_COULD_NOT_RESIZE_LOG|The log could not be set to the requested size.
-6630|ERROR_LOG_MULTIPLEXED|Log is multiplexed, no direct writes to the physical log is allowed.
-6631|ERROR_LOG_DEDICATED|The operation failed because the log is a dedicated log.
-6632|ERROR_LOG_ARCHIVE_NOT_IN_PROGRESS|The operation requires an archive context.
-6633|ERROR_LOG_ARCHIVE_IN_PROGRESS|Log archival is in progress.
-6634|ERROR_LOG_EPHEMERAL|The operation requires a non-ephemeral log, but the log is ephemeral.
-6635|ERROR_LOG_NOT_ENOUGH_CONTAINERS|The log must have at least two containers before it can be read from or written to.
-6636|ERROR_LOG_CLIENT_ALREADY_REGISTERED|A log client has already registered on the stream.
-6637|ERROR_LOG_CLIENT_NOT_REGISTERED|A log client has not been registered on the stream.
-6638|ERROR_LOG_FULL_HANDLER_IN_PROGRESS|A request has already been made to handle the log full condition.
-6639|ERROR_LOG_CONTAINER_READ_FAILED|Log service encountered an error when attempting to read from a log container.
-6640|ERROR_LOG_CONTAINER_WRITE_FAILED|Log service encountered an error when attempting to write to a log container.
-6641|ERROR_LOG_CONTAINER_OPEN_FAILED|Log service encountered an error when attempting open a log container.
-6642|ERROR_LOG_CONTAINER_STATE_INVALID|Log service encountered an invalid container state when attempting a requested action.
-6643|ERROR_LOG_STATE_INVALID|Log service is not in the correct state to perform a requested action.
-6644|ERROR_LOG_PINNED|Log space cannot be reclaimed because the log is pinned.
-6645|ERROR_LOG_METADATA_FLUSH_FAILED|Log metadata flush failed.
-6646|ERROR_LOG_INCONSISTENT_SECURITY|Security on the log and its containers is inconsistent.
-6647|ERROR_LOG_APPENDED_FLUSH_FAILED|Records were appended to the log or reservation changes were made, but the log could not be flushed.
-6648|ERROR_LOG_PINNED_RESERVATION|The log is pinned due to reservation consuming most of the log space. Free some reserved records to make space available.
-6700|ERROR_INVALID_TRANSACTION|The transaction handle associated with this operation is not valid.
-6701|ERROR_TRANSACTION_NOT_ACTIVE|The requested operation was made in the context of a transaction that is no longer active.
-6702|ERROR_TRANSACTION_REQUEST_NOT_VALID|The requested operation is not valid on the Transaction object in its current state.
-6703|ERROR_TRANSACTION_NOT_REQUESTED|The caller has called a response API, but the response is not expected because the TM did not issue the corresponding request to the caller.
-6704|ERROR_TRANSACTION_ALREADY_ABORTED|It is too late to perform the requested operation, since the Transaction has already been aborted.
-6705|ERROR_TRANSACTION_ALREADY_COMMITTED|It is too late to perform the requested operation, since the Transaction has already been committed.
-6706|ERROR_TM_INITIALIZATION_FAILED|The Transaction Manager was unable to be successfully initialized. Transacted operations are not supported.
-6707|ERROR_RESOURCEMANAGER_READ_ONLY|The specified ResourceManager made no changes or updates to the resource under this transaction.
-6708|ERROR_TRANSACTION_NOT_JOINED|The resource manager has attempted to prepare a transaction that it has not successfully joined.
-6709|ERROR_TRANSACTION_SUPERIOR_EXISTS|The Transaction object already has a superior enlistment, and the caller attempted an operation that would have created a new superior. Only a single superior enlistment is allow.
-6710|ERROR_CRM_PROTOCOL_ALREADY_EXISTS|The RM tried to register a protocol that already exists.
-6711|ERROR_TRANSACTION_PROPAGATION_FAILED|The attempt to propagate the Transaction failed.
-6712|ERROR_CRM_PROTOCOL_NOT_FOUND|The requested propagation protocol was not registered as a CRM.
-6713|ERROR_TRANSACTION_INVALID_MARSHALL_BUFFER|The buffer passed in to PushTransaction or PullTransaction is not in a valid format.
-6714|ERROR_CURRENT_TRANSACTION_NOT_VALID|The current transaction context associated with the thread is not a valid handle to a transaction object.
-6715|ERROR_TRANSACTION_NOT_FOUND|The specified Transaction object could not be opened, because it was not found.
-6716|ERROR_RESOURCEMANAGER_NOT_FOUND|The specified ResourceManager object could not be opened, because it was not found.
-6717|ERROR_ENLISTMENT_NOT_FOUND|The specified Enlistment object could not be opened, because it was not found.
-6718|ERROR_TRANSACTIONMANAGER_NOT_FOUND|The specified TransactionManager object could not be opened, because it was not found.
-6719|ERROR_TRANSACTIONMANAGER_NOT_ONLINE|The object specified could not be created or opened, because its associated TransactionManager is not online. The TransactionManager must be brought fully Online by calling RecoverTransactionManager to recover to the end of its LogFile before objects in its Transaction or ResourceManager namespaces can be opened. In addition, errors in writing records to its LogFile can cause a TransactionManager to go offline.
-6720|ERROR_TRANSACTIONMANAGER_RECOVERY_NAME_COLLISION|The specified TransactionManager was unable to create the objects contained in its logfile in the Ob namespace. Therefore, the TransactionManager was unable to recover.
-6721|ERROR_TRANSACTION_NOT_ROOT|The call to create a superior Enlistment on this Transaction object could not be completed, because the Transaction object specified for the enlistment is a subordinate branch of the Transaction. Only the root of the Transaction can be enlisted on as a superior.
-6722|ERROR_TRANSACTION_OBJECT_EXPIRED|Because the associated transaction manager or resource manager has been closed, the handle is no longer valid.
-6723|ERROR_TRANSACTION_RESPONSE_NOT_ENLISTED|The specified operation could not be performed on this Superior enlistment, because the enlistment was not created with the corresponding completion response in the NotificationMask.
-6724|ERROR_TRANSACTION_RECORD_TOO_LONG|The specified operation could not be performed, because the record that would be logged was too long. This can occur because of two conditions: either there are too many Enlistments on this Transaction, or the combined RecoveryInformation being logged on behalf of those Enlistments is too long.
-6725|ERROR_IMPLICIT_TRANSACTION_NOT_SUPPORTED|Implicit transaction are not supported.
-6726|ERROR_TRANSACTION_INTEGRITY_VIOLATED|The kernel transaction manager had to abort or forget the transaction because it blocked forward progress.
-6727|ERROR_TRANSACTIONMANAGER_IDENTITY_MISMATCH|The TransactionManager identity that was supplied did not match the one recorded in the TransactionManager's log file.
-6728|ERROR_RM_CANNOT_BE_FROZEN_FOR_SNAPSHOT|This snapshot operation cannot continue because a transactional resource manager cannot be frozen in its current state. Please try again.
-6729|ERROR_TRANSACTION_MUST_WRITETHROUGH|The transaction cannot be enlisted on with the specified EnlistmentMask, because the transaction has already completed the PrePrepare phase. In order to ensure correctness, the ResourceManager must switch to a write- through mode and cease caching data within this transaction. Enlisting for only subsequent transaction phases may still succeed.
-6730|ERROR_TRANSACTION_NO_SUPERIOR|The transaction does not have a superior enlistment.
-6731|ERROR_HEURISTIC_DAMAGE_POSSIBLE|The attempt to commit the Transaction completed, but it is possible that some portion of the transaction tree did not commit successfully due to heuristics. Therefore it is possible that some data modified in the transaction may not have committed, resulting in transactional inconsistency. If possible, check the consistency of the associated data.
-6800|ERROR_TRANSACTIONAL_CONFLICT|The function attempted to use a name that is reserved for use by another transaction.
-6801|ERROR_RM_NOT_ACTIVE|Transaction support within the specified resource manager is not started or was shut down due to an error.
-6802|ERROR_RM_METADATA_CORRUPT|The metadata of the RM has been corrupted. The RM will not function.
-6803|ERROR_DIRECTORY_NOT_RM|The specified directory does not contain a resource manager.
-6805|ERROR_TRANSACTIONS_UNSUPPORTED_REMOTE|The remote server or share does not support transacted file operations.
-6806|ERROR_LOG_RESIZE_INVALID_SIZE|The requested log size is invalid.
-6807|ERROR_OBJECT_NO_LONGER_EXISTS|The object (file, stream, link) corresponding to the handle has been deleted by a Transaction Savepoint Rollback.
-6808|ERROR_STREAM_MINIVERSION_NOT_FOUND|The specified file miniversion was not found for this transacted file open.
-6809|ERROR_STREAM_MINIVERSION_NOT_VALID|The specified file miniversion was found but has been invalidated. Most likely cause is a transaction savepoint rollback.
-6810|ERROR_MINIVERSION_INACCESSIBLE_FROM_SPECIFIED_TRANSACTION|A miniversion may only be opened in the context of the transaction that created it.
-6811|ERROR_CANT_OPEN_MINIVERSION_WITH_MODIFY_INTENT|It is not possible to open a miniversion with modify access.
-6812|ERROR_CANT_CREATE_MORE_STREAM_MINIVERSIONS|It is not possible to create any more miniversions for this stream.
-6814|ERROR_REMOTE_FILE_VERSION_MISMATCH|The remote server sent mismatching version number or Fid for a file opened with transactions.
-6815|ERROR_HANDLE_NO_LONGER_VALID|The handle has been invalidated by a transaction. The most likely cause is the presence of memory mapping on a file or an open handle when the transaction ended or rolled back to savepoint.
-6816|ERROR_NO_TXF_METADATA|There is no transaction metadata on the file.
-6817|ERROR_LOG_CORRUPTION_DETECTED|The log data is corrupt.
-6818|ERROR_CANT_RECOVER_WITH_HANDLE_OPEN|The file can't be recovered because there is a handle still open on it.
-6819|ERROR_RM_DISCONNECTED|The transaction outcome is unavailable because the resource manager responsible for it has disconnected.
-6820|ERROR_ENLISTMENT_NOT_SUPERIOR|The request was rejected because the enlistment in question is not a superior enlistment.
-6821|ERROR_RECOVERY_NOT_NEEDED|The transactional resource manager is already consistent. Recovery is not needed.
-6822|ERROR_RM_ALREADY_STARTED|The transactional resource manager has already been started.
-6823|ERROR_FILE_IDENTITY_NOT_PERSISTENT|The file cannot be opened transactionally, because its identity depends on the outcome of an unresolved transaction.
-6824|ERROR_CANT_BREAK_TRANSACTIONAL_DEPENDENCY|The operation cannot be performed because another transaction is depending on the fact that this property will not change.
-6825|ERROR_CANT_CROSS_RM_BOUNDARY|The operation would involve a single file with two transactional resource managers and is therefore not allowed.
-6826|ERROR_TXF_DIR_NOT_EMPTY|The $Txf directory must be empty for this operation to succeed.
-6827|ERROR_INDOUBT_TRANSACTIONS_EXIST|The operation would leave a transactional resource manager in an inconsistent state and is therefore not allowed.
-6828|ERROR_TM_VOLATILE|The operation could not be completed because the transaction manager does not have a log.
-6829|ERROR_ROLLBACK_TIMER_EXPIRED|A rollback could not be scheduled because a previously scheduled rollback has already executed or been queued for execution.
-6830|ERROR_TXF_ATTRIBUTE_CORRUPT|The transactional metadata attribute on the file or directory is corrupt and unreadable.
-6831|ERROR_EFS_NOT_ALLOWED_IN_TRANSACTION|The encryption operation could not be completed because a transaction is active.
-6832|ERROR_TRANSACTIONAL_OPEN_NOT_ALLOWED|This object is not allowed to be opened in a transaction.
-6833|ERROR_LOG_GROWTH_FAILED|An attempt to create space in the transactional resource manager's log failed. The failure status has been recorded in the event log.
-6834|ERROR_TRANSACTED_MAPPING_UNSUPPORTED_REMOTE|Memory mapping (creating a mapped section) a remote file under a transaction is not supported.
-6835|ERROR_TXF_METADATA_ALREADY_PRESENT|Transaction metadata is already present on this file and cannot be superseded.
-6836|ERROR_TRANSACTION_SCOPE_CALLBACKS_NOT_SET|A transaction scope could not be entered because the scope handler has not been initialized.
-6837|ERROR_TRANSACTION_REQUIRED_PROMOTION|Promotion was required in order to allow the resource manager to enlist, but the transaction was set to disallow it.
-6838|ERROR_CANNOT_EXECUTE_FILE_IN_TRANSACTION|This file is open for modification in an unresolved transaction and may be opened for execute only by a transacted reader.
-6839|ERROR_TRANSACTIONS_NOT_FROZEN|The request to thaw frozen transactions was ignored because transactions had not previously been frozen.
-6840|ERROR_TRANSACTION_FREEZE_IN_PROGRESS|Transactions cannot be frozen because a freeze is already in progress.
-6841|ERROR_NOT_SNAPSHOT_VOLUME|The target volume is not a snapshot volume. This operation is only valid on a volume mounted as a snapshot.
-6842|ERROR_NO_SAVEPOINT_WITH_OPEN_FILES|The savepoint operation failed because files are open on the transaction. This is not permitted.
-6843|ERROR_DATA_LOST_REPAIR|Windows has discovered corruption in a file, and that file has since been repaired. Data loss may have occurred.
-6844|ERROR_SPARSE_NOT_ALLOWED_IN_TRANSACTION|The sparse operation could not be completed because a transaction is active on the file.
-6845|ERROR_TM_IDENTITY_MISMATCH|The call to create a TransactionManager object failed because the Tm Identity stored in the logfile does not match the Tm Identity that was passed in as an argument.
-6846|ERROR_FLOATED_SECTION|I/O was attempted on a section object that has been floated as a result of a transaction ending. There is no valid data.
-6847|ERROR_CANNOT_ACCEPT_TRANSACTED_WORK|The transactional resource manager cannot currently accept transacted work due to a transient condition such as low resources.
-6848|ERROR_CANNOT_ABORT_TRANSACTIONS|The transactional resource manager had too many tranactions outstanding that could not be aborted. The transactional resource manger has been shut down.
-6849|ERROR_BAD_CLUSTERS|The operation could not be completed due to bad clusters on disk.
-6850|ERROR_COMPRESSION_NOT_ALLOWED_IN_TRANSACTION|The compression operation could not be completed because a transaction is active on the file.
-6851|ERROR_VOLUME_DIRTY|The operation could not be completed because the volume is dirty. Please run chkdsk and try again.
-6852|ERROR_NO_LINK_TRACKING_IN_TRANSACTION|The link tracking operation could not be completed because a transaction is active.
-6853|ERROR_OPERATION_NOT_SUPPORTED_IN_TRANSACTION|This operation cannot be performed in a transaction.
-6854|ERROR_EXPIRED_HANDLE|The handle is no longer properly associated with its transaction. It may have been opened in a transactional resource manager that was subsequently forced to restart. Please close the handle and open a new one.
-6855|ERROR_TRANSACTION_NOT_ENLISTED|The specified operation could not be performed because the resource manager is not enlisted in the transaction.
-7001|ERROR_CTX_WINSTATION_NAME_INVALID|The specified session name is invalid.
-7002|ERROR_CTX_INVALID_PD|The specified protocol driver is invalid.
-7003|ERROR_CTX_PD_NOT_FOUND|The specified protocol driver was not found in the system path.
-7004|ERROR_CTX_WD_NOT_FOUND|The specified terminal connection driver was not found in the system path.
-7005|ERROR_CTX_CANNOT_MAKE_EVENTLOG_ENTRY|A registry key for event logging could not be created for this session.
-7006|ERROR_CTX_SERVICE_NAME_COLLISION|A service with the same name already exists on the system.
-7007|ERROR_CTX_CLOSE_PENDING|A close operation is pending on the session.
-7008|ERROR_CTX_NO_OUTBUF|There are no free output buffers available.
-7009|ERROR_CTX_MODEM_INF_NOT_FOUND|The MODEM.INF file was not found.
-7010|ERROR_CTX_INVALID_MODEMNAME|The modem name was not found in MODEM.INF.
-7011|ERROR_CTX_MODEM_RESPONSE_ERROR|The modem did not accept the command sent to it. Verify that the configured modem name matches the attached modem.
-7012|ERROR_CTX_MODEM_RESPONSE_TIMEOUT|The modem did not respond to the command sent to it. Verify that the modem is properly cabled and powered on.
-7013|ERROR_CTX_MODEM_RESPONSE_NO_CARRIER|Carrier detect has failed or carrier has been dropped due to disconnect.
-7014|ERROR_CTX_MODEM_RESPONSE_NO_DIALTONE|Dial tone not detected within the required time. Verify that the phone cable is properly attached and functional.
-7015|ERROR_CTX_MODEM_RESPONSE_BUSY|Busy signal detected at remote site on callback.
-7016|ERROR_CTX_MODEM_RESPONSE_VOICE|Voice detected at remote site on callback.
-7017|ERROR_CTX_TD_ERROR|Transport driver error.
-7022|ERROR_CTX_WINSTATION_NOT_FOUND|The specified session cannot be found.
-7023|ERROR_CTX_WINSTATION_ALREADY_EXISTS|The specified session name is already in use.
-7024|ERROR_CTX_WINSTATION_BUSY|The task you are trying to do can't be completed because Remote Desktop Services is currently busy. Please try again in a few minutes. Other users should still be able to log on.
-7025|ERROR_CTX_BAD_VIDEO_MODE|An attempt has been made to connect to a session whose video mode is not supported by the current client.
-7035|ERROR_CTX_GRAPHICS_INVALID|The application attempted to enable DOS graphics mode. DOS graphics mode is not supported.
-7037|ERROR_CTX_LOGON_DISABLED|Your interactive logon privilege has been disabled. Please contact your administrator.
-7038|ERROR_CTX_NOT_CONSOLE|The requested operation can be performed only on the system console. This is most often the result of a driver or system DLL requiring direct console access.
-7040|ERROR_CTX_CLIENT_QUERY_TIMEOUT|The client failed to respond to the server connect message.
-7041|ERROR_CTX_CONSOLE_DISCONNECT|Disconnecting the console session is not supported.
-7042|ERROR_CTX_CONSOLE_CONNECT|Reconnecting a disconnected session to the console is not supported.
-7044|ERROR_CTX_SHADOW_DENIED|The request to control another session remotely was denied.
-7045|ERROR_CTX_WINSTATION_ACCESS_DENIED|The requested session access is denied.
-7049|ERROR_CTX_INVALID_WD|The specified terminal connection driver is invalid.
-7050|ERROR_CTX_SHADOW_INVALID|The requested session cannot be controlled remotely. This may be because the session is disconnected or does not currently have a user logged on.
-7051|ERROR_CTX_SHADOW_DISABLED|The requested session is not configured to allow remote control.
-7052|ERROR_CTX_CLIENT_LICENSE_IN_USE|Your request to connect to this Terminal Server has been rejected. Your Terminal Server client license number is currently being used by another user. Please call your system administrator to obtain a unique license number.
-7053|ERROR_CTX_CLIENT_LICENSE_NOT_SET|Your request to connect to this Terminal Server has been rejected. Your Terminal Server client license number has not been entered for this copy of the Terminal Server client. Please contact your system administrator.
-7054|ERROR_CTX_LICENSE_NOT_AVAILABLE|The number of connections to this computer is limited and all connections are in use right now. Try connecting later or contact your system administrator.
-7055|ERROR_CTX_LICENSE_CLIENT_INVALID|The client you are using is not licensed to use this system. Your logon request is denied.
-7056|ERROR_CTX_LICENSE_EXPIRED|The system license has expired. Your logon request is denied.
-7057|ERROR_CTX_SHADOW_NOT_RUNNING|Remote control could not be terminated because the specified session is not currently being remotely controlled.
-7058|ERROR_CTX_SHADOW_ENDED_BY_MODE_CHANGE|The remote control of the console was terminated because the display mode was changed. Changing the display mode in a remote control session is not supported.
-7059|ERROR_ACTIVATION_COUNT_EXCEEDED|Activation has already been reset the maximum number of times for this installation. Your activation timer will not be cleared.
-7060|ERROR_CTX_WINSTATIONS_DISABLED|Remote logins are currently disabled.
-7061|ERROR_CTX_ENCRYPTION_LEVEL_REQUIRED|You do not have the proper encryption level to access this Session.
-7062|ERROR_CTX_SESSION_IN_USE|The user `%s\\`%s is currently logged on to this computer. Only the current user or an administrator can log on to this computer.
-7063|ERROR_CTX_NO_FORCE_LOGOFF|The user `%s\\`%s is already logged on to the console of this computer. You do not have permission to log in at this time. To resolve this issue, contact `%s\\`%s and have them log off.
-7064|ERROR_CTX_ACCOUNT_RESTRICTION|Unable to log you on because of an account restriction.
-7065|ERROR_RDP_PROTOCOL_ERROR|The RDP protocol component `%2 detected an error in the protocol stream and has disconnected the client.
-7066|ERROR_CTX_CDM_CONNECT|The Client Drive Mapping Service Has Connected on Terminal Connection.
-7067|ERROR_CTX_CDM_DISCONNECT|The Client Drive Mapping Service Has Disconnected on Terminal Connection.
-7068|ERROR_CTX_SECURITY_LAYER_ERROR|The Terminal Server security layer detected an error in the protocol stream and has disconnected the client.
-7069|ERROR_TS_INCOMPATIBLE_SESSIONS|The target session is incompatible with the current session.
-7070|ERROR_TS_VIDEO_SUBSYSTEM_ERROR|Windows can't connect to your session because a problem occurred in the Windows video subsystem. Try connecting again later, or contact the server administrator for assistance.
-8001|FRS_ERR_INVALID_API_SEQUENCE|The file replication service API was called incorrectly.
-8002|FRS_ERR_STARTING_SERVICE|The file replication service cannot be started.
-8003|FRS_ERR_STOPPING_SERVICE|The file replication service cannot be stopped.
-8004|FRS_ERR_INTERNAL_API|The file replication service API terminated the request. The event log may have more information.
-8005|FRS_ERR_INTERNAL|The file replication service terminated the request. The event log may have more information.
-8006|FRS_ERR_SERVICE_COMM|The file replication service cannot be contacted. The event log may have more information.
-8007|FRS_ERR_INSUFFICIENT_PRIV|The file replication service cannot satisfy the request because the user has insufficient privileges. The event log may have more information.
-8008|FRS_ERR_AUTHENTICATION|The file replication service cannot satisfy the request because authenticated RPC is not available. The event log may have more information.
-8009|FRS_ERR_PARENT_INSUFFICIENT_PRIV|The file replication service cannot satisfy the request because the user has insufficient privileges on the domain controller. The event log may have more information.
-8010|FRS_ERR_PARENT_AUTHENTICATION|The file replication service cannot satisfy the request because authenticated RPC is not available on the domain controller. The event log may have more information.
-8011|FRS_ERR_CHILD_TO_PARENT_COMM|The file replication service cannot communicate with the file replication service on the domain controller. The event log may have more information.
-8012|FRS_ERR_PARENT_TO_CHILD_COMM|The file replication service on the domain controller cannot communicate with the file replication service on this computer. The event log may have more information.
-8013|FRS_ERR_SYSVOL_POPULATE|The file replication service cannot populate the system volume because of an internal error. The event log may have more information.
-8014|FRS_ERR_SYSVOL_POPULATE_TIMEOUT|The file replication service cannot populate the system volume because of an internal timeout. The event log may have more information.
-8015|FRS_ERR_SYSVOL_IS_BUSY|The file replication service cannot process the request. The system volume is busy with a previous request.
-8016|FRS_ERR_SYSVOL_DEMOTE|The file replication service cannot stop replicating the system volume because of an internal error. The event log may have more information.
-8017|FRS_ERR_INVALID_SERVICE_PARAMETER|The file replication service detected an invalid parameter.
-8200|ERROR_DS_NOT_INSTALLED|An error occurred while installing the directory service. For more information, see the event log.
-8201|ERROR_DS_MEMBERSHIP_EVALUATED_LOCALLY|The directory service evaluated group memberships locally.
-8202|ERROR_DS_NO_ATTRIBUTE_OR_VALUE|The specified directory service attribute or value does not exist.
-8203|ERROR_DS_INVALID_ATTRIBUTE_SYNTAX|The attribute syntax specified to the directory service is invalid.
-8204|ERROR_DS_ATTRIBUTE_TYPE_UNDEFINED|The attribute type specified to the directory service is not defined.
-8205|ERROR_DS_ATTRIBUTE_OR_VALUE_EXISTS|The specified directory service attribute or value already exists.
-8206|ERROR_DS_BUSY|The directory service is busy.
-8207|ERROR_DS_UNAVAILABLE|The directory service is unavailable.
-8208|ERROR_DS_NO_RIDS_ALLOCATED|The directory service was unable to allocate a relative identifier.
-8209|ERROR_DS_NO_MORE_RIDS|The directory service has exhausted the pool of relative identifiers.
-8210|ERROR_DS_INCORRECT_ROLE_OWNER|The requested operation could not be performed because the directory service is not the master for that type of operation.
-8211|ERROR_DS_RIDMGR_INIT_ERROR|The directory service was unable to initialize the subsystem that allocates relative identifiers.
-8212|ERROR_DS_OBJ_CLASS_VIOLATION|The requested operation did not satisfy one or more constraints associated with the class of the object.
-8213|ERROR_DS_CANT_ON_NON_LEAF|The directory service can perform the requested operation only on a leaf object.
-8214|ERROR_DS_CANT_ON_RDN|The directory service cannot perform the requested operation on the RDN attribute of an object.
-8215|ERROR_DS_CANT_MOD_OBJ_CLASS|The directory service detected an attempt to modify the object class of an object.
-8216|ERROR_DS_CROSS_DOM_MOVE_ERROR|The requested cross-domain move operation could not be performed.
-8217|ERROR_DS_GC_NOT_AVAILABLE|Unable to contact the global catalog server.
-8218|ERROR_SHARED_POLICY|The policy object is shared and can only be modified at the root.
-8219|ERROR_POLICY_OBJECT_NOT_FOUND|The policy object does not exist.
-8220|ERROR_POLICY_ONLY_IN_DS|The requested policy information is only in the directory service.
-8221|ERROR_PROMOTION_ACTIVE|A domain controller promotion is currently active.
-8222|ERROR_NO_PROMOTION_ACTIVE|A domain controller promotion is not currently active.
-8224|ERROR_DS_OPERATIONS_ERROR|An operations error occurred.
-8225|ERROR_DS_PROTOCOL_ERROR|A protocol error occurred.
-8226|ERROR_DS_TIMELIMIT_EXCEEDED|The time limit for this request was exceeded.
-8227|ERROR_DS_SIZELIMIT_EXCEEDED|The size limit for this request was exceeded.
-8228|ERROR_DS_ADMIN_LIMIT_EXCEEDED|The administrative limit for this request was exceeded.
-8229|ERROR_DS_COMPARE_FALSE|The compare response was false.
-8230|ERROR_DS_COMPARE_TRUE|The compare response was true.
-8231|ERROR_DS_AUTH_METHOD_NOT_SUPPORTED|The requested authentication method is not supported by the server.
-8232|ERROR_DS_STRONG_AUTH_REQUIRED|A more secure authentication method is required for this server.
-8233|ERROR_DS_INAPPROPRIATE_AUTH|Inappropriate authentication.
-8234|ERROR_DS_AUTH_UNKNOWN|The authentication mechanism is unknown.
-8235|ERROR_DS_REFERRAL|A referral was returned from the server.
-8236|ERROR_DS_UNAVAILABLE_CRIT_EXTENSION|The server does not support the requested critical extension.
-8237|ERROR_DS_CONFIDENTIALITY_REQUIRED|This request requires a secure connection.
-8238|ERROR_DS_INAPPROPRIATE_MATCHING|Inappropriate matching.
-8239|ERROR_DS_CONSTRAINT_VIOLATION|A constraint violation occurred.
-8240|ERROR_DS_NO_SUCH_OBJECT|There is no such object on the server.
-8241|ERROR_DS_ALIAS_PROBLEM|There is an alias problem.
-8242|ERROR_DS_INVALID_DN_SYNTAX|An invalid dn syntax has been specified.
-8243|ERROR_DS_IS_LEAF|The object is a leaf object.
-8244|ERROR_DS_ALIAS_DEREF_PROBLEM|There is an alias dereferencing problem.
-8245|ERROR_DS_UNWILLING_TO_PERFORM|The server is unwilling to process the request.
-8246|ERROR_DS_LOOP_DETECT|A loop has been detected.
-8247|ERROR_DS_NAMING_VIOLATION|There is a naming violation.
-8248|ERROR_DS_OBJECT_RESULTS_TOO_LARGE|The result set is too large.
-8249|ERROR_DS_AFFECTS_MULTIPLE_DSAS|The operation affects multiple DSAs.
-8250|ERROR_DS_SERVER_DOWN|The server is not operational.
-8251|ERROR_DS_LOCAL_ERROR|A local error has occurred.
-8252|ERROR_DS_ENCODING_ERROR|An encoding error has occurred.
-8253|ERROR_DS_DECODING_ERROR|A decoding error has occurred.
-8254|ERROR_DS_FILTER_UNKNOWN|The search filter cannot be recognized.
-8255|ERROR_DS_PARAM_ERROR|One or more parameters are illegal.
-8256|ERROR_DS_NOT_SUPPORTED|The specified method is not supported.
-8257|ERROR_DS_NO_RESULTS_RETURNED|No results were returned.
-8258|ERROR_DS_CONTROL_NOT_FOUND|The specified control is not supported by the server.
-8259|ERROR_DS_CLIENT_LOOP|A referral loop was detected by the client.
-8260|ERROR_DS_REFERRAL_LIMIT_EXCEEDED|The preset referral limit was exceeded.
-8261|ERROR_DS_SORT_CONTROL_MISSING|The search requires a SORT control.
-8262|ERROR_DS_OFFSET_RANGE_ERROR|The search results exceed the offset range specified.
-8263|ERROR_DS_RIDMGR_DISABLED|The directory service detected the subsystem that allocates relative identifiers is disabled. This can occur as a protective mechanism when the system determines a significant portion of relative identifiers (RIDs) have been exhausted. Please see <a href="http://go.microsoft.com/fwlink/p/?linkid=228610" data-linktype="external">http://go.microsoft.com/fwlink/p/?linkid=228610</a> for recommended diagnostic steps and the procedure to re-enable account creation.
-8301|ERROR_DS_ROOT_MUST_BE_NC|The root object must be the head of a naming context. The root object cannot have an instantiated parent.
-8302|ERROR_DS_ADD_REPLICA_INHIBITED|The add replica operation cannot be performed. The naming context must be writeable in order to create the replica.
-8303|ERROR_DS_ATT_NOT_DEF_IN_SCHEMA|A reference to an attribute that is not defined in the schema occurred.
-8304|ERROR_DS_MAX_OBJ_SIZE_EXCEEDED|The maximum size of an object has been exceeded.
-8305|ERROR_DS_OBJ_STRING_NAME_EXISTS|An attempt was made to add an object to the directory with a name that is already in use.
-8306|ERROR_DS_NO_RDN_DEFINED_IN_SCHEMA|An attempt was made to add an object of a class that does not have an RDN defined in the schema.
-8307|ERROR_DS_RDN_DOESNT_MATCH_SCHEMA|An attempt was made to add an object using an RDN that is not the RDN defined in the schema.
-8308|ERROR_DS_NO_REQUESTED_ATTS_FOUND|None of the requested attributes were found on the objects.
-8309|ERROR_DS_USER_BUFFER_TO_SMALL|The user buffer is too small.
-8310|ERROR_DS_ATT_IS_NOT_ON_OBJ|The attribute specified in the operation is not present on the object.
-8311|ERROR_DS_ILLEGAL_MOD_OPERATION|Illegal modify operation. Some aspect of the modification is not permitted.
-8312|ERROR_DS_OBJ_TOO_LARGE|The specified object is too large.
-8313|ERROR_DS_BAD_INSTANCE_TYPE|The specified instance type is not valid.
-8314|ERROR_DS_MASTERDSA_REQUIRED|The operation must be performed at a master DSA.
-8315|ERROR_DS_OBJECT_CLASS_REQUIRED|The object class attribute must be specified.
-8316|ERROR_DS_MISSING_REQUIRED_ATT|A required attribute is missing.
-8317|ERROR_DS_ATT_NOT_DEF_FOR_CLASS|An attempt was made to modify an object to include an attribute that is not legal for its class.
-8318|ERROR_DS_ATT_ALREADY_EXISTS|The specified attribute is already present on the object.
-8320|ERROR_DS_CANT_ADD_ATT_VALUES|The specified attribute is not present, or has no values.
-8321|ERROR_DS_SINGLE_VALUE_CONSTRAINT|Multiple values were specified for an attribute that can have only one value.
-8322|ERROR_DS_RANGE_CONSTRAINT|A value for the attribute was not in the acceptable range of values.
-8323|ERROR_DS_ATT_VAL_ALREADY_EXISTS|The specified value already exists.
-8324|ERROR_DS_CANT_REM_MISSING_ATT|The attribute cannot be removed because it is not present on the object.
-8325|ERROR_DS_CANT_REM_MISSING_ATT_VAL|The attribute value cannot be removed because it is not present on the object.
-8326|ERROR_DS_ROOT_CANT_BE_SUBREF|The specified root object cannot be a subref.
-8327|ERROR_DS_NO_CHAINING|Chaining is not permitted.
-8328|ERROR_DS_NO_CHAINED_EVAL|Chained evaluation is not permitted.
-8329|ERROR_DS_NO_PARENT_OBJECT|The operation could not be performed because the object's parent is either uninstantiated or deleted.
-8330|ERROR_DS_PARENT_IS_AN_ALIAS|Having a parent that is an alias is not permitted. Aliases are leaf objects.
-8331|ERROR_DS_CANT_MIX_MASTER_AND_REPS|The object and parent must be of the same type, either both masters or both replicas.
-8332|ERROR_DS_CHILDREN_EXIST|The operation cannot be performed because child objects exist. This operation can only be performed on a leaf object.
-8333|ERROR_DS_OBJ_NOT_FOUND|Directory object not found.
-8334|ERROR_DS_ALIASED_OBJ_MISSING|The aliased object is missing.
-8335|ERROR_DS_BAD_NAME_SYNTAX|The object name has bad syntax.
-8336|ERROR_DS_ALIAS_POINTS_TO_ALIAS|It is not permitted for an alias to refer to another alias.
-8337|ERROR_DS_CANT_DEREF_ALIAS|The alias cannot be dereferenced.
-8338|ERROR_DS_OUT_OF_SCOPE|The operation is out of scope.
-8339|ERROR_DS_OBJECT_BEING_REMOVED|The operation cannot continue because the object is in the process of being removed.
-8340|ERROR_DS_CANT_DELETE_DSA_OBJ|The DSA object cannot be deleted.
-8341|ERROR_DS_GENERIC_ERROR|A directory service error has occurred.
-8342|ERROR_DS_DSA_MUST_BE_INT_MASTER|The operation can only be performed on an internal master DSA object.
-8343|ERROR_DS_CLASS_NOT_DSA|The object must be of class DSA.
-8344|ERROR_DS_INSUFF_ACCESS_RIGHTS|Insufficient access rights to perform the operation.
-8345|ERROR_DS_ILLEGAL_SUPERIOR|The object cannot be added because the parent is not on the list of possible superiors.
-8346|ERROR_DS_ATTRIBUTE_OWNED_BY_SAM|Access to the attribute is not permitted because the attribute is owned by the Security Accounts Manager (SAM).
-8347|ERROR_DS_NAME_TOO_MANY_PARTS|The name has too many parts.
-8348|ERROR_DS_NAME_TOO_LONG|The name is too long.
-8349|ERROR_DS_NAME_VALUE_TOO_LONG|The name value is too long.
-8350|ERROR_DS_NAME_UNPARSEABLE|The directory service encountered an error parsing a name.
-8351|ERROR_DS_NAME_TYPE_UNKNOWN|The directory service cannot get the attribute type for a name.
-8352|ERROR_DS_NOT_AN_OBJECT|The name does not identify an object; the name identifies a phantom.
-8353|ERROR_DS_SEC_DESC_TOO_SHORT|The security descriptor is too short.
-8354|ERROR_DS_SEC_DESC_INVALID|The security descriptor is invalid.
-8355|ERROR_DS_NO_DELETED_NAME|Failed to create name for deleted object.
-8356|ERROR_DS_SUBREF_MUST_HAVE_PARENT|The parent of a new subref must exist.
-8357|ERROR_DS_NCNAME_MUST_BE_NC|The object must be a naming context.
-8358|ERROR_DS_CANT_ADD_SYSTEM_ONLY|It is not permitted to add an attribute which is owned by the system.
-8359|ERROR_DS_CLASS_MUST_BE_CONCRETE|The class of the object must be structural; you cannot instantiate an abstract class.
-8360|ERROR_DS_INVALID_DMD|The schema object could not be found.
-8361|ERROR_DS_OBJ_GUID_EXISTS|A local object with this GUID (dead or alive) already exists.
-8362|ERROR_DS_NOT_ON_BACKLINK|The operation cannot be performed on a back link.
-8363|ERROR_DS_NO_CROSSREF_FOR_NC|The cross reference for the specified naming context could not be found.
-8364|ERROR_DS_SHUTTING_DOWN|The operation could not be performed because the directory service is shutting down.
-8365|ERROR_DS_UNKNOWN_OPERATION|The directory service request is invalid.
-8366|ERROR_DS_INVALID_ROLE_OWNER|The role owner attribute could not be read.
-8367|ERROR_DS_COULDNT_CONTACT_FSMO|The requested FSMO operation failed. The current FSMO holder could not be contacted.
-8368|ERROR_DS_CROSS_NC_DN_RENAME|Modification of a DN across a naming context is not permitted.
-8369|ERROR_DS_CANT_MOD_SYSTEM_ONLY|The attribute cannot be modified because it is owned by the system.
-8370|ERROR_DS_REPLICATOR_ONLY|Only the replicator can perform this function.
-8371|ERROR_DS_OBJ_CLASS_NOT_DEFINED|The specified class is not defined.
-8372|ERROR_DS_OBJ_CLASS_NOT_SUBCLASS|The specified class is not a subclass.
-8373|ERROR_DS_NAME_REFERENCE_INVALID|The name reference is invalid.
-8374|ERROR_DS_CROSS_REF_EXISTS|A cross reference already exists.
-8375|ERROR_DS_CANT_DEL_MASTER_CROSSREF|It is not permitted to delete a master cross reference.
-8376|ERROR_DS_SUBTREE_NOTIFY_NOT_NC_HEAD|Subtree notifications are only supported on NC heads.
-8377|ERROR_DS_NOTIFY_FILTER_TOO_COMPLEX|Notification filter is too complex.
-8378|ERROR_DS_DUP_RDN|Schema update failed: duplicate RDN.
-8379|ERROR_DS_DUP_OID|Schema update failed: duplicate OID.
-8380|ERROR_DS_DUP_MAPI_ID|Schema update failed: duplicate MAPI identifier.
-8381|ERROR_DS_DUP_SCHEMA_ID_GUID|Schema update failed: duplicate schema-id GUID.
-8382|ERROR_DS_DUP_LDAP_DISPLAY_NAME|Schema update failed: duplicate LDAP display name.
-8383|ERROR_DS_SEMANTIC_ATT_TEST|Schema update failed: range-lower less than range upper.
-8384|ERROR_DS_SYNTAX_MISMATCH|Schema update failed: syntax mismatch.
-8385|ERROR_DS_EXISTS_IN_MUST_HAVE|Schema deletion failed: attribute is used in must-contain.
-8386|ERROR_DS_EXISTS_IN_MAY_HAVE|Schema deletion failed: attribute is used in may-contain.
-8387|ERROR_DS_NONEXISTENT_MAY_HAVE|Schema update failed: attribute in may-contain does not exist.
-8388|ERROR_DS_NONEXISTENT_MUST_HAVE|Schema update failed: attribute in must-contain does not exist.
-8389|ERROR_DS_AUX_CLS_TEST_FAIL|Schema update failed: class in aux-class list does not exist or is not an auxiliary class.
-8390|ERROR_DS_NONEXISTENT_POSS_SUP|Schema update failed: class in poss-superiors does not exist.
-8391|ERROR_DS_SUB_CLS_TEST_FAIL|Schema update failed: class in subclassof list does not exist or does not satisfy hierarchy rules.
-8392|ERROR_DS_BAD_RDN_ATT_ID_SYNTAX|Schema update failed: Rdn-Att-Id has wrong syntax.
-8393|ERROR_DS_EXISTS_IN_AUX_CLS|Schema deletion failed: class is used as auxiliary class.
-8394|ERROR_DS_EXISTS_IN_SUB_CLS|Schema deletion failed: class is used as sub class.
-8395|ERROR_DS_EXISTS_IN_POSS_SUP|Schema deletion failed: class is used as poss superior.
-8396|ERROR_DS_RECALCSCHEMA_FAILED|Schema update failed in recalculating validation cache.
-8397|ERROR_DS_TREE_DELETE_NOT_FINISHED|The tree deletion is not finished. The request must be made again to continue deleting the tree.
-8398|ERROR_DS_CANT_DELETE|The requested delete operation could not be performed.
-8399|ERROR_DS_ATT_SCHEMA_REQ_ID|Cannot read the governs class identifier for the schema record.
-8400|ERROR_DS_BAD_ATT_SCHEMA_SYNTAX|The attribute schema has bad syntax.
-8401|ERROR_DS_CANT_CACHE_ATT|The attribute could not be cached.
-8402|ERROR_DS_CANT_CACHE_CLASS|The class could not be cached.
-8403|ERROR_DS_CANT_REMOVE_ATT_CACHE|The attribute could not be removed from the cache.
-8404|ERROR_DS_CANT_REMOVE_CLASS_CACHE|The class could not be removed from the cache.
-8405|ERROR_DS_CANT_RETRIEVE_DN|The distinguished name attribute could not be read.
-8406|ERROR_DS_MISSING_SUPREF|No superior reference has been configured for the directory service. The directory service is therefore unable to issue referrals to objects outside this forest.
-8407|ERROR_DS_CANT_RETRIEVE_INSTANCE|The instance type attribute could not be retrieved.
-8408|ERROR_DS_CODE_INCONSISTENCY|An internal error has occurred.
-8409|ERROR_DS_DATABASE_ERROR|A database error has occurred.
-8410|ERROR_DS_GOVERNSID_MISSING|The attribute GOVERNSID is missing.
-8411|ERROR_DS_MISSING_EXPECTED_ATT|An expected attribute is missing.
-8412|ERROR_DS_NCNAME_MISSING_CR_REF|The specified naming context is missing a cross reference.
-8413|ERROR_DS_SECURITY_CHECKING_ERROR|A security checking error has occurred.
-8414|ERROR_DS_SCHEMA_NOT_LOADED|The schema is not loaded.
-8415|ERROR_DS_SCHEMA_ALLOC_FAILED|Schema allocation failed. Please check if the machine is running low on memory.
-8416|ERROR_DS_ATT_SCHEMA_REQ_SYNTAX|Failed to obtain the required syntax for the attribute schema.
-8417|ERROR_DS_GCVERIFY_ERROR|The global catalog verification failed. The global catalog is not available or does not support the operation. Some part of the directory is currently not available.
-8418|ERROR_DS_DRA_SCHEMA_MISMATCH|The replication operation failed because of a schema mismatch between the servers involved.
-8419|ERROR_DS_CANT_FIND_DSA_OBJ|The DSA object could not be found.
-8420|ERROR_DS_CANT_FIND_EXPECTED_NC|The naming context could not be found.
-8421|ERROR_DS_CANT_FIND_NC_IN_CACHE|The naming context could not be found in the cache.
-8422|ERROR_DS_CANT_RETRIEVE_CHILD|The child object could not be retrieved.
-8423|ERROR_DS_SECURITY_ILLEGAL_MODIFY|The modification was not permitted for security reasons.
-8424|ERROR_DS_CANT_REPLACE_HIDDEN_REC|The operation cannot replace the hidden record.
-8425|ERROR_DS_BAD_HIERARCHY_FILE|The hierarchy file is invalid.
-8426|ERROR_DS_BUILD_HIERARCHY_TABLE_FAILED|The attempt to build the hierarchy table failed.
-8427|ERROR_DS_CONFIG_PARAM_MISSING|The directory configuration parameter is missing from the registry.
-8428|ERROR_DS_COUNTING_AB_INDICES_FAILED|The attempt to count the address book indices failed.
-8429|ERROR_DS_HIERARCHY_TABLE_MALLOC_FAILED|The allocation of the hierarchy table failed.
-8430|ERROR_DS_INTERNAL_FAILURE|The directory service encountered an internal failure.
-8431|ERROR_DS_UNKNOWN_ERROR|The directory service encountered an unknown failure.
-8432|ERROR_DS_ROOT_REQUIRES_CLASS_TOP|A root object requires a class of 'top'.
-8433|ERROR_DS_REFUSING_FSMO_ROLES|This directory server is shutting down, and cannot take ownership of new floating single-master operation roles.
-8434|ERROR_DS_MISSING_FSMO_SETTINGS|The directory service is missing mandatory configuration information, and is unable to determine the ownership of floating single-master operation roles.
-8435|ERROR_DS_UNABLE_TO_SURRENDER_ROLES|The directory service was unable to transfer ownership of one or more floating single-master operation roles to other servers.
-8436|ERROR_DS_DRA_GENERIC|The replication operation failed.
-8437|ERROR_DS_DRA_INVALID_PARAMETER|An invalid parameter was specified for this replication operation.
-8438|ERROR_DS_DRA_BUSY|The directory service is too busy to complete the replication operation at this time.
-8439|ERROR_DS_DRA_BAD_DN|The distinguished name specified for this replication operation is invalid.
-8440|ERROR_DS_DRA_BAD_NC|The naming context specified for this replication operation is invalid.
-8441|ERROR_DS_DRA_DN_EXISTS|The distinguished name specified for this replication operation already exists.
-8442|ERROR_DS_DRA_INTERNAL_ERROR|The replication system encountered an internal error.
-8443|ERROR_DS_DRA_INCONSISTENT_DIT|The replication operation encountered a database inconsistency.
-8444|ERROR_DS_DRA_CONNECTION_FAILED|The server specified for this replication operation could not be contacted.
-8445|ERROR_DS_DRA_BAD_INSTANCE_TYPE|The replication operation encountered an object with an invalid instance type.
-8446|ERROR_DS_DRA_OUT_OF_MEM|The replication operation failed to allocate memory.
-8447|ERROR_DS_DRA_MAIL_PROBLEM|The replication operation encountered an error with the mail system.
-8448|ERROR_DS_DRA_REF_ALREADY_EXISTS|The replication reference information for the target server already exists.
-8449|ERROR_DS_DRA_REF_NOT_FOUND|The replication reference information for the target server does not exist.
-8450|ERROR_DS_DRA_OBJ_IS_REP_SOURCE|The naming context cannot be removed because it is replicated to another server.
-8451|ERROR_DS_DRA_DB_ERROR|The replication operation encountered a database error.
-8452|ERROR_DS_DRA_NO_REPLICA|The naming context is in the process of being removed or is not replicated from the specified server.
-8453|ERROR_DS_DRA_ACCESS_DENIED|Replication access was denied.
-8454|ERROR_DS_DRA_NOT_SUPPORTED|The requested operation is not supported by this version of the directory service.
-8455|ERROR_DS_DRA_RPC_CANCELLED|The replication remote procedure call was cancelled.
-8456|ERROR_DS_DRA_SOURCE_DISABLED|The source server is currently rejecting replication requests.
-8457|ERROR_DS_DRA_SINK_DISABLED|The destination server is currently rejecting replication requests.
-8458|ERROR_DS_DRA_NAME_COLLISION|The replication operation failed due to a collision of object names.
-8459|ERROR_DS_DRA_SOURCE_REINSTALLED|The replication source has been reinstalled.
-8460|ERROR_DS_DRA_MISSING_PARENT|The replication operation failed because a required parent object is missing.
-8461|ERROR_DS_DRA_PREEMPTED|The replication operation was preempted.
-8462|ERROR_DS_DRA_ABANDON_SYNC|The replication synchronization attempt was abandoned because of a lack of updates.
-8463|ERROR_DS_DRA_SHUTDOWN|The replication operation was terminated because the system is shutting down.
-8464|ERROR_DS_DRA_INCOMPATIBLE_PARTIAL_SET|Synchronization attempt failed because the destination DC is currently waiting to synchronize new partial attributes from source. This condition is normal if a recent schema change modified the partial attribute set. The destination partial attribute set is not a subset of source partial attribute set.
-8465|ERROR_DS_DRA_SOURCE_IS_PARTIAL_REPLICA|The replication synchronization attempt failed because a master replica attempted to sync from a partial replica.
-8466|ERROR_DS_DRA_EXTN_CONNECTION_FAILED|The server specified for this replication operation was contacted, but that server was unable to contact an additional server needed to complete the operation.
-8467|ERROR_DS_INSTALL_SCHEMA_MISMATCH|The version of the directory service schema of the source forest is not compatible with the version of directory service on this computer.
-8468|ERROR_DS_DUP_LINK_ID|Schema update failed: An attribute with the same link identifier already exists.
-8469|ERROR_DS_NAME_ERROR_RESOLVING|Name translation: Generic processing error.
-8470|ERROR_DS_NAME_ERROR_NOT_FOUND|Name translation: Could not find the name or insufficient right to see name.
-8471|ERROR_DS_NAME_ERROR_NOT_UNIQUE|Name translation: Input name mapped to more than one output name.
-8472|ERROR_DS_NAME_ERROR_NO_MAPPING|Name translation: Input name found, but not the associated output format.
-8473|ERROR_DS_NAME_ERROR_DOMAIN_ONLY|Name translation: Unable to resolve completely, only the domain was found.
-8474|ERROR_DS_NAME_ERROR_NO_SYNTACTICAL_MAPPING|Name translation: Unable to perform purely syntactical mapping at the client without going out to the wire.
-8475|ERROR_DS_CONSTRUCTED_ATT_MOD|Modification of a constructed attribute is not allowed.
-8476|ERROR_DS_WRONG_OM_OBJ_CLASS|The OM-Object-Class specified is incorrect for an attribute with the specified syntax.
-8477|ERROR_DS_DRA_REPL_PENDING|The replication request has been posted; waiting for reply.
-8478|ERROR_DS_DS_REQUIRED|The requested operation requires a directory service, and none was available.
-8479|ERROR_DS_INVALID_LDAP_DISPLAY_NAME|The LDAP display name of the class or attribute contains non-ASCII characters.
-8480|ERROR_DS_NON_BASE_SEARCH|The requested search operation is only supported for base searches.
-8481|ERROR_DS_CANT_RETRIEVE_ATTS|The search failed to retrieve attributes from the database.
-8482|ERROR_DS_BACKLINK_WITHOUT_LINK|The schema update operation tried to add a backward link attribute that has no corresponding forward link.
-8483|ERROR_DS_EPOCH_MISMATCH|Source and destination of a cross-domain move do not agree on the object's epoch number. Either source or destination does not have the latest version of the object.
-8484|ERROR_DS_SRC_NAME_MISMATCH|Source and destination of a cross-domain move do not agree on the object's current name. Either source or destination does not have the latest version of the object.
-8485|ERROR_DS_SRC_AND_DST_NC_IDENTICAL|Source and destination for the cross-domain move operation are identical. Caller should use local move operation instead of cross-domain move operation.
-8486|ERROR_DS_DST_NC_MISMATCH|Source and destination for a cross-domain move are not in agreement on the naming contexts in the forest. Either source or destination does not have the latest version of the Partitions container.
-8487|ERROR_DS_NOT_AUTHORITIVE_FOR_DST_NC|Destination of a cross-domain move is not authoritative for the destination naming context.
-8488|ERROR_DS_SRC_GUID_MISMATCH|Source and destination of a cross-domain move do not agree on the identity of the source object. Either source or destination does not have the latest version of the source object.
-8489|ERROR_DS_CANT_MOVE_DELETED_OBJECT|Object being moved across-domains is already known to be deleted by the destination server. The source server does not have the latest version of the source object.
-8490|ERROR_DS_PDC_OPERATION_IN_PROGRESS|Another operation which requires exclusive access to the PDC FSMO is already in progress.
-8491|ERROR_DS_CROSS_DOMAIN_CLEANUP_REQD|A cross-domain move operation failed such that two versions of the moved object exist - one each in the source and destination domains. The destination object needs to be removed to restore the system to a consistent state.
-8492|ERROR_DS_ILLEGAL_XDOM_MOVE_OPERATION|This object may not be moved across domain boundaries either because cross-domain moves for this class are disallowed, or the object has some special characteristics, e.g.: trust account or restricted RID, which prevent its move.
-8493|ERROR_DS_CANT_WITH_ACCT_GROUP_MEMBERSHPS|Can't move objects with memberships across domain boundaries as once moved, this would violate the membership conditions of the account group. Remove the object from any account group memberships and retry.
-8494|ERROR_DS_NC_MUST_HAVE_NC_PARENT|A naming context head must be the immediate child of another naming context head, not of an interior node.
-8495|ERROR_DS_CR_IMPOSSIBLE_TO_VALIDATE|The directory cannot validate the proposed naming context name because it does not hold a replica of the naming context above the proposed naming context. Please ensure that the domain naming master role is held by a server that is configured as a global catalog server, and that the server is up to date with its replication partners. (Applies only to Windows 2000 Domain Naming masters.)
-8496|ERROR_DS_DST_DOMAIN_NOT_NATIVE|Destination domain must be in native mode.
-8497|ERROR_DS_MISSING_INFRASTRUCTURE_CONTAINER|The operation cannot be performed because the server does not have an infrastructure container in the domain of interest.
-8498|ERROR_DS_CANT_MOVE_ACCOUNT_GROUP|Cross-domain move of non-empty account groups is not allowed.
-8499|ERROR_DS_CANT_MOVE_RESOURCE_GROUP|Cross-domain move of non-empty resource groups is not allowed.
-8500|ERROR_DS_INVALID_SEARCH_FLAG|The search flags for the attribute are invalid. The ANR bit is valid only on attributes of Unicode or Teletex strings.
-8501|ERROR_DS_NO_TREE_DELETE_ABOVE_NC|Tree deletions starting at an object which has an NC head as a descendant are not allowed.
-8502|ERROR_DS_COULDNT_LOCK_TREE_FOR_DELETE|The directory service failed to lock a tree in preparation for a tree deletion because the tree was in use.
-8503|ERROR_DS_COULDNT_IDENTIFY_OBJECTS_FOR_TREE_DELETE|The directory service failed to identify the list of objects to delete while attempting a tree deletion.
-8504|ERROR_DS_SAM_INIT_FAILURE|Security Accounts Manager initialization failed because of the following error: `%1. Error Status: 0x`%2. Please shutdown this system and reboot into Directory Services Restore Mode, check the event log for more detailed information.
-8505|ERROR_DS_SENSITIVE_GROUP_VIOLATION|Only an administrator can modify the membership list of an administrative group.
-8506|ERROR_DS_CANT_MOD_PRIMARYGROUPID|Cannot change the primary group ID of a domain controller account.
-8507|ERROR_DS_ILLEGAL_BASE_SCHEMA_MOD|An attempt is made to modify the base schema.
-8508|ERROR_DS_NONSAFE_SCHEMA_CHANGE|Adding a new mandatory attribute to an existing class, deleting a mandatory attribute from an existing class, or adding an optional attribute to the special class Top that is not a backlink attribute (directly or through inheritance, for example, by adding or deleting an auxiliary class) is not allowed.
-8509|ERROR_DS_SCHEMA_UPDATE_DISALLOWED|Schema update is not allowed on this DC because the DC is not the schema FSMO Role Owner.
-8510|ERROR_DS_CANT_CREATE_UNDER_SCHEMA|An object of this class cannot be created under the schema container. You can only create attribute-schema and class-schema objects under the schema container.
-8511|ERROR_DS_INSTALL_NO_SRC_SCH_VERSION|The replica/child install failed to get the objectVersion attribute on the schema container on the source DC. Either the attribute is missing on the schema container or the credentials supplied do not have permission to read it.
-8512|ERROR_DS_INSTALL_NO_SCH_VERSION_IN_INIFILE|The replica/child install failed to read the objectVersion attribute in the SCHEMA section of the file schema.ini in the system32 directory.
-8513|ERROR_DS_INVALID_GROUP_TYPE|The specified group type is invalid.
-8514|ERROR_DS_NO_NEST_GLOBALGROUP_IN_MIXEDDOMAIN|You cannot nest global groups in a mixed domain if the group is security-enabled.
-8515|ERROR_DS_NO_NEST_LOCALGROUP_IN_MIXEDDOMAIN|You cannot nest local groups in a mixed domain if the group is security-enabled.
-8516|ERROR_DS_GLOBAL_CANT_HAVE_LOCAL_MEMBER|A global group cannot have a local group as a member.
-8517|ERROR_DS_GLOBAL_CANT_HAVE_UNIVERSAL_MEMBER|A global group cannot have a universal group as a member.
-8518|ERROR_DS_UNIVERSAL_CANT_HAVE_LOCAL_MEMBER|A universal group cannot have a local group as a member.
-8519|ERROR_DS_GLOBAL_CANT_HAVE_CROSSDOMAIN_MEMBER|A global group cannot have a cross-domain member.
-8520|ERROR_DS_LOCAL_CANT_HAVE_CROSSDOMAIN_LOCAL_MEMBER|A local group cannot have another cross domain local group as a member.
-8521|ERROR_DS_HAVE_PRIMARY_MEMBERS|A group with primary members cannot change to a security-disabled group.
-8522|ERROR_DS_STRING_SD_CONVERSION_FAILED|The schema cache load failed to convert the string default SD on a class-schema object.
-8523|ERROR_DS_NAMING_MASTER_GC|Only DSAs configured to be Global Catalog servers should be allowed to hold the Domain Naming Master FSMO role. (Applies only to Windows 2000 servers.)
-8524|ERROR_DS_DNS_LOOKUP_FAILURE|The DSA operation is unable to proceed because of a DNS lookup failure.
-8525|ERROR_DS_COULDNT_UPDATE_SPNS|While processing a change to the DNS Host Name for an object, the Service Principal Name values could not be kept in sync.
-8526|ERROR_DS_CANT_RETRIEVE_SD|The Security Descriptor attribute could not be read.
-8527|ERROR_DS_KEY_NOT_UNIQUE|The object requested was not found, but an object with that key was found.
-8528|ERROR_DS_WRONG_LINKED_ATT_SYNTAX|The syntax of the linked attribute being added is incorrect. Forward links can only have syntax 2.5.5.1, 2.5.5.7, and 2.5.5.14, and backlinks can only have syntax 2.5.5.1.
-8529|ERROR_DS_SAM_NEED_BOOTKEY_PASSWORD|Security Account Manager needs to get the boot password.
-8530|ERROR_DS_SAM_NEED_BOOTKEY_FLOPPY|Security Account Manager needs to get the boot key from floppy disk.
-8531|ERROR_DS_CANT_START|Directory Service cannot start.
-8532|ERROR_DS_INIT_FAILURE|Directory Services could not start.
-8533|ERROR_DS_NO_PKT_PRIVACY_ON_CONNECTION|The connection between client and server requires packet privacy or better.
-8534|ERROR_DS_SOURCE_DOMAIN_IN_FOREST|The source domain may not be in the same forest as destination.
-8535|ERROR_DS_DESTINATION_DOMAIN_NOT_IN_FOREST|The destination domain must be in the forest.
-8536|ERROR_DS_DESTINATION_AUDITING_NOT_ENABLED|The operation requires that destination domain auditing be enabled.
-8537|ERROR_DS_CANT_FIND_DC_FOR_SRC_DOMAIN|The operation couldn't locate a DC for the source domain.
-8538|ERROR_DS_SRC_OBJ_NOT_GROUP_OR_USER|The source object must be a group or user.
-8539|ERROR_DS_SRC_SID_EXISTS_IN_FOREST|The source object's SID already exists in destination forest.
-8540|ERROR_DS_SRC_AND_DST_OBJECT_CLASS_MISMATCH|The source and destination object must be of the same type.
-8541|ERROR_SAM_INIT_FAILURE|Security Accounts Manager initialization failed because of the following error: `%1. Error Status: 0x`%2. Click OK to shut down the system and reboot into Safe Mode. Check the event log for detailed information.
-8542|ERROR_DS_DRA_SCHEMA_INFO_SHIP|Schema information could not be included in the replication request.
-8543|ERROR_DS_DRA_SCHEMA_CONFLICT|The replication operation could not be completed due to a schema incompatibility.
-8544|ERROR_DS_DRA_EARLIER_SCHEMA_CONFLICT|The replication operation could not be completed due to a previous schema incompatibility.
-8545|ERROR_DS_DRA_OBJ_NC_MISMATCH|The replication update could not be applied because either the source or the destination has not yet received information regarding a recent cross-domain move operation.
-8546|ERROR_DS_NC_STILL_HAS_DSAS|The requested domain could not be deleted because there exist domain controllers that still host this domain.
-8547|ERROR_DS_GC_REQUIRED|The requested operation can be performed only on a global catalog server.
-8548|ERROR_DS_LOCAL_MEMBER_OF_LOCAL_ONLY|A local group can only be a member of other local groups in the same domain.
-8549|ERROR_DS_NO_FPO_IN_UNIVERSAL_GROUPS|Foreign security principals cannot be members of universal groups.
-8550|ERROR_DS_CANT_ADD_TO_GC|The attribute is not allowed to be replicated to the GC because of security reasons.
-8551|ERROR_DS_NO_CHECKPOINT_WITH_PDC|The checkpoint with the PDC could not be taken because there too many modifications being processed currently.
-8552|ERROR_DS_SOURCE_AUDITING_NOT_ENABLED|The operation requires that source domain auditing be enabled.
-8553|ERROR_DS_CANT_CREATE_IN_NONDOMAIN_NC|Security principal objects can only be created inside domain naming contexts.
-8554|ERROR_DS_INVALID_NAME_FOR_SPN|A Service Principal Name (SPN) could not be constructed because the provided hostname is not in the necessary format.
-8555|ERROR_DS_FILTER_USES_CONTRUCTED_ATTRS|A Filter was passed that uses constructed attributes.
-8556|ERROR_DS_UNICODEPWD_NOT_IN_QUOTES|The unicodePwd attribute value must be enclosed in double quotes.
-8557|ERROR_DS_MACHINE_ACCOUNT_QUOTA_EXCEEDED|Your computer could not be joined to the domain. You have exceeded the maximum number of computer accounts you are allowed to create in this domain. Contact your system administrator to have this limit reset or increased.
-8558|ERROR_DS_MUST_BE_RUN_ON_DST_DC|For security reasons, the operation must be run on the destination DC.
-8559|ERROR_DS_SRC_DC_MUST_BE_SP4_OR_GREATER|For security reasons, the source DC must be NT4SP4 or greater.
-8560|ERROR_DS_CANT_TREE_DELETE_CRITICAL_OBJ|Critical Directory Service System objects cannot be deleted during tree delete operations. The tree delete may have been partially performed.
-8561|ERROR_DS_INIT_FAILURE_CONSOLE|Directory Services could not start because of the following error: `%1. Error Status: 0x`%2. Please click OK to shutdown the system. You can use the recovery console to diagnose the system further.
-8562|ERROR_DS_SAM_INIT_FAILURE_CONSOLE|Security Accounts Manager initialization failed because of the following error: `%1. Error Status: 0x`%2. Please click OK to shutdown the system. You can use the recovery console to diagnose the system further.
-8563|ERROR_DS_FOREST_VERSION_TOO_HIGH|The version of the operating system is incompatible with the current AD DS forest functional level or AD LDS Configuration Set functional level. You must upgrade to a new version of the operating system before this server can become an AD DS Domain Controller or add an AD LDS Instance in this AD DS Forest or AD LDS Configuration Set.
-8564|ERROR_DS_DOMAIN_VERSION_TOO_HIGH|The version of the operating system installed is incompatible with the current domain functional level. You must upgrade to a new version of the operating system before this server can become a domain controller in this domain.
-8565|ERROR_DS_FOREST_VERSION_TOO_LOW|The version of the operating system installed on this server no longer supports the current AD DS Forest functional level or AD LDS Configuration Set functional level. You must raise the AD DS Forest functional level or AD LDS Configuration Set functional level before this server can become an AD DS Domain Controller or an AD LDS Instance in this Forest or Configuration Set.
-8566|ERROR_DS_DOMAIN_VERSION_TOO_LOW|The version of the operating system installed on this server no longer supports the current domain functional level. You must raise the domain functional level before this server can become a domain controller in this domain.
-8567|ERROR_DS_INCOMPATIBLE_VERSION|The version of the operating system installed on this server is incompatible with the functional level of the domain or forest.
-8568|ERROR_DS_LOW_DSA_VERSION|The functional level of the domain (or forest) cannot be raised to the requested value, because there exist one or more domain controllers in the domain (or forest) that are at a lower incompatible functional level.
-8569|ERROR_DS_NO_BEHAVIOR_VERSION_IN_MIXEDDOMAIN|The forest functional level cannot be raised to the requested value since one or more domains are still in mixed domain mode. All domains in the forest must be in native mode, for you to raise the forest functional level.
-8570|ERROR_DS_NOT_SUPPORTED_SORT_ORDER|The sort order requested is not supported.
-8571|ERROR_DS_NAME_NOT_UNIQUE|The requested name already exists as a unique identifier.
-8572|ERROR_DS_MACHINE_ACCOUNT_CREATED_PRENT4|The machine account was created pre-NT4. The account needs to be recreated.
-8573|ERROR_DS_OUT_OF_VERSION_STORE|The database is out of version store.
-8574|ERROR_DS_INCOMPATIBLE_CONTROLS_USED|Unable to continue operation because multiple conflicting controls were used.
-8575|ERROR_DS_NO_REF_DOMAIN|Unable to find a valid security descriptor reference domain for this partition.
-8576|ERROR_DS_RESERVED_LINK_ID|Schema update failed: The link identifier is reserved.
-8577|ERROR_DS_LINK_ID_NOT_AVAILABLE|Schema update failed: There are no link identifiers available.
-8578|ERROR_DS_AG_CANT_HAVE_UNIVERSAL_MEMBER|An account group cannot have a universal group as a member.
-8579|ERROR_DS_MODIFYDN_DISALLOWED_BY_INSTANCE_TYPE|Rename or move operations on naming context heads or read-only objects are not allowed.
-8580|ERROR_DS_NO_OBJECT_MOVE_IN_SCHEMA_NC|Move operations on objects in the schema naming context are not allowed.
-8581|ERROR_DS_MODIFYDN_DISALLOWED_BY_FLAG|A system flag has been set on the object and does not allow the object to be moved or renamed.
-8582|ERROR_DS_MODIFYDN_WRONG_GRANDPARENT|This object is not allowed to change its grandparent container. Moves are not forbidden on this object, but are restricted to sibling containers.
-8583|ERROR_DS_NAME_ERROR_TRUST_REFERRAL|Unable to resolve completely, a referral to another forest is generated.
-8584|ERROR_NOT_SUPPORTED_ON_STANDARD_SERVER|The requested action is not supported on standard server.
-8585|ERROR_DS_CANT_ACCESS_REMOTE_PART_OF_AD|Could not access a partition of the directory service located on a remote server. Make sure at least one server is running for the partition in question.
-8586|ERROR_DS_CR_IMPOSSIBLE_TO_VALIDATE_V2|The directory cannot validate the proposed naming context (or partition) name because it does not hold a replica nor can it contact a replica of the naming context above the proposed naming context. Please ensure that the parent naming context is properly registered in DNS, and at least one replica of this naming context is reachable by the Domain Naming master.
-8587|ERROR_DS_THREAD_LIMIT_EXCEEDED|The thread limit for this request was exceeded.
-8588|ERROR_DS_NOT_CLOSEST|The Global catalog server is not in the closest site.
-8589|ERROR_DS_CANT_DERIVE_SPN_WITHOUT_SERVER_REF|The DS cannot derive a service principal name (SPN) with which to mutually authenticate the target server because the corresponding server object in the local DS database has no serverReference attribute.
-8590|ERROR_DS_SINGLE_USER_MODE_FAILED|The Directory Service failed to enter single user mode.
-8591|ERROR_DS_NTDSCRIPT_SYNTAX_ERROR|The Directory Service cannot parse the script because of a syntax error.
-8592|ERROR_DS_NTDSCRIPT_PROCESS_ERROR|The Directory Service cannot process the script because of an error.
-8593|ERROR_DS_DIFFERENT_REPL_EPOCHS|The directory service cannot perform the requested operation because the servers involved are of different replication epochs (which is usually related to a domain rename that is in progress).
-8594|ERROR_DS_DRS_EXTENSIONS_CHANGED|The directory service binding must be renegotiated due to a change in the server extensions information.
-8595|ERROR_DS_REPLICA_SET_CHANGE_NOT_ALLOWED_ON_DISABLED_CR|Operation not allowed on a disabled cross ref.
-8596|ERROR_DS_NO_MSDS_INTID|Schema update failed: No values for msDS-IntId are available.
-8597|ERROR_DS_DUP_MSDS_INTID|Schema update failed: Duplicate msDS-INtId. Retry the operation.
-8598|ERROR_DS_EXISTS_IN_RDNATTID|Schema deletion failed: attribute is used in rDNAttID.
-8599|ERROR_DS_AUTHORIZATION_FAILED|The directory service failed to authorize the request.
-8600|ERROR_DS_INVALID_SCRIPT|The Directory Service cannot process the script because it is invalid.
-8601|ERROR_DS_REMOTE_CROSSREF_OP_FAILED|The remote create cross reference operation failed on the Domain Naming Master FSMO. The operation's error is in the extended data.
-8602|ERROR_DS_CROSS_REF_BUSY|A cross reference is in use locally with the same name.
-8603|ERROR_DS_CANT_DERIVE_SPN_FOR_DELETED_DOMAIN|The DS cannot derive a service principal name (SPN) with which to mutually authenticate the target server because the server's domain has been deleted from the forest.
-8604|ERROR_DS_CANT_DEMOTE_WITH_WRITEABLE_NC|Writeable NCs prevent this DC from demoting.
-8605|ERROR_DS_DUPLICATE_ID_FOUND|The requested object has a non-unique identifier and cannot be retrieved.
-8606|ERROR_DS_INSUFFICIENT_ATTR_TO_CREATE_OBJECT|Insufficient attributes were given to create an object. This object may not exist because it may have been deleted and already garbage collected.
-8607|ERROR_DS_GROUP_CONVERSION_ERROR|The group cannot be converted due to attribute restrictions on the requested group type.
-8608|ERROR_DS_CANT_MOVE_APP_BASIC_GROUP|Cross-domain move of non-empty basic application groups is not allowed.
-8609|ERROR_DS_CANT_MOVE_APP_QUERY_GROUP|Cross-domain move of non-empty query based application groups is not allowed.
-8610|ERROR_DS_ROLE_NOT_VERIFIED|The FSMO role ownership could not be verified because its directory partition has not replicated successfully with at least one replication partner.
-8611|ERROR_DS_WKO_CONTAINER_CANNOT_BE_SPECIAL|The target container for a redirection of a well known object container cannot already be a special container.
-8612|ERROR_DS_DOMAIN_RENAME_IN_PROGRESS|The Directory Service cannot perform the requested operation because a domain rename operation is in progress.
-8613|ERROR_DS_EXISTING_AD_CHILD_NC|The directory service detected a child partition below the requested partition name. The partition hierarchy must be created in a top down method.
-8614|ERROR_DS_REPL_LIFETIME_EXCEEDED|The directory service cannot replicate with this server because the time since the last replication with this server has exceeded the tombstone lifetime.
-8615|ERROR_DS_DISALLOWED_IN_SYSTEM_CONTAINER|The requested operation is not allowed on an object under the system container.
-8616|ERROR_DS_LDAP_SEND_QUEUE_FULL|The LDAP servers network send queue has filled up because the client is not processing the results of its requests fast enough. No more requests will be processed until the client catches up. If the client does not catch up then it will be disconnected.
-8617|ERROR_DS_DRA_OUT_SCHEDULE_WINDOW|The scheduled replication did not take place because the system was too busy to execute the request within the schedule window. The replication queue is overloaded. Consider reducing the number of partners or decreasing the scheduled replication frequency.
-8618|ERROR_DS_POLICY_NOT_KNOWN|At this time, it cannot be determined if the branch replication policy is available on the hub domain controller. Please retry at a later time to account for replication latencies.
-8619|ERROR_NO_SITE_SETTINGS_OBJECT|The site settings object for the specified site does not exist.
-8620|ERROR_NO_SECRETS|The local account store does not contain secret material for the specified account.
-8621|ERROR_NO_WRITABLE_DC_FOUND|Could not find a writable domain controller in the domain.
-8622|ERROR_DS_NO_SERVER_OBJECT|The server object for the domain controller does not exist.
-8623|ERROR_DS_NO_NTDSA_OBJECT|The NTDS Settings object for the domain controller does not exist.
-8624|ERROR_DS_NON_ASQ_SEARCH|The requested search operation is not supported for ASQ searches.
-8625|ERROR_DS_AUDIT_FAILURE|A required audit event could not be generated for the operation.
-8626|ERROR_DS_INVALID_SEARCH_FLAG_SUBTREE|The search flags for the attribute are invalid. The subtree index bit is valid only on single valued attributes.
-8627|ERROR_DS_INVALID_SEARCH_FLAG_TUPLE|The search flags for the attribute are invalid. The tuple index bit is valid only on attributes of Unicode strings.
-8628|ERROR_DS_HIERARCHY_TABLE_TOO_DEEP|The address books are nested too deeply. Failed to build the hierarchy table.
-8629|ERROR_DS_DRA_CORRUPT_UTD_VECTOR|The specified up-to-date-ness vector is corrupt.
-8630|ERROR_DS_DRA_SECRETS_DENIED|The request to replicate secrets is denied.
-8631|ERROR_DS_RESERVED_MAPI_ID|Schema update failed: The MAPI identifier is reserved.
-8632|ERROR_DS_MAPI_ID_NOT_AVAILABLE|Schema update failed: There are no MAPI identifiers available.
-8633|ERROR_DS_DRA_MISSING_KRBTGT_SECRET|The replication operation failed because the required attributes of the local krbtgt object are missing.
-8634|ERROR_DS_DOMAIN_NAME_EXISTS_IN_FOREST|The domain name of the trusted domain already exists in the forest.
-8635|ERROR_DS_FLAT_NAME_EXISTS_IN_FOREST|The flat name of the trusted domain already exists in the forest.
-8636|ERROR_INVALID_USER_PRINCIPAL_NAME|The User Principal Name (UPN) is invalid.
-8637|ERROR_DS_OID_MAPPED_GROUP_CANT_HAVE_MEMBERS|OID mapped groups cannot have members.
-8638|ERROR_DS_OID_NOT_FOUND|The specified OID cannot be found.
-8639|ERROR_DS_DRA_RECYCLED_TARGET|The replication operation failed because the target object referred by a link value is recycled.
-8640|ERROR_DS_DISALLOWED_NC_REDIRECT|The redirect operation failed because the target object is in a NC different from the domain NC of the current domain controller.
-8641|ERROR_DS_HIGH_ADLDS_FFL|The functional level of the AD LDS configuration set cannot be lowered to the requested value.
-8642|ERROR_DS_HIGH_DSA_VERSION|The functional level of the domain (or forest) cannot be lowered to the requested value.
-8643|ERROR_DS_LOW_ADLDS_FFL|The functional level of the AD LDS configuration set cannot be raised to the requested value, because there exist one or more ADLDS instances that are at a lower incompatible functional level.
-8644|ERROR_DOMAIN_SID_SAME_AS_LOCAL_WORKSTATION|The domain join cannot be completed because the SID of the domain you attempted to join was identical to the SID of this machine. This is a symptom of an improperly cloned operating system install. You should run sysprep on this machine in order to generate a new machine SID. Please see <a href="http://go.microsoft.com/fwlink/p/?linkid=168895" data-linktype="external">http://go.microsoft.com/fwlink/p/?linkid=168895</a> for more information.
-8645|ERROR_DS_UNDELETE_SAM_VALIDATION_FAILED|The undelete operation failed because the Sam Account Name or Additional Sam Account Name of the object being undeleted conflicts with an existing live object.
-8646|ERROR_INCORRECT_ACCOUNT_TYPE|The system is not authoritative for the specified account and therefore cannot complete the operation. Please retry the operation using the provider associated with this account. If this is an online provider please use the provider's online site.
-9001|DNS_ERROR_RCODE_FORMAT_ERROR|DNS server unable to interpret format.
-9002|DNS_ERROR_RCODE_SERVER_FAILURE|DNS server failure.
-9003|DNS_ERROR_RCODE_NAME_ERROR|DNS name does not exist.
-9004|DNS_ERROR_RCODE_NOT_IMPLEMENTED|DNS request not supported by name server.
-9005|DNS_ERROR_RCODE_REFUSED|DNS operation refused.
-9006|DNS_ERROR_RCODE_YXDOMAIN|DNS name that ought not exist, does exist.
-9007|DNS_ERROR_RCODE_YXRRSET|DNS RR set that ought not exist, does exist.
-9008|DNS_ERROR_RCODE_NXRRSET|DNS RR set that ought to exist, does not exist.
-9009|DNS_ERROR_RCODE_NOTAUTH|DNS server not authoritative for zone.
-9010|DNS_ERROR_RCODE_NOTZONE|DNS name in update or prereq is not in zone.
-9016|DNS_ERROR_RCODE_BADSIG|DNS signature failed to verify.
-9017|DNS_ERROR_RCODE_BADKEY|DNS bad key.
-9018|DNS_ERROR_RCODE_BADTIME|DNS signature validity expired.
-9101|DNS_ERROR_KEYMASTER_REQUIRED|Only the DNS server acting as the key master for the zone may perform this operation.
-9102|DNS_ERROR_NOT_ALLOWED_ON_SIGNED_ZONE|This operation is not allowed on a zone that is signed or has signing keys.
-9103|DNS_ERROR_NSEC3_INCOMPATIBLE_WITH_RSA_SHA1|NSEC3 is not compatible with the RSA-SHA-1 algorithm. Choose a different algorithm or use NSEC.`nThis value was also named <strong>DNS_ERROR_INVALID_NSEC3_PARAMETERS</strong>
-9104|DNS_ERROR_NOT_ENOUGH_SIGNING_KEY_DESCRIPTORS|The zone does not have enough signing keys. There must be at least one key signing key (KSK) and at least one zone signing key (ZSK).
-9105|DNS_ERROR_UNSUPPORTED_ALGORITHM|The specified algorithm is not supported.
-9106|DNS_ERROR_INVALID_KEY_SIZE|The specified key size is not supported.
-9107|DNS_ERROR_SIGNING_KEY_NOT_ACCESSIBLE|One or more of the signing keys for a zone are not accessible to the DNS server. Zone signing will not be operational until this error is resolved.
-9108|DNS_ERROR_KSP_DOES_NOT_SUPPORT_PROTECTION|The specified key storage provider does not support DPAPI++ data protection. Zone signing will not be operational until this error is resolved.
-9109|DNS_ERROR_UNEXPECTED_DATA_PROTECTION_ERROR|An unexpected DPAPI++ error was encountered. Zone signing will not be operational until this error is resolved.
-9110|DNS_ERROR_UNEXPECTED_CNG_ERROR|An unexpected crypto error was encountered. Zone signing may not be operational until this error is resolved.
-9111|DNS_ERROR_UNKNOWN_SIGNING_PARAMETER_VERSION|The DNS server encountered a signing key with an unknown version. Zone signing will not be operational until this error is resolved.
-9112|DNS_ERROR_KSP_NOT_ACCESSIBLE|The specified key service provider cannot be opened by the DNS server.
-9113|DNS_ERROR_TOO_MANY_SKDS|The DNS server cannot accept any more signing keys with the specified algorithm and KSK flag value for this zone.
-9114|DNS_ERROR_INVALID_ROLLOVER_PERIOD|The specified rollover period is invalid.
-9115|DNS_ERROR_INVALID_INITIAL_ROLLOVER_OFFSET|The specified initial rollover offset is invalid.
-9116|DNS_ERROR_ROLLOVER_IN_PROGRESS|The specified signing key is already in process of rolling over keys.
-9117|DNS_ERROR_STANDBY_KEY_NOT_PRESENT|The specified signing key does not have a standby key to revoke.
-9118|DNS_ERROR_NOT_ALLOWED_ON_ZSK|This operation is not allowed on a zone signing key (ZSK).
-9119|DNS_ERROR_NOT_ALLOWED_ON_ACTIVE_SKD|This operation is not allowed on an active signing key.
-9120|DNS_ERROR_ROLLOVER_ALREADY_QUEUED|The specified signing key is already queued for rollover.
-9121|DNS_ERROR_NOT_ALLOWED_ON_UNSIGNED_ZONE|This operation is not allowed on an unsigned zone.
-9122|DNS_ERROR_BAD_KEYMASTER|This operation could not be completed because the DNS server listed as the current key master for this zone is down or misconfigured. Resolve the problem on the current key master for this zone or use another DNS server to seize the key master role.
-9123|DNS_ERROR_INVALID_SIGNATURE_VALIDITY_PERIOD|The specified signature validity period is invalid.
-9124|DNS_ERROR_INVALID_NSEC3_ITERATION_COUNT|The specified NSEC3 iteration count is higher than allowed by the minimum key length used in the zone.
-9125|DNS_ERROR_DNSSEC_IS_DISABLED|This operation could not be completed because the DNS server has been configured with DNSSEC features disabled. Enable DNSSEC on the DNS server.
-9126|DNS_ERROR_INVALID_XML|This operation could not be completed because the XML stream received is empty or syntactically invalid.
-9127|DNS_ERROR_NO_VALID_TRUST_ANCHORS|This operation completed, but no trust anchors were added because all of the trust anchors received were either invalid, unsupported, expired, or would not become valid in less than 30 days.
-9128|DNS_ERROR_ROLLOVER_NOT_POKEABLE|The specified signing key is not waiting for parental DS update.
-9129|DNS_ERROR_NSEC3_NAME_COLLISION|Hash collision detected during NSEC3 signing. Specify a different user-provided salt, or use a randomly generated salt, and attempt to sign the zone again.
-9130|DNS_ERROR_NSEC_INCOMPATIBLE_WITH_NSEC3_RSA_SHA1|NSEC is not compatible with the NSEC3-RSA-SHA-1 algorithm. Choose a different algorithm or use NSEC3.
-9501|DNS_INFO_NO_RECORDS|No records found for given DNS query.
-9502|DNS_ERROR_BAD_PACKET|Bad DNS packet.
-9503|DNS_ERROR_NO_PACKET|No DNS packet.
-9504|DNS_ERROR_RCODE|DNS error, check rcode.
-9505|DNS_ERROR_UNSECURE_PACKET|Unsecured DNS packet.
-9506|DNS_REQUEST_PENDING|DNS query request is pending.
-9551|DNS_ERROR_INVALID_TYPE|Invalid DNS type.
-9552|DNS_ERROR_INVALID_IP_ADDRESS|Invalid IP address.
-9553|DNS_ERROR_INVALID_PROPERTY|Invalid property.
-9554|DNS_ERROR_TRY_AGAIN_LATER|Try DNS operation again later.
-9555|DNS_ERROR_NOT_UNIQUE|Record for given name and type is not unique.
-9556|DNS_ERROR_NON_RFC_NAME|DNS name does not comply with RFC specifications.
-9557|DNS_STATUS_FQDN|DNS name is a fully-qualified DNS name.
-9558|DNS_STATUS_DOTTED_NAME|DNS name is dotted (multi-label).
-9559|DNS_STATUS_SINGLE_PART_NAME|DNS name is a single-part name.
-9560|DNS_ERROR_INVALID_NAME_CHAR|DNS name contains an invalid character.
-9561|DNS_ERROR_NUMERIC_NAME|DNS name is entirely numeric.
-9562|DNS_ERROR_NOT_ALLOWED_ON_ROOT_SERVER|The operation requested is not permitted on a DNS root server.
-9563|DNS_ERROR_NOT_ALLOWED_UNDER_DELEGATION|The record could not be created because this part of the DNS namespace has been delegated to another server.
-9564|DNS_ERROR_CANNOT_FIND_ROOT_HINTS|The DNS server could not find a set of root hints.
-9565|DNS_ERROR_INCONSISTENT_ROOT_HINTS|The DNS server found root hints but they were not consistent across all adapters.
-9566|DNS_ERROR_DWORD_VALUE_TOO_SMALL|The specified value is too small for this parameter.
-9567|DNS_ERROR_DWORD_VALUE_TOO_LARGE|The specified value is too large for this parameter.
-9568|DNS_ERROR_BACKGROUND_LOADING|This operation is not allowed while the DNS server is loading zones in the background. Please try again later.
-9569|DNS_ERROR_NOT_ALLOWED_ON_RODC|The operation requested is not permitted on against a DNS server running on a read-only DC.
-9570|DNS_ERROR_NOT_ALLOWED_UNDER_DNAME|No data is allowed to exist underneath a DNAME record.
-9571|DNS_ERROR_DELEGATION_REQUIRED|This operation requires credentials delegation.
-9572|DNS_ERROR_INVALID_POLICY_TABLE|Name resolution policy table has been corrupted. DNS resolution will fail until it is fixed. Contact your network administrator.
-9601|DNS_ERROR_ZONE_DOES_NOT_EXIST|DNS zone does not exist.
-9602|DNS_ERROR_NO_ZONE_INFO|DNS zone information not available.
-9603|DNS_ERROR_INVALID_ZONE_OPERATION|Invalid operation for DNS zone.
-9604|DNS_ERROR_ZONE_CONFIGURATION_ERROR|Invalid DNS zone configuration.
-9605|DNS_ERROR_ZONE_HAS_NO_SOA_RECORD|DNS zone has no start of authority (SOA) record.
-9606|DNS_ERROR_ZONE_HAS_NO_NS_RECORDS|DNS zone has no Name Server (NS) record.
-9607|DNS_ERROR_ZONE_LOCKED|DNS zone is locked.
-9608|DNS_ERROR_ZONE_CREATION_FAILED|DNS zone creation failed.
-9609|DNS_ERROR_ZONE_ALREADY_EXISTS|DNS zone already exists.
-9610|DNS_ERROR_AUTOZONE_ALREADY_EXISTS|DNS automatic zone already exists.
-9611|DNS_ERROR_INVALID_ZONE_TYPE|Invalid DNS zone type.
-9612|DNS_ERROR_SECONDARY_REQUIRES_MASTER_IP|Secondary DNS zone requires master IP address.
-9613|DNS_ERROR_ZONE_NOT_SECONDARY|DNS zone not secondary.
-9614|DNS_ERROR_NEED_SECONDARY_ADDRESSES|Need secondary IP address.
-9615|DNS_ERROR_WINS_INIT_FAILED|WINS initialization failed.
-9616|DNS_ERROR_NEED_WINS_SERVERS|Need WINS servers.
-9617|DNS_ERROR_NBSTAT_INIT_FAILED|NBTSTAT initialization call failed.
-9618|DNS_ERROR_SOA_DELETE_INVALID|Invalid delete of start of authority (SOA).
-9619|DNS_ERROR_FORWARDER_ALREADY_EXISTS|A conditional forwarding zone already exists for that name.
-9620|DNS_ERROR_ZONE_REQUIRES_MASTER_IP|This zone must be configured with one or more master DNS server IP addresses.
-9621|DNS_ERROR_ZONE_IS_SHUTDOWN|The operation cannot be performed because this zone is shut down.
-9622|DNS_ERROR_ZONE_LOCKED_FOR_SIGNING|This operation cannot be performed because the zone is currently being signed. Please try again later.
-9651|DNS_ERROR_PRIMARY_REQUIRES_DATAFILE|Primary DNS zone requires datafile.
-9652|DNS_ERROR_INVALID_DATAFILE_NAME|Invalid datafile name for DNS zone.
-9653|DNS_ERROR_DATAFILE_OPEN_FAILURE|Failed to open datafile for DNS zone.
-9654|DNS_ERROR_FILE_WRITEBACK_FAILED|Failed to write datafile for DNS zone.
-9655|DNS_ERROR_DATAFILE_PARSING|Failure while reading datafile for DNS zone.
-9701|DNS_ERROR_RECORD_DOES_NOT_EXIST|DNS record does not exist.
-9702|DNS_ERROR_RECORD_FORMAT|DNS record format error.
-9703|DNS_ERROR_NODE_CREATION_FAILED|Node creation failure in DNS.
-9704|DNS_ERROR_UNKNOWN_RECORD_TYPE|Unknown DNS record type.
-9705|DNS_ERROR_RECORD_TIMED_OUT|DNS record timed out.
-9706|DNS_ERROR_NAME_NOT_IN_ZONE|Name not in DNS zone.
-9707|DNS_ERROR_CNAME_LOOP|CNAME loop detected.
-9708|DNS_ERROR_NODE_IS_CNAME|Node is a CNAME DNS record.
-9709|DNS_ERROR_CNAME_COLLISION|A CNAME record already exists for given name.
-9710|DNS_ERROR_RECORD_ONLY_AT_ZONE_ROOT|Record only at DNS zone root.
-9711|DNS_ERROR_RECORD_ALREADY_EXISTS|DNS record already exists.
-9712|DNS_ERROR_SECONDARY_DATA|Secondary DNS zone data error.
-9713|DNS_ERROR_NO_CREATE_CACHE_DATA|Could not create DNS cache data.
-9714|DNS_ERROR_NAME_DOES_NOT_EXIST|DNS name does not exist.
-9715|DNS_WARNING_PTR_CREATE_FAILED|Could not create pointer (PTR) record.
-9716|DNS_WARNING_DOMAIN_UNDELETED|DNS domain was undeleted.
-9717|DNS_ERROR_DS_UNAVAILABLE|The directory service is unavailable.
-9718|DNS_ERROR_DS_ZONE_ALREADY_EXISTS|DNS zone already exists in the directory service.
-9719|DNS_ERROR_NO_BOOTFILE_IF_DS_ZONE|DNS server not creating or reading the boot file for the directory service integrated DNS zone.
-9720|DNS_ERROR_NODE_IS_DNAME|Node is a DNAME DNS record.
-9721|DNS_ERROR_DNAME_COLLISION|A DNAME record already exists for given name.
-9722|DNS_ERROR_ALIAS_LOOP|An alias loop has been detected with either CNAME or DNAME records.
-9751|DNS_INFO_AXFR_COMPLETE|DNS AXFR (zone transfer) complete.
-9752|DNS_ERROR_AXFR|DNS zone transfer failed.
-9753|DNS_INFO_ADDED_LOCAL_WINS|Added local WINS server.
-9801|DNS_STATUS_CONTINUE_NEEDED|Secure update call needs to continue update request.
-9851|DNS_ERROR_NO_TCPIP|TCP/IP network protocol not installed.
-9852|DNS_ERROR_NO_DNS_SERVERS|No DNS servers configured for local system.
-9901|DNS_ERROR_DP_DOES_NOT_EXIST|The specified directory partition does not exist.
-9902|DNS_ERROR_DP_ALREADY_EXISTS|The specified directory partition already exists.
-9903|DNS_ERROR_DP_NOT_ENLISTED|This DNS server is not enlisted in the specified directory partition.
-9904|DNS_ERROR_DP_ALREADY_ENLISTED|This DNS server is already enlisted in the specified directory partition.
-9905|DNS_ERROR_DP_NOT_AVAILABLE|The directory partition is not available at this time. Please wait a few minutes and try again.
-9906|DNS_ERROR_DP_FSMO_ERROR|The operation failed because the domain naming master FSMO role could not be reached. The domain controller holding the domain naming master FSMO role is down or unable to service the request or is not running Windows Server 2003 or later.
-10004|WSAEINTR|A blocking operation was interrupted by a call to WSACancelBlockingCall.
-10009|WSAEBADF|The file handle supplied is not valid.
-10013|WSAEACCES|An attempt was made to access a socket in a way forbidden by its access permissions.
-10014|WSAEFAULT|The system detected an invalid pointer address in attempting to use a pointer argument in a call.
-10022|WSAEINVAL|An invalid argument was supplied.
-10024|WSAEMFILE|Too many open sockets.
-10035|WSAEWOULDBLOCK|A non-blocking socket operation could not be completed immediately.
-10036|WSAEINPROGRESS|A blocking operation is currently executing.
-10037|WSAEALREADY|An operation was attempted on a non-blocking socket that already had an operation in progress.
-10038|WSAENOTSOCK|An operation was attempted on something that is not a socket.
-10039|WSAEDESTADDRREQ|A required address was omitted from an operation on a socket.
-10040|WSAEMSGSIZE|A message sent on a datagram socket was larger than the internal message buffer or some other network limit, or the buffer used to receive a datagram into was smaller than the datagram itself.
-10041|WSAEPROTOTYPE|A protocol was specified in the socket function call that does not support the semantics of the socket type requested.
-10042|WSAENOPROTOOPT|An unknown, invalid, or unsupported option or level was specified in a getsockopt or setsockopt call.
-10043|WSAEPROTONOSUPPORT|The requested protocol has not been configured into the system, or no implementation for it exists.
-10044|WSAESOCKTNOSUPPORT|The support for the specified socket type does not exist in this address family.
-10045|WSAEOPNOTSUPP|The attempted operation is not supported for the type of object referenced.
-10046|WSAEPFNOSUPPORT|The protocol family has not been configured into the system or no implementation for it exists.
-10047|WSAEAFNOSUPPORT|An address incompatible with the requested protocol was used.
-10048|WSAEADDRINUSE|Only one usage of each socket address (protocol/network address/port) is normally permitted.
-10049|WSAEADDRNOTAVAIL|The requested address is not valid in its context.
-10050|WSAENETDOWN|A socket operation encountered a dead network.
-10051|WSAENETUNREACH|A socket operation was attempted to an unreachable network.
-10052|WSAENETRESET|The connection has been broken due to keep-alive activity detecting a failure while the operation was in progress.
-10053|WSAECONNABORTED|An established connection was aborted by the software in your host machine.
-10054|WSAECONNRESET|An existing connection was forcibly closed by the remote host.
-10055|WSAENOBUFS|An operation on a socket could not be performed because the system lacked sufficient buffer space or because a queue was full.
-10056|WSAEISCONN|A connect request was made on an already connected socket.
-10057|WSAENOTCONN|A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied.
-10058|WSAESHUTDOWN|A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call.
-10059|WSAETOOMANYREFS|Too many references to some kernel object.
-10060|WSAETIMEDOUT|A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond.
-10061|WSAECONNREFUSED|No connection could be made because the target machine actively refused it.
-10062|WSAELOOP|Cannot translate name.
-10063|WSAENAMETOOLONG|Name component or name was too long.
-10064|WSAEHOSTDOWN|A socket operation failed because the destination host was down.
-10065|WSAEHOSTUNREACH|A socket operation was attempted to an unreachable host.
-10066|WSAENOTEMPTY|Cannot remove a directory that is not empty.
-10067|WSAEPROCLIM|A Windows Sockets implementation may have a limit on the number of applications that may use it simultaneously.
-10068|WSAEUSERS|Ran out of quota.
-10069|WSAEDQUOT|Ran out of disk quota.
-10070|WSAESTALE|File handle reference is no longer available.
-10071|WSAEREMOTE|Item is not available locally.
-10091|WSASYSNOTREADY|WSAStartup cannot function at this time because the underlying system it uses to provide network services is currently unavailable.
-10092|WSAVERNOTSUPPORTED|The Windows Sockets version requested is not supported.
-10093|WSANOTINITIALISED|Either the application has not called WSAStartup, or WSAStartup failed.
-10101|WSAEDISCON|Returned by WSARecv or WSARecvFrom to indicate the remote party has initiated a graceful shutdown sequence.
-10102|WSAENOMORE|No more results can be returned by WSALookupServiceNext.
-10103|WSAECANCELLED|A call to WSALookupServiceEnd was made while this call was still processing. The call has been canceled.
-10104|WSAEINVALIDPROCTABLE|The procedure call table is invalid.
-10105|WSAEINVALIDPROVIDER|The requested service provider is invalid.
-10106|WSAEPROVIDERFAILEDINIT|The requested service provider could not be loaded or initialized.
-10107|WSASYSCALLFAILURE|A system call has failed.
-10108|WSASERVICE_NOT_FOUND|No such service is known. The service cannot be found in the specified name space.
-10109|WSATYPE_NOT_FOUND|The specified class was not found.
-10110|WSA_E_NO_MORE|No more results can be returned by WSALookupServiceNext.
-10111|WSA_E_CANCELLED|A call to WSALookupServiceEnd was made while this call was still processing. The call has been canceled.
-10112|WSAEREFUSED|A database query failed because it was actively refused.
-11001|WSAHOST_NOT_FOUND|No such host is known.
-11002|WSATRY_AGAIN|This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server.
-11003|WSANO_RECOVERY|A non-recoverable error occurred during a database lookup.
-11004|WSANO_DATA|The requested name is valid, but no data of the requested type was found.
-11005|WSA_QOS_RECEIVERS|At least one reserve has arrived.
-11006|WSA_QOS_SENDERS|At least one path has arrived.
-11007|WSA_QOS_NO_SENDERS|There are no senders.
-11008|WSA_QOS_NO_RECEIVERS|There are no receivers.
-11009|WSA_QOS_REQUEST_CONFIRMED|Reserve has been confirmed.
-11010|WSA_QOS_ADMISSION_FAILURE|Error due to lack of resources.
-11011|WSA_QOS_POLICY_FAILURE|Rejected for administrative reasons - bad credentials.
-11012|WSA_QOS_BAD_STYLE|Unknown or conflicting style.
-11013|WSA_QOS_BAD_OBJECT|Problem with some part of the filterspec or providerspecific buffer in general.
-11014|WSA_QOS_TRAFFIC_CTRL_ERROR|Problem with some part of the flowspec.
-11015|WSA_QOS_GENERIC_ERROR|General QOS error.
-11016|WSA_QOS_ESERVICETYPE|An invalid or unrecognized service type was found in the flowspec.
-11017|WSA_QOS_EFLOWSPEC|An invalid or inconsistent flowspec was found in the QOS structure.
-11018|WSA_QOS_EPROVSPECBUF|Invalid QOS provider-specific buffer.
-11019|WSA_QOS_EFILTERSTYLE|An invalid QOS filter style was used.
-11020|WSA_QOS_EFILTERTYPE|An invalid QOS filter type was used.
-11021|WSA_QOS_EFILTERCOUNT|An incorrect number of QOS FILTERSPECs were specified in the FLOWDESCRIPTOR.
-11022|WSA_QOS_EOBJLENGTH|An object with an invalid ObjectLength field was specified in the QOS provider-specific buffer.
-11023|WSA_QOS_EFLOWCOUNT|An incorrect number of flow descriptors was specified in the QOS structure.
-11024|WSA_QOS_EUNKOWNPSOBJ|An unrecognized object was found in the QOS provider-specific buffer.
-11025|WSA_QOS_EPOLICYOBJ|An invalid policy object was found in the QOS provider-specific buffer.
-11026|WSA_QOS_EFLOWDESC|An invalid QOS flow descriptor was found in the flow descriptor list.
-11027|WSA_QOS_EPSFLOWSPEC|An invalid or inconsistent flowspec was found in the QOS provider specific buffer.
-11028|WSA_QOS_EPSFILTERSPEC|An invalid FILTERSPEC was found in the QOS provider-specific buffer.
-11029|WSA_QOS_ESDMODEOBJ|An invalid shape discard mode object was found in the QOS provider specific buffer.
-11030|WSA_QOS_ESHAPERATEOBJ|An invalid shaping rate object was found in the QOS provider-specific buffer.
-11031|WSA_QOS_RESERVED_PETYPE|A reserved policy element was found in the QOS provider-specific buffer.
-11032|WSA_SECURE_HOST_NOT_FOUND|No such host is known securely.
-11033|WSA_IPSEC_NAME_POLICY_ERROR|Name based IPSEC policy could not be added
-12111|ERROR_FTP_DROPPED|The FTP operation was not completed because the session was aborted.
-12112|ERROR_FTP_NO_PASSIVE_MODE|Passive mode is not available on the server.
-12110|ERROR_FTP_TRANSFER_IN_PROGRESS|The requested operation cannot be made on the FTP session handle because an operation is already in progress.
-12137|ERROR_GOPHER_ATTRIBUTE_NOT_FOUND|The requested attribute could not be located.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12132|ERROR_GOPHER_DATA_ERROR|An error was detected while receiving data from the Gopher server.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12133|ERROR_GOPHER_END_OF_DATA|The end of the data has been reached.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12135|ERROR_GOPHER_INCORRECT_LOCATOR_TYPE|The type of the locator is not correct for this operation.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12134|ERROR_GOPHER_INVALID_LOCATOR|The supplied locator is not valid.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12131|ERROR_GOPHER_NOT_FILE|The request must be made for a file locator.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12136|ERROR_GOPHER_NOT_GOPHER_PLUS|The requested operation can be made only against a Gopher+ server, or with a locator that specifies a Gopher+ operation.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12130|ERROR_GOPHER_PROTOCOL_ERROR|An error was detected while parsing data returned from the Gopher server.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12138|ERROR_GOPHER_UNKNOWN_LOCATOR|The locator type is unknown.`nWindows XP and Windows Server 2003 R2 and earlier only.
-12162|ERROR_HTTP_COOKIE_DECLINED|The HTTP cookie was declined by the server.
-12161|ERROR_HTTP_COOKIE_NEEDS_CONFIRMATION|The HTTP cookie requires confirmation.`nWindows Vista and Windows Server 2008 and earlier only.
-12151|ERROR_HTTP_DOWNLEVEL_SERVER|The server did not return any headers.
-12155|ERROR_HTTP_HEADER_ALREADY_EXISTS|The header could not be added because it already exists.
-12150|ERROR_HTTP_HEADER_NOT_FOUND|The requested header could not be located.
-12153|ERROR_HTTP_INVALID_HEADER|The supplied header is invalid.
-12154|ERROR_HTTP_INVALID_QUERY_REQUEST|The request made to HttpQueryInfo is invalid.
-12152|ERROR_HTTP_INVALID_SERVER_RESPONSE|The server response could not be parsed.
-12160|ERROR_HTTP_NOT_REDIRECTED|The HTTP request was not redirected.
-12156|ERROR_HTTP_REDIRECT_FAILED|The redirection failed because either the scheme changed (for example, HTTP to FTP) or all attempts made to redirect failed (default is five attempts).
-12168|ERROR_HTTP_REDIRECT_NEEDS_CONFIRMATION|The redirection requires user confirmation.
-12047|ERROR_INTERNET_ASYNC_THREAD_FAILED|The application could not start an asynchronous thread.
-12166|ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT|There was an error in the automatic proxy configuration script.
-12010|ERROR_INTERNET_BAD_OPTION_LENGTH|The length of an option supplied to InternetQueryOption or InternetSetOption is incorrect for the type of option specified.
-12022|ERROR_INTERNET_BAD_REGISTRY_PARAMETER|A required registry value was located but is an incorrect type or has an invalid value.
-12029|ERROR_INTERNET_CANNOT_CONNECT|The attempt to connect to the server failed.
-12042|ERROR_INTERNET_CHG_POST_IS_NON_SECURE|The application is posting and attempting to change multiple lines of text on a server that is not secure.
-12044|ERROR_INTERNET_CLIENT_AUTH_CERT_NEEDED|The server is requesting client authentication.
-12046|ERROR_INTERNET_CLIENT_AUTH_NOT_SETUP|Client authorization is not set up on this computer.
-12030|ERROR_INTERNET_CONNECTION_ABORTED|The connection with the server has been terminated.
-12031|ERROR_INTERNET_CONNECTION_RESET|The connection with the server has been reset.
-12175|ERROR_INTERNET_DECODING_FAILED|WinINet failed to perform content decoding on the response. For more information, see the Content Encoding topic.
-12049|ERROR_INTERNET_DIALOG_PENDING|Another thread has a password dialog box in progress.
-12163|ERROR_INTERNET_DISCONNECTED|The Internet connection has been lost.
-12003|ERROR_INTERNET_EXTENDED_ERROR|An extended error was returned from the server. This is typically a string or buffer containing a verbose error message. Call InternetGetLastResponseInfo to retrieve the error text.
-12171|ERROR_INTERNET_FAILED_DUETOSECURITYCHECK|The function failed due to a security check.
-12032|ERROR_INTERNET_FORCE_RETRY|The function needs to redo the request.
-12054|ERROR_INTERNET_FORTEZZA_LOGIN_NEEDED|The requested resource requires Fortezza authentication.
-12036|ERROR_INTERNET_HANDLE_EXISTS|The request failed because the handle already exists.
-12039|ERROR_INTERNET_HTTP_TO_HTTPS_ON_REDIR|The application is moving from a non-SSL to an SSL connection because of a redirect.
-12052|ERROR_INTERNET_HTTPS_HTTP_SUBMIT_REDIR|The data being submitted to an SSL connection is being redirected to a non-SSL connection.
-12040|ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR|The application is moving from an SSL to an non-SSL connection because of a redirect.
-12027|ERROR_INTERNET_INCORRECT_FORMAT|The format of the request is invalid.
-12019|ERROR_INTERNET_INCORRECT_HANDLE_STATE|The requested operation cannot be carried out because the handle supplied is not in the correct state.
-12018|ERROR_INTERNET_INCORRECT_HANDLE_TYPE|The type of handle supplied is incorrect for this operation.
-12014|ERROR_INTERNET_INCORRECT_PASSWORD|The request to connect and log on to an FTP server could not be completed because the supplied password is incorrect.
-12013|ERROR_INTERNET_INCORRECT_USER_NAME|The request to connect and log on to an FTP server could not be completed because the supplied user name is incorrect.
-12053|ERROR_INTERNET_INSERT_CDROM|The request requires a CD-ROM to be inserted in the CD-ROM drive to locate the resource requested.`nWindows Vista and Windows Server 2008 and earlier only.
-12004|ERROR_INTERNET_INTERNAL_ERROR|An internal error has occurred.
-12045|ERROR_INTERNET_INVALID_CA|The function is unfamiliar with the Certificate Authority that generated the server's certificate.
-12016|ERROR_INTERNET_INVALID_OPERATION|The requested operation is invalid.
-12009|ERROR_INTERNET_INVALID_OPTION|A request to InternetQueryOption or InternetSetOption specified an invalid option value.
-12033|ERROR_INTERNET_INVALID_PROXY_REQUEST|The request to the proxy was invalid.
-12005|ERROR_INTERNET_INVALID_URL|The URL is invalid.
-12028|ERROR_INTERNET_ITEM_NOT_FOUND|The requested item could not be located.
-12015|ERROR_INTERNET_LOGIN_FAILURE|The request to connect and log on to an FTP server failed.
-12174|ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY|The MS-Logoff digest header has been returned from the website. This header specifically instructs the digest package to purge credentials for the associated realm. This error will only be returned if INTERNET_ERROR_MASK_LOGIN_FAILURE_DISPLAY_ENTITY_BODY option has been set; otherwise, ERROR_INTERNET_LOGIN_FAILURE is returned.
-12041|ERROR_INTERNET_MIXED_SECURITY|The content is not entirely secure. Some of the content being viewed may have come from unsecured servers.
-12007|ERROR_INTERNET_NAME_NOT_RESOLVED|The server name could not be resolved.
-12173|ERROR_INTERNET_NEED_MSN_SSPI_PKG|Not currently implemented.
-12034|ERROR_INTERNET_NEED_UI|A user interface or other blocking operation has been requested.`nWindows Vista and Windows Server 2008 and earlier only.
-12025|ERROR_INTERNET_NO_CALLBACK|An asynchronous request could not be made because a callback function has not been set.
-12024|ERROR_INTERNET_NO_CONTEXT|An asynchronous request could not be made because a zero context value was supplied.
-12023|ERROR_INTERNET_NO_DIRECT_ACCESS|Direct network access cannot be made at this time.
-12172|ERROR_INTERNET_NOT_INITIALIZED|Initialization of the WinINet API has not occurred. Indicates that a higher-level function, such as InternetOpen, has not been called yet.
-12020|ERROR_INTERNET_NOT_PROXY_REQUEST|The request cannot be made via a proxy.
-12017|ERROR_INTERNET_OPERATION_CANCELLED|The operation was canceled, usually because the handle on which the request was operating was closed before the operation completed.
-12011|ERROR_INTERNET_OPTION_NOT_SETTABLE|The requested option cannot be set, only queried.
-12001|ERROR_INTERNET_OUT_OF_HANDLES|No more handles could be generated at this time.
-12043|ERROR_INTERNET_POST_IS_NON_SECURE|The application is posting data to a server that is not secure.
-12008|ERROR_INTERNET_PROTOCOL_NOT_FOUND|The requested protocol could not be located.
-12165|ERROR_INTERNET_PROXY_SERVER_UNREACHABLE|The designated proxy server cannot be reached.
-12048|ERROR_INTERNET_REDIRECT_SCHEME_CHANGE|The function could not handle the redirection, because the scheme changed (for example, HTTP to FTP).
-12021|ERROR_INTERNET_REGISTRY_VALUE_NOT_FOUND|A required registry value could not be located.
-12026|ERROR_INTERNET_REQUEST_PENDING|The required operation could not be completed because one or more requests are pending.
-12050|ERROR_INTERNET_RETRY_DIALOG|The dialog box should be retried.
-12038|ERROR_INTERNET_SEC_CERT_CN_INVALID|SSL certificate common name (host name field) is incorrect for example, if you entered www.server.com and the common name on the certificate says www.different.com.
-12037|ERROR_INTERNET_SEC_CERT_DATE_INVALID|SSL certificate date that was received from the server is bad. The certificate is expired.
-12055|ERROR_INTERNET_SEC_CERT_ERRORS|The SSL certificate contains errors.
-12056|ERROR_INTERNET_SEC_CERT_NO_REV|The SSL certificate was not revoked.
-12057|ERROR_INTERNET_SEC_CERT_REV_FAILED|Revocation of the SSL certificate failed.
-12170|ERROR_INTERNET_SEC_CERT_REVOKED|The SSL certificate was revoked.
-12169|ERROR_INTERNET_SEC_INVALID_CERT|The SSL certificate is invalid.
-12157|ERROR_INTERNET_SECURITY_CHANNEL_ERROR|The application experienced an internal error loading the SSL libraries.
-12164|ERROR_INTERNET_SERVER_UNREACHABLE|The website or server indicated is unreachable.
-12012|ERROR_INTERNET_SHUTDOWN|WinINet support is being shut down or unloaded.
-12159|ERROR_INTERNET_TCPIP_NOT_INSTALLED|The required protocol stack is not loaded and the application cannot start WinSock.
-12002|ERROR_INTERNET_TIMEOUT|The request has timed out.
-12158|ERROR_INTERNET_UNABLE_TO_CACHE_FILE|The function was unable to cache the file.
-12167|ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT|The automatic proxy configuration script could not be downloaded. The INTERNET_FLAG_MUST_CACHE_REQUEST flag was set.
-12006|ERROR_INTERNET_UNRECOGNIZED_SCHEME|The URL scheme could not be recognized, or is not supported."
-13000|ERROR_IPSEC_QM_POLICY_EXISTS|The specified quick mode policy already exists.
-13001|ERROR_IPSEC_QM_POLICY_NOT_FOUND|The specified quick mode policy was not found.
-13002|ERROR_IPSEC_QM_POLICY_IN_USE|The specified quick mode policy is being used.
-13003|ERROR_IPSEC_MM_POLICY_EXISTS|The specified main mode policy already exists.
-13004|ERROR_IPSEC_MM_POLICY_NOT_FOUND|The specified main mode policy was not found.
-13005|ERROR_IPSEC_MM_POLICY_IN_USE|The specified main mode policy is being used.
-13006|ERROR_IPSEC_MM_FILTER_EXISTS|The specified main mode filter already exists.
-13007|ERROR_IPSEC_MM_FILTER_NOT_FOUND|The specified main mode filter was not found.
-13008|ERROR_IPSEC_TRANSPORT_FILTER_EXISTS|The specified transport mode filter already exists.
-13009|ERROR_IPSEC_TRANSPORT_FILTER_NOT_FOUND|The specified transport mode filter does not exist.
-13010|ERROR_IPSEC_MM_AUTH_EXISTS|The specified main mode authentication list exists.
-13011|ERROR_IPSEC_MM_AUTH_NOT_FOUND|The specified main mode authentication list was not found.
-13012|ERROR_IPSEC_MM_AUTH_IN_USE|The specified main mode authentication list is being used.
-13013|ERROR_IPSEC_DEFAULT_MM_POLICY_NOT_FOUND|The specified default main mode policy was not found.
-13014|ERROR_IPSEC_DEFAULT_MM_AUTH_NOT_FOUND|The specified default main mode authentication list was not found.
-13015|ERROR_IPSEC_DEFAULT_QM_POLICY_NOT_FOUND|The specified default quick mode policy was not found.
-13016|ERROR_IPSEC_TUNNEL_FILTER_EXISTS|The specified tunnel mode filter exists.
-13017|ERROR_IPSEC_TUNNEL_FILTER_NOT_FOUND|The specified tunnel mode filter was not found.
-13018|ERROR_IPSEC_MM_FILTER_PENDING_DELETION|The Main Mode filter is pending deletion.
-13019|ERROR_IPSEC_TRANSPORT_FILTER_PENDING_DELETION|The transport filter is pending deletion.
-13020|ERROR_IPSEC_TUNNEL_FILTER_PENDING_DELETION|The tunnel filter is pending deletion.
-13021|ERROR_IPSEC_MM_POLICY_PENDING_DELETION|The Main Mode policy is pending deletion.
-13022|ERROR_IPSEC_MM_AUTH_PENDING_DELETION|The Main Mode authentication bundle is pending deletion.
-13023|ERROR_IPSEC_QM_POLICY_PENDING_DELETION|The Quick Mode policy is pending deletion.
-13024|WARNING_IPSEC_MM_POLICY_PRUNED|The Main Mode policy was successfully added, but some of the requested offers are not supported.
-13025|WARNING_IPSEC_QM_POLICY_PRUNED|The Quick Mode policy was successfully added, but some of the requested offers are not supported.
-13800|ERROR_IPSEC_IKE_NEG_STATUS_BEGIN|ERROR_IPSEC_IKE_NEG_STATUS_BEGIN
-13801|ERROR_IPSEC_IKE_AUTH_FAIL|IKE authentication credentials are unacceptable.
-13802|ERROR_IPSEC_IKE_ATTRIB_FAIL|IKE security attributes are unacceptable.
-13803|ERROR_IPSEC_IKE_NEGOTIATION_PENDING|IKE Negotiation in progress.
-13804|ERROR_IPSEC_IKE_GENERAL_PROCESSING_ERROR|General processing error.
-13805|ERROR_IPSEC_IKE_TIMED_OUT|Negotiation timed out.
-13806|ERROR_IPSEC_IKE_NO_CERT|IKE failed to find valid machine certificate. Contact your Network Security Administrator about installing a valid certificate in the appropriate Certificate Store.
-13807|ERROR_IPSEC_IKE_SA_DELETED|IKE SA deleted by peer before establishment completed.
-13808|ERROR_IPSEC_IKE_SA_REAPED|IKE SA deleted before establishment completed.
-13809|ERROR_IPSEC_IKE_MM_ACQUIRE_DROP|Negotiation request sat in Queue too long.
-13810|ERROR_IPSEC_IKE_QM_ACQUIRE_DROP|Negotiation request sat in Queue too long.
-13811|ERROR_IPSEC_IKE_QUEUE_DROP_MM|Negotiation request sat in Queue too long.
-13812|ERROR_IPSEC_IKE_QUEUE_DROP_NO_MM|Negotiation request sat in Queue too long.
-13813|ERROR_IPSEC_IKE_DROP_NO_RESPONSE|No response from peer.
-13814|ERROR_IPSEC_IKE_MM_DELAY_DROP|Negotiation took too long.
-13815|ERROR_IPSEC_IKE_QM_DELAY_DROP|Negotiation took too long.
-13816|ERROR_IPSEC_IKE_ERROR|Unknown error occurred.
-13817|ERROR_IPSEC_IKE_CRL_FAILED|Certificate Revocation Check failed.
-13818|ERROR_IPSEC_IKE_INVALID_KEY_USAGE|Invalid certificate key usage.
-13819|ERROR_IPSEC_IKE_INVALID_CERT_TYPE|Invalid certificate type.
-13820|ERROR_IPSEC_IKE_NO_PRIVATE_KEY|IKE negotiation failed because the machine certificate used does not have a private key. IPsec certificates require a private key. Contact your Network Security administrator about replacing with a certificate that has a private key.
-13821|ERROR_IPSEC_IKE_SIMULTANEOUS_REKEY|Simultaneous rekeys were detected.
-13822|ERROR_IPSEC_IKE_DH_FAIL|Failure in Diffie-Hellman computation.
-13823|ERROR_IPSEC_IKE_CRITICAL_PAYLOAD_NOT_RECOGNIZED|Don't know how to process critical payload.
-13824|ERROR_IPSEC_IKE_INVALID_HEADER|Invalid header.
-13825|ERROR_IPSEC_IKE_NO_POLICY|No policy configured.
-13826|ERROR_IPSEC_IKE_INVALID_SIGNATURE|Failed to verify signature.
-13827|ERROR_IPSEC_IKE_KERBEROS_ERROR|Failed to authenticate using Kerberos.
-13828|ERROR_IPSEC_IKE_NO_PUBLIC_KEY|Peer's certificate did not have a public key.
-13829|ERROR_IPSEC_IKE_PROCESS_ERR|Error processing error payload.
-13830|ERROR_IPSEC_IKE_PROCESS_ERR_SA|Error processing SA payload.
-13831|ERROR_IPSEC_IKE_PROCESS_ERR_PROP|Error processing Proposal payload.
-13832|ERROR_IPSEC_IKE_PROCESS_ERR_TRANS|Error processing Transform payload.
-13833|ERROR_IPSEC_IKE_PROCESS_ERR_KE|Error processing KE payload.
-13834|ERROR_IPSEC_IKE_PROCESS_ERR_ID|Error processing ID payload.
-13835|ERROR_IPSEC_IKE_PROCESS_ERR_CERT|Error processing Cert payload.
-13836|ERROR_IPSEC_IKE_PROCESS_ERR_CERT_REQ|Error processing Certificate Request payload.
-13837|ERROR_IPSEC_IKE_PROCESS_ERR_HASH|Error processing Hash payload.
-13838|ERROR_IPSEC_IKE_PROCESS_ERR_SIG|Error processing Signature payload.
-13839|ERROR_IPSEC_IKE_PROCESS_ERR_NONCE|Error processing Nonce payload.
-13840|ERROR_IPSEC_IKE_PROCESS_ERR_NOTIFY|Error processing Notify payload.
-13841|ERROR_IPSEC_IKE_PROCESS_ERR_DELETE|Error processing Delete Payload.
-13842|ERROR_IPSEC_IKE_PROCESS_ERR_VENDOR|Error processing VendorId payload.
-13843|ERROR_IPSEC_IKE_INVALID_PAYLOAD|Invalid payload received.
-13844|ERROR_IPSEC_IKE_LOAD_SOFT_SA|Soft SA loaded.
-13845|ERROR_IPSEC_IKE_SOFT_SA_TORN_DOWN|Soft SA torn down.
-13846|ERROR_IPSEC_IKE_INVALID_COOKIE|Invalid cookie received.
-13847|ERROR_IPSEC_IKE_NO_PEER_CERT|Peer failed to send valid machine certificate.
-13848|ERROR_IPSEC_IKE_PEER_CRL_FAILED|Certification Revocation check of peer's certificate failed.
-13849|ERROR_IPSEC_IKE_POLICY_CHANGE|New policy invalidated SAs formed with old policy.
-13850|ERROR_IPSEC_IKE_NO_MM_POLICY|There is no available Main Mode IKE policy.
-13851|ERROR_IPSEC_IKE_NOTCBPRIV|Failed to enabled TCB privilege.
-13852|ERROR_IPSEC_IKE_SECLOADFAIL|Failed to load SECURITY.DLL.
-13853|ERROR_IPSEC_IKE_FAILSSPINIT|Failed to obtain security function table dispatch address from SSPI.
-13854|ERROR_IPSEC_IKE_FAILQUERYSSP|Failed to query Kerberos package to obtain max token size.
-13855|ERROR_IPSEC_IKE_SRVACQFAIL|Failed to obtain Kerberos server credentials for ISAKMP/ERROR_IPSEC_IKE service. Kerberos authentication will not function. The most likely reason for this is lack of domain membership. This is normal if your computer is a member of a workgroup.
-13856|ERROR_IPSEC_IKE_SRVQUERYCRED|Failed to determine SSPI principal name for ISAKMP/ERROR_IPSEC_IKE service (`nQueryCredentialsAttributes).
-13857|ERROR_IPSEC_IKE_GETSPIFAIL|Failed to obtain new SPI for the inbound SA from IPsec driver. The most common cause for this is that the driver does not have the correct filter. Check your policy to verify the filters.
-13858|ERROR_IPSEC_IKE_INVALID_FILTER|Given filter is invalid.
-13859|ERROR_IPSEC_IKE_OUT_OF_MEMORY|Memory allocation failed.
-13860|ERROR_IPSEC_IKE_ADD_UPDATE_KEY_FAILED|Failed to add Security Association to IPsec Driver. The most common cause for this is if the IKE negotiation took too long to complete. If the problem persists, reduce the load on the faulting machine.
-13861|ERROR_IPSEC_IKE_INVALID_POLICY|Invalid policy.
-13862|ERROR_IPSEC_IKE_UNKNOWN_DOI|Invalid DOI.
-13863|ERROR_IPSEC_IKE_INVALID_SITUATION|Invalid situation.
-13864|ERROR_IPSEC_IKE_DH_FAILURE|Diffie-Hellman failure.
-13865|ERROR_IPSEC_IKE_INVALID_GROUP|Invalid Diffie-Hellman group.
-13866|ERROR_IPSEC_IKE_ENCRYPT|Error encrypting payload.
-13867|ERROR_IPSEC_IKE_DECRYPT|Error decrypting payload.
-13868|ERROR_IPSEC_IKE_POLICY_MATCH|Policy match error.
-13869|ERROR_IPSEC_IKE_UNSUPPORTED_ID|Unsupported ID.
-13870|ERROR_IPSEC_IKE_INVALID_HASH|Hash verification failed.
-13871|ERROR_IPSEC_IKE_INVALID_HASH_ALG|Invalid hash algorithm.
-13872|ERROR_IPSEC_IKE_INVALID_HASH_SIZE|Invalid hash size.
-13873|ERROR_IPSEC_IKE_INVALID_ENCRYPT_ALG|Invalid encryption algorithm.
-13874|ERROR_IPSEC_IKE_INVALID_AUTH_ALG|Invalid authentication algorithm.
-13875|ERROR_IPSEC_IKE_INVALID_SIG|Invalid certificate signature.
-13876|ERROR_IPSEC_IKE_LOAD_FAILED|Load failed.
-13877|ERROR_IPSEC_IKE_RPC_DELETE|Deleted via RPC call.
-13878|ERROR_IPSEC_IKE_BENIGN_REINIT|Temporary state created to perform reinitialization. This is not a real failure.
-13879|ERROR_IPSEC_IKE_INVALID_RESPONDER_LIFETIME_NOTIFY|The lifetime value received in the Responder Lifetime Notify is below the Windows 2000 configured minimum value. Please fix the policy on the peer machine.
-13880|ERROR_IPSEC_IKE_INVALID_MAJOR_VERSION|The recipient cannot handle version of IKE specified in the header.
-13881|ERROR_IPSEC_IKE_INVALID_CERT_KEYLEN|Key length in certificate is too small for configured security requirements.
-13882|ERROR_IPSEC_IKE_MM_LIMIT|Max number of established MM SAs to peer exceeded.
-13883|ERROR_IPSEC_IKE_NEGOTIATION_DISABLED|IKE received a policy that disables negotiation.
-13884|ERROR_IPSEC_IKE_QM_LIMIT|Reached maximum quick mode limit for the main mode. New main mode will be started.
-13885|ERROR_IPSEC_IKE_MM_EXPIRED|Main mode SA lifetime expired or peer sent a main mode delete.
-13886|ERROR_IPSEC_IKE_PEER_MM_ASSUMED_INVALID|Main mode SA assumed to be invalid because peer stopped responding.
-13887|ERROR_IPSEC_IKE_CERT_CHAIN_POLICY_MISMATCH|Certificate doesn't chain to a trusted root in IPsec policy.
-13888|ERROR_IPSEC_IKE_UNEXPECTED_MESSAGE_ID|Received unexpected message ID.
-13889|ERROR_IPSEC_IKE_INVALID_AUTH_PAYLOAD|Received invalid authentication offers.
-13890|ERROR_IPSEC_IKE_DOS_COOKIE_SENT|Sent DoS cookie notify to initiator.
-13891|ERROR_IPSEC_IKE_SHUTTING_DOWN|IKE service is shutting down.
-13892|ERROR_IPSEC_IKE_CGA_AUTH_FAILED|Could not verify binding between CGA address and certificate.
-13893|ERROR_IPSEC_IKE_PROCESS_ERR_NATOA|Error processing NatOA payload.
-13894|ERROR_IPSEC_IKE_INVALID_MM_FOR_QM|Parameters of the main mode are invalid for this quick mode.
-13895|ERROR_IPSEC_IKE_QM_EXPIRED|Quick mode SA was expired by IPsec driver.
-13896|ERROR_IPSEC_IKE_TOO_MANY_FILTERS|Too many dynamically added IKEEXT filters were detected.
-13897|ERROR_IPSEC_IKE_NEG_STATUS_END|ERROR_IPSEC_IKE_NEG_STATUS_END
-13898|ERROR_IPSEC_IKE_KILL_DUMMY_NAP_TUNNEL|NAP reauth succeeded and must delete the dummy NAP IKEv2 tunnel.
-13899|ERROR_IPSEC_IKE_INNER_IP_ASSIGNMENT_FAILURE|Error in assigning inner IP address to initiator in tunnel mode.
-13900|ERROR_IPSEC_IKE_REQUIRE_CP_PAYLOAD_MISSING|Require configuration payload missing.
-13901|ERROR_IPSEC_KEY_MODULE_IMPERSONATION_NEGOTIATION_PENDING|A negotiation running as the security principle who issued the connection is in progress.
-13902|ERROR_IPSEC_IKE_COEXISTENCE_SUPPRESS|SA was deleted due to IKEv1/AuthIP co-existence suppress check.
-13903|ERROR_IPSEC_IKE_RATELIMIT_DROP|Incoming SA request was dropped due to peer IP address rate limiting.
-13904|ERROR_IPSEC_IKE_PEER_DOESNT_SUPPORT_MOBIKE|Peer does not support MOBIKE.
-13905|ERROR_IPSEC_IKE_AUTHORIZATION_FAILURE|SA establishment is not authorized.
-13906|ERROR_IPSEC_IKE_STRONG_CRED_AUTHORIZATION_FAILURE|SA establishment is not authorized because there is not a sufficiently strong PKINIT-based credential.
-13907|ERROR_IPSEC_IKE_AUTHORIZATION_FAILURE_WITH_OPTIONAL_RETRY|SA establishment is not authorized. You may need to enter updated or different credentials such as a smartcard.
-13908|ERROR_IPSEC_IKE_STRONG_CRED_AUTHORIZATION_AND_CERTMAP_FAILURE|SA establishment is not authorized because there is not a sufficiently strong PKINIT-based credential. This might be related to certificate-to-account mapping failure for the SA.
-13909|ERROR_IPSEC_IKE_NEG_STATUS_EXTENDED_END|ERROR_IPSEC_IKE_NEG_STATUS_EXTENDED_END
-13910|ERROR_IPSEC_BAD_SPI|The SPI in the packet does not match a valid IPsec SA.
-13911|ERROR_IPSEC_SA_LIFETIME_EXPIRED|Packet was received on an IPsec SA whose lifetime has expired.
-13912|ERROR_IPSEC_WRONG_SA|Packet was received on an IPsec SA that does not match the packet characteristics.
-13913|ERROR_IPSEC_REPLAY_CHECK_FAILED|Packet sequence number replay check failed.
-13914|ERROR_IPSEC_INVALID_PACKET|IPsec header and/or trailer in the packet is invalid.
-13915|ERROR_IPSEC_INTEGRITY_CHECK_FAILED|IPsec integrity check failed.
-13916|ERROR_IPSEC_CLEAR_TEXT_DROP|IPsec dropped a clear text packet.
-13917|ERROR_IPSEC_AUTH_FIREWALL_DROP|IPsec dropped an incoming ESP packet in authenticated firewall mode. This drop is benign.
-13918|ERROR_IPSEC_THROTTLE_DROP|IPsec dropped a packet due to DoS throttling.
-13925|ERROR_IPSEC_DOSP_BLOCK|IPsec DoS Protection matched an explicit block rule.
-13926|ERROR_IPSEC_DOSP_RECEIVED_MULTICAST|IPsec DoS Protection received an IPsec specific multicast packet which is not allowed.
-13927|ERROR_IPSEC_DOSP_INVALID_PACKET|IPsec DoS Protection received an incorrectly formatted packet.
-13928|ERROR_IPSEC_DOSP_STATE_LOOKUP_FAILED|IPsec DoS Protection failed to look up state.
-13929|ERROR_IPSEC_DOSP_MAX_ENTRIES|IPsec DoS Protection failed to create state because the maximum number of entries allowed by policy has been reached.
-13930|ERROR_IPSEC_DOSP_KEYMOD_NOT_ALLOWED|IPsec DoS Protection received an IPsec negotiation packet for a keying module which is not allowed by policy.
-13931|ERROR_IPSEC_DOSP_NOT_INSTALLED|IPsec DoS Protection has not been enabled.
-13932|ERROR_IPSEC_DOSP_MAX_PER_IP_RATELIMIT_QUEUES|IPsec DoS Protection failed to create a per internal IP rate limit queue because the maximum number of queues allowed by policy has been reached.
-14000|ERROR_SXS_SECTION_NOT_FOUND|The requested section was not present in the activation context.
-14001|ERROR_SXS_CANT_GEN_ACTCTX|The application has failed to start because its side-by-side configuration is incorrect. Please see the application event log or use the command-line sxstrace.exe tool for more detail.
-14002|ERROR_SXS_INVALID_ACTCTXDATA_FORMAT|The application binding data format is invalid.
-14003|ERROR_SXS_ASSEMBLY_NOT_FOUND|The referenced assembly is not installed on your system.
-14004|ERROR_SXS_MANIFEST_FORMAT_ERROR|The manifest file does not begin with the required tag and format information.
-14005|ERROR_SXS_MANIFEST_PARSE_ERROR|The manifest file contains one or more syntax errors.
-14006|ERROR_SXS_ACTIVATION_CONTEXT_DISABLED|The application attempted to activate a disabled activation context.
-14007|ERROR_SXS_KEY_NOT_FOUND|The requested lookup key was not found in any active activation context.
-14008|ERROR_SXS_VERSION_CONFLICT|A component version required by the application conflicts with another component version already active.
-14009|ERROR_SXS_WRONG_SECTION_TYPE|The type requested activation context section does not match the query API used.
-14010|ERROR_SXS_THREAD_QUERIES_DISABLED|Lack of system resources has required isolated activation to be disabled for the current thread of execution.
-14011|ERROR_SXS_PROCESS_DEFAULT_ALREADY_SET|An attempt to set the process default activation context failed because the process default activation context was already set.
-14012|ERROR_SXS_UNKNOWN_ENCODING_GROUP|The encoding group identifier specified is not recognized.
-14013|ERROR_SXS_UNKNOWN_ENCODING|The encoding requested is not recognized.
-14014|ERROR_SXS_INVALID_XML_NAMESPACE_URI|The manifest contains a reference to an invalid URI.
-14015|ERROR_SXS_ROOT_MANIFEST_DEPENDENCY_NOT_INSTALLED|The application manifest contains a reference to a dependent assembly which is not installed.
-14016|ERROR_SXS_LEAF_MANIFEST_DEPENDENCY_NOT_INSTALLED|The manifest for an assembly used by the application has a reference to a dependent assembly which is not installed.
-14017|ERROR_SXS_INVALID_ASSEMBLY_IDENTITY_ATTRIBUTE|The manifest contains an attribute for the assembly identity which is not valid.
-14018|ERROR_SXS_MANIFEST_MISSING_REQUIRED_DEFAULT_NAMESPACE|The manifest is missing the required default namespace specification on the assembly element.
-14019|ERROR_SXS_MANIFEST_INVALID_REQUIRED_DEFAULT_NAMESPACE|The manifest has a default namespace specified on the assembly element but its value is not &quot;urn:schemas-microsoft-com:asm.v1&quot;.
-14020|ERROR_SXS_PRIVATE_MANIFEST_CROSS_PATH_WITH_REPARSE_POINT|The private manifest probed has crossed a path with an unsupported reparse point.
-14021|ERROR_SXS_DUPLICATE_DLL_NAME|Two or more components referenced directly or indirectly by the application manifest have files by the same name.
-14022|ERROR_SXS_DUPLICATE_WINDOWCLASS_NAME|Two or more components referenced directly or indirectly by the application manifest have window classes with the same name.
-14023|ERROR_SXS_DUPLICATE_CLSID|Two or more components referenced directly or indirectly by the application manifest have the same COM server CLSIDs.
-14024|ERROR_SXS_DUPLICATE_IID|Two or more components referenced directly or indirectly by the application manifest have proxies for the same COM interface IIDs.
-14025|ERROR_SXS_DUPLICATE_TLBID|Two or more components referenced directly or indirectly by the application manifest have the same COM type library TLBIDs.
-14026|ERROR_SXS_DUPLICATE_PROGID|Two or more components referenced directly or indirectly by the application manifest have the same COM ProgIDs.
-14027|ERROR_SXS_DUPLICATE_ASSEMBLY_NAME|Two or more components referenced directly or indirectly by the application manifest are different versions of the same component which is not permitted.
-14028|ERROR_SXS_FILE_HASH_MISMATCH|A component's file does not match the verification information present in the component manifest.
-14029|ERROR_SXS_POLICY_PARSE_ERROR|The policy manifest contains one or more syntax errors.
-14030|ERROR_SXS_XML_E_MISSINGQUOTE|Manifest Parse Error : A string literal was expected, but no opening quote character was found.
-14031|ERROR_SXS_XML_E_COMMENTSYNTAX|Manifest Parse Error : Incorrect syntax was used in a comment.
-14032|ERROR_SXS_XML_E_BADSTARTNAMECHAR|Manifest Parse Error : A name was started with an invalid character.
-14033|ERROR_SXS_XML_E_BADNAMECHAR|Manifest Parse Error : A name contained an invalid character.
-14034|ERROR_SXS_XML_E_BADCHARINSTRING|Manifest Parse Error : A string literal contained an invalid character.
-14035|ERROR_SXS_XML_E_XMLDECLSYNTAX|Manifest Parse Error : Invalid syntax for an xml declaration.
-14036|ERROR_SXS_XML_E_BADCHARDATA|Manifest Parse Error : An Invalid character was found in text content.
-14037|ERROR_SXS_XML_E_MISSINGWHITESPACE|Manifest Parse Error : Required white space was missing.
-14038|ERROR_SXS_XML_E_EXPECTINGTAGEND|Manifest Parse Error : The character '&gt;' was expected.
-14039|ERROR_SXS_XML_E_MISSINGSEMICOLON|Manifest Parse Error : A semi colon character was expected.
-14040|ERROR_SXS_XML_E_UNBALANCEDPAREN|Manifest Parse Error : Unbalanced parentheses.
-14041|ERROR_SXS_XML_E_INTERNALERROR|Manifest Parse Error : Internal error.
-14042|ERROR_SXS_XML_E_UNEXPECTED_WHITESPACE|Manifest Parse Error : Whitespace is not allowed at this location.
-14043|ERROR_SXS_XML_E_INCOMPLETE_ENCODING|Manifest Parse Error : End of file reached in invalid state for current encoding.
-14044|ERROR_SXS_XML_E_MISSING_PAREN|Manifest Parse Error : Missing parenthesis.
-14045|ERROR_SXS_XML_E_EXPECTINGCLOSEQUOTE|Manifest Parse Error : A single or double closing quote character (\' or \&quot;) is missing.
-14046|ERROR_SXS_XML_E_MULTIPLE_COLONS|Manifest Parse Error : Multiple colons are not allowed in a name.
-14047|ERROR_SXS_XML_E_INVALID_DECIMAL|Manifest Parse Error : Invalid character for decimal digit.
-14048|ERROR_SXS_XML_E_INVALID_HEXIDECIMAL|Manifest Parse Error : Invalid character for hexadecimal digit.
-14049|ERROR_SXS_XML_E_INVALID_UNICODE|Manifest Parse Error : Invalid unicode character value for this platform.
-14050|ERROR_SXS_XML_E_WHITESPACEORQUESTIONMARK|Manifest Parse Error : Expecting whitespace or '?'.
-14051|ERROR_SXS_XML_E_UNEXPECTEDENDTAG|Manifest Parse Error : End tag was not expected at this location.
-14052|ERROR_SXS_XML_E_UNCLOSEDTAG|Manifest Parse Error : The following tags were not closed: `%1.
-14053|ERROR_SXS_XML_E_DUPLICATEATTRIBUTE|Manifest Parse Error : Duplicate attribute.
-14054|ERROR_SXS_XML_E_MULTIPLEROOTS|Manifest Parse Error : Only one top level element is allowed in an XML document.
-14055|ERROR_SXS_XML_E_INVALIDATROOTLEVEL|Manifest Parse Error : Invalid at the top level of the document.
-14056|ERROR_SXS_XML_E_BADXMLDECL|Manifest Parse Error : Invalid xml declaration.
-14057|ERROR_SXS_XML_E_MISSINGROOT|Manifest Parse Error : XML document must have a top level element.
-14058|ERROR_SXS_XML_E_UNEXPECTEDEOF|Manifest Parse Error : Unexpected end of file.
-14059|ERROR_SXS_XML_E_BADPEREFINSUBSET|Manifest Parse Error : Parameter entities cannot be used inside markup declarations in an internal subset.
-14060|ERROR_SXS_XML_E_UNCLOSEDSTARTTAG|Manifest Parse Error : Element was not closed.
-14061|ERROR_SXS_XML_E_UNCLOSEDENDTAG|Manifest Parse Error : End element was missing the character '&gt;'.
-14062|ERROR_SXS_XML_E_UNCLOSEDSTRING|Manifest Parse Error : A string literal was not closed.
-14063|ERROR_SXS_XML_E_UNCLOSEDCOMMENT|Manifest Parse Error : A comment was not closed.
-14064|ERROR_SXS_XML_E_UNCLOSEDDECL|Manifest Parse Error : A declaration was not closed.
-14065|ERROR_SXS_XML_E_UNCLOSEDCDATA|Manifest Parse Error : A CDATA section was not closed.
-14066|ERROR_SXS_XML_E_RESERVEDNAMESPACE|Manifest Parse Error : The namespace prefix is not allowed to start with the reserved string &quot;xml&quot;.
-14067|ERROR_SXS_XML_E_INVALIDENCODING|Manifest Parse Error : System does not support the specified encoding.
-14068|ERROR_SXS_XML_E_INVALIDSWITCH|Manifest Parse Error : Switch from current encoding to specified encoding not supported.
-14069|ERROR_SXS_XML_E_BADXMLCASE|Manifest Parse Error : The name 'xml' is reserved and must be lower case.
-14070|ERROR_SXS_XML_E_INVALID_STANDALONE|Manifest Parse Error : The standalone attribute must have the value 'yes' or 'no'.
-14071|ERROR_SXS_XML_E_UNEXPECTED_STANDALONE|Manifest Parse Error : The standalone attribute cannot be used in external entities.
-14072|ERROR_SXS_XML_E_INVALID_VERSION|Manifest Parse Error : Invalid version number.
-14073|ERROR_SXS_XML_E_MISSINGEQUALS|Manifest Parse Error : Missing equals sign between attribute and attribute value.
-14074|ERROR_SXS_PROTECTION_RECOVERY_FAILED|Assembly Protection Error : Unable to recover the specified assembly.
-14075|ERROR_SXS_PROTECTION_PUBLIC_KEY_TOO_SHORT|Assembly Protection Error : The public key for an assembly was too short to be allowed.
-14076|ERROR_SXS_PROTECTION_CATALOG_NOT_VALID|Assembly Protection Error : The catalog for an assembly is not valid, or does not match the assembly's manifest.
-14077|ERROR_SXS_UNTRANSLATABLE_HRESULT|An HRESULT could not be translated to a corresponding Win32 error code.
-14078|ERROR_SXS_PROTECTION_CATALOG_FILE_MISSING|Assembly Protection Error : The catalog for an assembly is missing.
-14079|ERROR_SXS_MISSING_ASSEMBLY_IDENTITY_ATTRIBUTE|The supplied assembly identity is missing one or more attributes which must be present in this context.
-14080|ERROR_SXS_INVALID_ASSEMBLY_IDENTITY_ATTRIBUTE_NAME|The supplied assembly identity has one or more attribute names that contain characters not permitted in XML names.
-14081|ERROR_SXS_ASSEMBLY_MISSING|The referenced assembly could not be found.
-14082|ERROR_SXS_CORRUPT_ACTIVATION_STACK|The activation context activation stack for the running thread of execution is corrupt.
-14083|ERROR_SXS_CORRUPTION|The application isolation metadata for this process or thread has become corrupt.
-14084|ERROR_SXS_EARLY_DEACTIVATION|The activation context being deactivated is not the most recently activated one.
-14085|ERROR_SXS_INVALID_DEACTIVATION|The activation context being deactivated is not active for the current thread of execution.
-14086|ERROR_SXS_MULTIPLE_DEACTIVATION|The activation context being deactivated has already been deactivated.
-14087|ERROR_SXS_PROCESS_TERMINATION_REQUESTED|A component used by the isolation facility has requested to terminate the process.
-14088|ERROR_SXS_RELEASE_ACTIVATION_CONTEXT|A kernel mode component is releasing a reference on an activation context.
-14089|ERROR_SXS_SYSTEM_DEFAULT_ACTIVATION_CONTEXT_EMPTY|The activation context of system default assembly could not be generated.
-14090|ERROR_SXS_INVALID_IDENTITY_ATTRIBUTE_VALUE|The value of an attribute in an identity is not within the legal range.
-14091|ERROR_SXS_INVALID_IDENTITY_ATTRIBUTE_NAME|The name of an attribute in an identity is not within the legal range.
-14092|ERROR_SXS_IDENTITY_DUPLICATE_ATTRIBUTE|An identity contains two definitions for the same attribute.
-14093|ERROR_SXS_IDENTITY_PARSE_ERROR|The identity string is malformed. This may be due to a trailing comma, more than two unnamed attributes, missing attribute name or missing attribute value.
-14094|ERROR_MALFORMED_SUBSTITUTION_STRING|A string containing localized substitutable content was malformed. Either a dollar sign ($) was followed by something other than a left parenthesis or another dollar sign or an substitution's right parenthesis was not found.
-14095|ERROR_SXS_INCORRECT_PUBLIC_KEY_TOKEN|The public key token does not correspond to the public key specified.
-14096|ERROR_UNMAPPED_SUBSTITUTION_STRING|A substitution string had no mapping.
-14097|ERROR_SXS_ASSEMBLY_NOT_LOCKED|The component must be locked before making the request.
-14098|ERROR_SXS_COMPONENT_STORE_CORRUPT|The component store has been corrupted.
-14099|ERROR_ADVANCED_INSTALLER_FAILED|An advanced installer failed during setup or servicing.
-14100|ERROR_XML_ENCODING_MISMATCH|The character encoding in the XML declaration did not match the encoding used in the document.
-14101|ERROR_SXS_MANIFEST_IDENTITY_SAME_BUT_CONTENTS_DIFFERENT|The identities of the manifests are identical but their contents are different.
-14102|ERROR_SXS_IDENTITIES_DIFFERENT|The component identities are different.
-14103|ERROR_SXS_ASSEMBLY_IS_NOT_A_DEPLOYMENT|The assembly is not a deployment.
-14104|ERROR_SXS_FILE_NOT_PART_OF_ASSEMBLY|The file is not a part of the assembly.
-14105|ERROR_SXS_MANIFEST_TOO_BIG|The size of the manifest exceeds the maximum allowed.
-14106|ERROR_SXS_SETTING_NOT_REGISTERED|The setting is not registered.
-14107|ERROR_SXS_TRANSACTION_CLOSURE_INCOMPLETE|One or more required members of the transaction are not present.
-14108|ERROR_SMI_PRIMITIVE_INSTALLER_FAILED|The SMI primitive installer failed during setup or servicing.
-14109|ERROR_GENERIC_COMMAND_FAILED|A generic command executable returned a result that indicates failure.
-14110|ERROR_SXS_FILE_HASH_MISSING|A component is missing file verification information in its manifest.
-15000|ERROR_EVT_INVALID_CHANNEL_PATH|The specified channel path is invalid.
-15001|ERROR_EVT_INVALID_QUERY|The specified query is invalid.
-15002|ERROR_EVT_PUBLISHER_METADATA_NOT_FOUND|The publisher metadata cannot be found in the resource.
-15003|ERROR_EVT_EVENT_TEMPLATE_NOT_FOUND|The template for an event definition cannot be found in the resource (error = `%1).
-15004|ERROR_EVT_INVALID_PUBLISHER_NAME|The specified publisher name is invalid.
-15005|ERROR_EVT_INVALID_EVENT_DATA|The event data raised by the publisher is not compatible with the event template definition in the publisher's manifest.
-15007|ERROR_EVT_CHANNEL_NOT_FOUND|The specified channel could not be found. Check channel configuration.
-15008|ERROR_EVT_MALFORMED_XML_TEXT|The specified xml text was not well-formed. See Extended Error for more details.
-15009|ERROR_EVT_SUBSCRIPTION_TO_DIRECT_CHANNEL|The caller is trying to subscribe to a direct channel which is not allowed. The events for a direct channel go directly to a logfile and cannot be subscribed to.
-15010|ERROR_EVT_CONFIGURATION_ERROR|Configuration error.
-15011|ERROR_EVT_QUERY_RESULT_STALE|The query result is stale / invalid. This may be due to the log being cleared or rolling over after the query result was created. Users should handle this code by releasing the query result object and reissuing the query.
-15012|ERROR_EVT_QUERY_RESULT_INVALID_POSITION|Query result is currently at an invalid position.
-15013|ERROR_EVT_NON_VALIDATING_MSXML|Registered MSXML doesn't support validation.
-15014|ERROR_EVT_FILTER_ALREADYSCOPED|An expression can only be followed by a change of scope operation if it itself evaluates to a node set and is not already part of some other change of scope operation.
-15015|ERROR_EVT_FILTER_NOTELTSET|Can't perform a step operation from a term that does not represent an element set.
-15016|ERROR_EVT_FILTER_INVARG|Left hand side arguments to binary operators must be either attributes, nodes or variables and right hand side arguments must be constants.
-15017|ERROR_EVT_FILTER_INVTEST|A step operation must involve either a node test or, in the case of a predicate, an algebraic expression against which to test each node in the node set identified by the preceeding node set can be evaluated.
-15018|ERROR_EVT_FILTER_INVTYPE|This data type is currently unsupported.
-15019|ERROR_EVT_FILTER_PARSEERR|A syntax error occurred at position `%1!d!.
-15020|ERROR_EVT_FILTER_UNSUPPORTEDOP|This operator is unsupported by this implementation of the filter.
-15021|ERROR_EVT_FILTER_UNEXPECTEDTOKEN|The token encountered was unexpected.
-15022|ERROR_EVT_INVALID_OPERATION_OVER_ENABLED_DIRECT_CHANNEL|The requested operation cannot be performed over an enabled direct channel. The channel must first be disabled before performing the requested operation.
-15023|ERROR_EVT_INVALID_CHANNEL_PROPERTY_VALUE|Channel property `%1!s! contains invalid value. The value has invalid type, is outside of valid range, can't be updated or is not supported by this type of channel.
-15024|ERROR_EVT_INVALID_PUBLISHER_PROPERTY_VALUE|Publisher property `%1!s! contains invalid value. The value has invalid type, is outside of valid range, can't be updated or is not supported by this type of publisher.
-15025|ERROR_EVT_CHANNEL_CANNOT_ACTIVATE|The channel fails to activate.
-15026|ERROR_EVT_FILTER_TOO_COMPLEX|The xpath expression exceeded supported complexity. Please symplify it or split it into two or more simple expressions.
-15027|ERROR_EVT_MESSAGE_NOT_FOUND|the message resource is present but the message is not found in the string/message table.
-15028|ERROR_EVT_MESSAGE_ID_NOT_FOUND|The message id for the desired message could not be found.
-15029|ERROR_EVT_UNRESOLVED_VALUE_INSERT|The substitution string for insert index (`%1) could not be found.
-15030|ERROR_EVT_UNRESOLVED_PARAMETER_INSERT|The description string for parameter reference (`%1) could not be found.
-15031|ERROR_EVT_MAX_INSERTS_REACHED|The maximum number of replacements has been reached.
-15032|ERROR_EVT_EVENT_DEFINITION_NOT_FOUND|The event definition could not be found for event id (`%1).
-15033|ERROR_EVT_MESSAGE_LOCALE_NOT_FOUND|The locale specific resource for the desired message is not present.
-15034|ERROR_EVT_VERSION_TOO_OLD|The resource is too old to be compatible.
-15035|ERROR_EVT_VERSION_TOO_NEW|The resource is too new to be compatible.
-15036|ERROR_EVT_CANNOT_OPEN_CHANNEL_OF_QUERY|The channel at index `%1!d! of the query can't be opened.
-15037|ERROR_EVT_PUBLISHER_DISABLED|The publisher has been disabled and its resource is not available. This usually occurs when the publisher is in the process of being uninstalled or upgraded.
-15038|ERROR_EVT_FILTER_OUT_OF_RANGE|Attempted to create a numeric type that is outside of its valid range.
-15080|ERROR_EC_SUBSCRIPTION_CANNOT_ACTIVATE|The subscription fails to activate.
-15081|ERROR_EC_LOG_DISABLED|The log of the subscription is in disabled state, and can not be used to forward events to. The log must first be enabled before the subscription can be activated.
-15082|ERROR_EC_CIRCULAR_FORWARDING|When forwarding events from local machine to itself, the query of the subscription can't contain target log of the subscription.
-15083|ERROR_EC_CREDSTORE_FULL|The credential store that is used to save credentials is full.
-15084|ERROR_EC_CRED_NOT_FOUND|The credential used by this subscription can't be found in credential store.
-15085|ERROR_EC_NO_ACTIVE_CHANNEL|No active channel is found for the query.
-15100|ERROR_MUI_FILE_NOT_FOUND|The resource loader failed to find MUI file.
-15101|ERROR_MUI_INVALID_FILE|The resource loader failed to load MUI file because the file fail to pass validation.
-15102|ERROR_MUI_INVALID_RC_CONFIG|The RC Manifest is corrupted with garbage data or unsupported version or missing required item.
-15103|ERROR_MUI_INVALID_LOCALE_NAME|The RC Manifest has invalid culture name.
-15104|ERROR_MUI_INVALID_ULTIMATEFALLBACK_NAME|The RC Manifest has invalid ultimatefallback name.
-15105|ERROR_MUI_FILE_NOT_LOADED|The resource loader cache doesn't have loaded MUI entry.
-15106|ERROR_RESOURCE_ENUM_USER_STOP|User stopped resource enumeration.
-15107|ERROR_MUI_INTLSETTINGS_UILANG_NOT_INSTALLED|UI language installation failed.
-15108|ERROR_MUI_INTLSETTINGS_INVALID_LOCALE_NAME|Locale installation failed.
-15110|ERROR_MRM_RUNTIME_NO_DEFAULT_OR_NEUTRAL_RESOURCE|A resource does not have default or neutral value.
-15111|ERROR_MRM_INVALID_PRICONFIG|Invalid PRI config file.
-15112|ERROR_MRM_INVALID_FILE_TYPE|Invalid file type.
-15113|ERROR_MRM_UNKNOWN_QUALIFIER|Unknown qualifier.
-15114|ERROR_MRM_INVALID_QUALIFIER_VALUE|Invalid qualifier value.
-15115|ERROR_MRM_NO_CANDIDATE|No Candidate found.
-15116|ERROR_MRM_NO_MATCH_OR_DEFAULT_CANDIDATE|The ResourceMap or NamedResource has an item that does not have default or neutral resource..
-15117|ERROR_MRM_RESOURCE_TYPE_MISMATCH|Invalid ResourceCandidate type.
-15118|ERROR_MRM_DUPLICATE_MAP_NAME|Duplicate Resource Map.
-15119|ERROR_MRM_DUPLICATE_ENTRY|Duplicate Entry.
-15120|ERROR_MRM_INVALID_RESOURCE_IDENTIFIER|Invalid Resource Identifier.
-15121|ERROR_MRM_FILEPATH_TOO_LONG|Filepath too long.
-15122|ERROR_MRM_UNSUPPORTED_DIRECTORY_TYPE|Unsupported directory type.
-15126|ERROR_MRM_INVALID_PRI_FILE|Invalid PRI File.
-15127|ERROR_MRM_NAMED_RESOURCE_NOT_FOUND|NamedResource Not Found.
-15135|ERROR_MRM_MAP_NOT_FOUND|ResourceMap Not Found.
-15136|ERROR_MRM_UNSUPPORTED_PROFILE_TYPE|Unsupported MRT profile type.
-15137|ERROR_MRM_INVALID_QUALIFIER_OPERATOR|Invalid qualifier operator.
-15138|ERROR_MRM_INDETERMINATE_QUALIFIER_VALUE|Unable to determine qualifier value or qualifier value has not been set.
-15139|ERROR_MRM_AUTOMERGE_ENABLED|Automerge is enabled in the PRI file.
-15140|ERROR_MRM_TOO_MANY_RESOURCES|Too many resources defined for package.
-15200|ERROR_MCA_INVALID_CAPABILITIES_STRING|The monitor returned a DDC/CI capabilities string that did not comply with the ACCESS.bus 3.0, DDC/CI 1.1 or MCCS 2 Revision 1 specification.
-15201|ERROR_MCA_INVALID_VCP_VERSION|The monitor's VCP Version (0xDF) VCP code returned an invalid version value.
-15202|ERROR_MCA_MONITOR_VIOLATES_MCCS_SPECIFICATION|The monitor does not comply with the MCCS specification it claims to support.
-15203|ERROR_MCA_MCCS_VERSION_MISMATCH|The MCCS version in a monitor's mccs_ver capability does not match the MCCS version the monitor reports when the VCP Version (0xDF) VCP code returned an invalid version value.
-15204|ERROR_MCA_UNSUPPORTED_MCCS_VERSION|The Monitor Configuration API only works with monitors that support the MCCS 1.0 specification, MCCS 2.0 specification or the MCCS 2.0 Revision 1 specification.
-15205|ERROR_MCA_INTERNAL_ERROR|An internal Monitor Configuration API error occurred.
-15206|ERROR_MCA_INVALID_TECHNOLOGY_TYPE_RETURNED|The monitor returned an invalid monitor technology type. CRT, Plasma and LCD (TFT) are examples of monitor technology types. This error implies that the monitor violated the MCCS 2.0 or MCCS 2.0 Revision 1 specification.
-15207|ERROR_MCA_UNSUPPORTED_COLOR_TEMPERATURE|The caller of SetMonitorColorTemperature specified a color temperature that the current monitor did not support. This error implies that the monitor violated the MCCS 2.0 or MCCS 2.0 Revision 1 specification.
-15250|ERROR_AMBIGUOUS_SYSTEM_DEVICE|The requested system device cannot be identified due to multiple indistinguishable devices potentially matching the identification criteria.
-15299|ERROR_SYSTEM_DEVICE_NOT_FOUND|The requested system device cannot be found.
-15300|ERROR_HASH_NOT_SUPPORTED|Hash generation for the specified hash version and hash type is not enabled on the server.
-15301|ERROR_HASH_NOT_PRESENT|The hash requested from the server is not available or no longer valid.
-15321|ERROR_SECONDARY_IC_PROVIDER_NOT_REGISTERED|The secondary interrupt controller instance that manages the specified interrupt is not registered.
-15322|ERROR_GPIO_CLIENT_INFORMATION_INVALID|The information supplied by the GPIO client driver is invalid.
-15323|ERROR_GPIO_VERSION_NOT_SUPPORTED|The version specified by the GPIO client driver is not supported.
-15324|ERROR_GPIO_INVALID_REGISTRATION_PACKET|The registration packet supplied by the GPIO client driver is not valid.
-15325|ERROR_GPIO_OPERATION_DENIED|The requested operation is not suppported for the specified handle.
-15326|ERROR_GPIO_INCOMPATIBLE_CONNECT_MODE|The requested connect mode conflicts with an existing mode on one or more of the specified pins.
-15327|ERROR_GPIO_INTERRUPT_ALREADY_UNMASKED|The interrupt requested to be unmasked is not masked.
-15400|ERROR_CANNOT_SWITCH_RUNLEVEL|The requested run level switch cannot be completed successfully.
-15401|ERROR_INVALID_RUNLEVEL_SETTING|The service has an invalid run level setting. The run level for a service must not be higher than the run level of its dependent services.
-15402|ERROR_RUNLEVEL_SWITCH_TIMEOUT|The requested run level switch cannot be completed successfully since one or more services will not stop or restart within the specified timeout.
-15403|ERROR_RUNLEVEL_SWITCH_AGENT_TIMEOUT|A run level switch agent did not respond within the specified timeout.
-15404|ERROR_RUNLEVEL_SWITCH_IN_PROGRESS|A run level switch is currently in progress.
-15405|ERROR_SERVICES_FAILED_AUTOSTART|One or more services failed to start during the service startup phase of a run level switch.
-15501|ERROR_COM_TASK_STOP_PENDING|The task stop request cannot be completed immediately since task needs more time to shutdown.
-15600|ERROR_INSTALL_OPEN_PACKAGE_FAILED|Package could not be opened.
-15601|ERROR_INSTALL_PACKAGE_NOT_FOUND|Package was not found.
-15602|ERROR_INSTALL_INVALID_PACKAGE|Package data is invalid.
-15603|ERROR_INSTALL_RESOLVE_DEPENDENCY_FAILED|Package failed updates, dependency or conflict validation.
-15604|ERROR_INSTALL_OUT_OF_DISK_SPACE|There is not enough disk space on your computer. Please free up some space and try again.
-15605|ERROR_INSTALL_NETWORK_FAILURE|There was a problem downloading your product.
-15606|ERROR_INSTALL_REGISTRATION_FAILURE|Package could not be registered.
-15607|ERROR_INSTALL_DEREGISTRATION_FAILURE|Package could not be unregistered.
-15608|ERROR_INSTALL_CANCEL|User cancelled the install request.
-15609|ERROR_INSTALL_FAILED|Install failed. Please contact your software vendor.
-15610|ERROR_REMOVE_FAILED|Removal failed. Please contact your software vendor.
-15611|ERROR_PACKAGE_ALREADY_EXISTS|The provided package is already installed, and reinstallation of the package was blocked. Check the AppXDeployment-Server event log for details.
-15612|ERROR_NEEDS_REMEDIATION|The application cannot be started. Try reinstalling the application to fix the problem.
-15613|ERROR_INSTALL_PREREQUISITE_FAILED|A Prerequisite for an install could not be satisfied.
-15614|ERROR_PACKAGE_REPOSITORY_CORRUPTED|The package repository is corrupted.
-15615|ERROR_INSTALL_POLICY_FAILURE|To install this application you need either a Windows developer license or a sideloading-enabled system.
-15616|ERROR_PACKAGE_UPDATING|The application cannot be started because it is currently updating.
-15617|ERROR_DEPLOYMENT_BLOCKED_BY_POLICY|The package deployment operation is blocked by policy. Please contact your system administrator.
-15618|ERROR_PACKAGES_IN_USE|The package could not be installed because resources it modifies are currently in use.
-15619|ERROR_RECOVERY_FILE_CORRUPT|The package could not be recovered because necessary data for recovery have been corrupted.
-15620|ERROR_INVALID_STAGED_SIGNATURE|The signature is invalid. To register in developer mode, AppxSignature.p7x and AppxBlockMap.xml must be valid or should not be present.
-15621|ERROR_DELETING_EXISTING_APPLICATIONDATA_STORE_FAILED|An error occurred while deleting the package's previously existing application data.
-15622|ERROR_INSTALL_PACKAGE_DOWNGRADE|The package could not be installed because a higher version of this package is already installed.
-15623|ERROR_SYSTEM_NEEDS_REMEDIATION|An error in a system binary was detected. Try refreshing the PC to fix the problem.
-15624|ERROR_APPX_INTEGRITY_FAILURE_CLR_NGEN|A corrupted CLR NGEN binary was detected on the system.
-15625|ERROR_RESILIENCY_FILE_CORRUPT|The operation could not be resumed because necessary data for recovery have been corrupted.
-15626|ERROR_INSTALL_FIREWALL_SERVICE_NOT_RUNNING|The package could not be installed because the Windows Firewall service is not running. Enable the Windows Firewall service and try again.
-15700|APPMODEL_ERROR_NO_PACKAGE|The process has no package identity.
-15701|APPMODEL_ERROR_PACKAGE_RUNTIME_CORRUPT|The package runtime information is corrupted.
-15702|APPMODEL_ERROR_PACKAGE_IDENTITY_CORRUPT|The package identity is corrupted.
-15703|APPMODEL_ERROR_NO_APPLICATION|The process has no application identity.
-15800|ERROR_STATE_LOAD_STORE_FAILED|Loading the state store failed.
-15801|ERROR_STATE_GET_VERSION_FAILED|Retrieving the state version for the application failed.
-15802|ERROR_STATE_SET_VERSION_FAILED|Setting the state version for the application failed.
-15803|ERROR_STATE_STRUCTURED_RESET_FAILED|Resetting the structured state of the application failed.
-15804|ERROR_STATE_OPEN_CONTAINER_FAILED|State Manager failed to open the container.
-15805|ERROR_STATE_CREATE_CONTAINER_FAILED|State Manager failed to create the container.
-15806|ERROR_STATE_DELETE_CONTAINER_FAILED|State Manager failed to delete the container.
-15807|ERROR_STATE_READ_SETTING_FAILED|State Manager failed to read the setting.
-15808|ERROR_STATE_WRITE_SETTING_FAILED|State Manager failed to write the setting.
-15809|ERROR_STATE_DELETE_SETTING_FAILED|State Manager failed to delete the setting.
-15810|ERROR_STATE_QUERY_SETTING_FAILED|State Manager failed to query the setting.
-15811|ERROR_STATE_READ_COMPOSITE_SETTING_FAILED|State Manager failed to read the composite setting.
-15812|ERROR_STATE_WRITE_COMPOSITE_SETTING_FAILED|State Manager failed to write the composite setting.
-15813|ERROR_STATE_ENUMERATE_CONTAINER_FAILED|State Manager failed to enumerate the containers.
-15814|ERROR_STATE_ENUMERATE_SETTINGS_FAILED|State Manager failed to enumerate the settings.
-15815|ERROR_STATE_COMPOSITE_SETTING_VALUE_SIZE_LIMIT_EXCEEDED|The size of the state manager composite setting value has exceeded the limit.
-15816|ERROR_STATE_SETTING_VALUE_SIZE_LIMIT_EXCEEDED|The size of the state manager setting value has exceeded the limit.
-15817|ERROR_STATE_SETTING_NAME_SIZE_LIMIT_EXCEEDED|The length of the state manager setting name has exceeded the limit.
-15818|ERROR_STATE_CONTAINER_NAME_SIZE_LIMIT_EXCEEDED|The length of the state manager container name has exceeded the limit.
-15841|ERROR_API_UNAVAILABLE|This API cannot be used in the context of the caller's application type.
-<<<END>>>
-*/
+	_LoadErrorTable() {
+		a := {}
+
+		a[0] := {"enum": "ERROR_SUCCESS", "msg": "The operation completed successfully."}
+		a[1] := {"enum": "ERROR_INVALID_FUNCTION", "msg": "Incorrect function."}
+		a[2] := {"enum": "ERROR_FILE_NOT_FOUND", "msg": "The system cannot find the file specified."}
+		a[3] := {"enum": "ERROR_PATH_NOT_FOUND", "msg": "The system cannot find the path specified."}
+		a[4] := {"enum": "ERROR_TOO_MANY_OPEN_FILES", "msg": "The system cannot open the file."}
+		a[5] := {"enum": "ERROR_ACCESS_DENIED", "msg": "Access is denied."}
+		a[6] := {"enum": "ERROR_INVALID_HANDLE", "msg": "The handle is invalid."}
+		a[7] := {"enum": "ERROR_ARENA_TRASHED", "msg": "The storage control blocks were destroyed."}
+		a[8] := {"enum": "ERROR_NOT_ENOUGH_MEMORY", "msg": "Not enough storage is available to process this command."}
+		a[9] := {"enum": "ERROR_INVALID_BLOCK", "msg": "The storage control block address is invalid."}
+		a[10] := {"enum": "ERROR_BAD_ENVIRONMENT", "msg": "The environment is incorrect."}
+		a[11] := {"enum": "ERROR_BAD_FORMAT", "msg": "An attempt was made to load a program with an incorrect format."}
+		a[12] := {"enum": "ERROR_INVALID_ACCESS", "msg": "The access code is invalid."}
+		a[13] := {"enum": "ERROR_INVALID_DATA", "msg": "The data is invalid."}
+		a[14] := {"enum": "ERROR_OUTOFMEMORY", "msg": "Not enough storage is available to complete this operation."}
+		a[15] := {"enum": "ERROR_INVALID_DRIVE", "msg": "The system cannot find the drive specified."}
+		a[16] := {"enum": "ERROR_CURRENT_DIRECTORY", "msg": "The directory cannot be removed."}
+		a[17] := {"enum": "ERROR_NOT_SAME_DEVICE", "msg": "The system cannot move the file to a different disk drive."}
+		a[18] := {"enum": "ERROR_NO_MORE_FILES", "msg": "There are no more files."}
+		a[19] := {"enum": "ERROR_WRITE_PROTECT", "msg": "The media is write protected."}
+		a[20] := {"enum": "ERROR_BAD_UNIT", "msg": "The system cannot find the device specified."}
+		a[21] := {"enum": "ERROR_NOT_READY", "msg": "The device is not ready."}
+		a[22] := {"enum": "ERROR_BAD_COMMAND", "msg": "The device does not recognize the command."}
+		a[23] := {"enum": "ERROR_CRC", "msg": "Data error (cyclic redundancy check)."}
+		a[24] := {"enum": "ERROR_BAD_LENGTH", "msg": "The program issued a command but the command length is incorrect."}
+		a[25] := {"enum": "ERROR_SEEK", "msg": "The drive cannot locate a specific area or track on the disk."}
+		a[26] := {"enum": "ERROR_NOT_DOS_DISK", "msg": "The specified disk or diskette cannot be accessed."}
+		a[27] := {"enum": "ERROR_SECTOR_NOT_FOUND", "msg": "The drive cannot find the sector requested."}
+		a[28] := {"enum": "ERROR_OUT_OF_PAPER", "msg": "The printer is out of paper."}
+		a[29] := {"enum": "ERROR_WRITE_FAULT", "msg": "The system cannot write to the specified device."}
+		a[30] := {"enum": "ERROR_READ_FAULT", "msg": "The system cannot read from the specified device."}
+		a[31] := {"enum": "ERROR_GEN_FAILURE", "msg": "A device attached to the system is not functioning."}
+		a[32] := {"enum": "ERROR_SHARING_VIOLATION", "msg": "The process cannot access the file because it is being used by another process."}
+		a[33] := {"enum": "ERROR_LOCK_VIOLATION", "msg": "The process cannot access the file because another process has locked a portion of the file."}
+		a[34] := {"enum": "ERROR_WRONG_DISK", "msg": "The wrong diskette is in the drive. Insert `%2 (Volume Serial Number: `%3) into drive `%1."}
+		a[36] := {"enum": "ERROR_SHARING_BUFFER_EXCEEDED", "msg": "Too many files opened for sharing."}
+		a[38] := {"enum": "ERROR_HANDLE_EOF", "msg": "Reached the end of the file."}
+		a[39] := {"enum": "ERROR_HANDLE_DISK_FULL", "msg": "The disk is full."}
+		a[50] := {"enum": "ERROR_NOT_SUPPORTED", "msg": "The request is not supported."}
+		a[51] := {"enum": "ERROR_REM_NOT_LIST", "msg": "Windows cannot find the network path. Verify that the network path is correct and the destination computer is not busy or turned off. If Windows still cannot find the network path, contact your network administrator."}
+		a[52] := {"enum": "ERROR_DUP_NAME", "msg": "You were not connected because a duplicate name exists on the network. If joining a domain, go to System in Control Panel to change the computer name and try again. If joining a workgroup, choose another workgroup name."}
+		a[53] := {"enum": "ERROR_BAD_NETPATH", "msg": "The network path was not found."}
+		a[54] := {"enum": "ERROR_NETWORK_BUSY", "msg": "The network is busy."}
+		a[55] := {"enum": "ERROR_DEV_NOT_EXIST", "msg": "The specified network resource or device is no longer available."}
+		a[56] := {"enum": "ERROR_TOO_MANY_CMDS", "msg": "The network BIOS command limit has been reached."}
+		a[57] := {"enum": "ERROR_ADAP_HDW_ERR", "msg": "A network adapter hardware error occurred."}
+		a[58] := {"enum": "ERROR_BAD_NET_RESP", "msg": "The specified server cannot perform the requested operation."}
+		a[59] := {"enum": "ERROR_UNEXP_NET_ERR", "msg": "An unexpected network error occurred."}
+		a[60] := {"enum": "ERROR_BAD_REM_ADAP", "msg": "The remote adapter is not compatible."}
+		a[61] := {"enum": "ERROR_PRINTQ_FULL", "msg": "The printer queue is full."}
+		a[62] := {"enum": "ERROR_NO_SPOOL_SPACE", "msg": "Space to store the file waiting to be printed is not available on the server."}
+		a[63] := {"enum": "ERROR_PRINT_CANCELLED", "msg": "Your file waiting to be printed was deleted."}
+		a[64] := {"enum": "ERROR_NETNAME_DELETED", "msg": "The specified network name is no longer available."}
+		a[65] := {"enum": "ERROR_NETWORK_ACCESS_DENIED", "msg": "Network access is denied."}
+		a[66] := {"enum": "ERROR_BAD_DEV_TYPE", "msg": "The network resource type is not correct."}
+		a[67] := {"enum": "ERROR_BAD_NET_NAME", "msg": "The network name cannot be found."}
+		a[68] := {"enum": "ERROR_TOO_MANY_NAMES", "msg": "The name limit for the local computer network adapter card was exceeded."}
+		a[69] := {"enum": "ERROR_TOO_MANY_SESS", "msg": "The network BIOS session limit was exceeded."}
+		a[70] := {"enum": "ERROR_SHARING_PAUSED", "msg": "The remote server has been paused or is in the process of being started."}
+		a[71] := {"enum": "ERROR_REQ_NOT_ACCEP", "msg": "No more connections can be made to this remote computer at this time because there are already as many connections as the computer can accept."}
+		a[72] := {"enum": "ERROR_REDIR_PAUSED", "msg": "The specified printer or disk device has been paused."}
+		a[80] := {"enum": "ERROR_FILE_EXISTS", "msg": "The file exists."}
+		a[82] := {"enum": "ERROR_CANNOT_MAKE", "msg": "The directory or file cannot be created."}
+		a[83] := {"enum": "ERROR_FAIL_I24", "msg": "Fail on INT 24."}
+		a[84] := {"enum": "ERROR_OUT_OF_STRUCTURES", "msg": "Storage to process this request is not available."}
+		a[85] := {"enum": "ERROR_ALREADY_ASSIGNED", "msg": "The local device name is already in use."}
+		a[86] := {"enum": "ERROR_INVALID_PASSWORD", "msg": "The specified network password is not correct."}
+		a[87] := {"enum": "ERROR_INVALID_PARAMETER", "msg": "The parameter is incorrect."}
+		a[88] := {"enum": "ERROR_NET_WRITE_FAULT", "msg": "A write fault occurred on the network."}
+		a[89] := {"enum": "ERROR_NO_PROC_SLOTS", "msg": "The system cannot start another process at this time."}
+		a[100] := {"enum": "ERROR_TOO_MANY_SEMAPHORES", "msg": "Cannot create another system semaphore."}
+		a[101] := {"enum": "ERROR_EXCL_SEM_ALREADY_OWNED", "msg": "The exclusive semaphore is owned by another process."}
+		a[102] := {"enum": "ERROR_SEM_IS_SET", "msg": "The semaphore is set and cannot be closed."}
+		a[103] := {"enum": "ERROR_TOO_MANY_SEM_REQUESTS", "msg": "The semaphore cannot be set again."}
+		a[104] := {"enum": "ERROR_INVALID_AT_INTERRUPT_TIME", "msg": "Cannot request exclusive semaphores at interrupt time."}
+		a[105] := {"enum": "ERROR_SEM_OWNER_DIED", "msg": "The previous ownership of this semaphore has ended."}
+		a[106] := {"enum": "ERROR_SEM_USER_LIMIT", "msg": "Insert the diskette for drive `%1."}
+		a[107] := {"enum": "ERROR_DISK_CHANGE", "msg": "The program stopped because an alternate diskette was not inserted."}
+		a[108] := {"enum": "ERROR_DRIVE_LOCKED", "msg": "The disk is in use or locked by another process."}
+		a[109] := {"enum": "ERROR_BROKEN_PIPE", "msg": "The pipe has been ended."}
+		a[110] := {"enum": "ERROR_OPEN_FAILED", "msg": "The system cannot open the device or file specified."}
+		a[111] := {"enum": "ERROR_BUFFER_OVERFLOW", "msg": "The file name is too long."}
+		a[112] := {"enum": "ERROR_DISK_FULL", "msg": "There is not enough space on the disk."}
+		a[113] := {"enum": "ERROR_NO_MORE_SEARCH_HANDLES", "msg": "No more internal file identifiers available."}
+		a[114] := {"enum": "ERROR_INVALID_TARGET_HANDLE", "msg": "The target internal file identifier is incorrect."}
+		a[117] := {"enum": "ERROR_INVALID_CATEGORY", "msg": "The IOCTL call made by the application program is not correct."}
+		a[118] := {"enum": "ERROR_INVALID_VERIFY_SWITCH", "msg": "The verify-on-write switch parameter value is not correct."}
+		a[119] := {"enum": "ERROR_BAD_DRIVER_LEVEL", "msg": "The system does not support the command requested."}
+		a[120] := {"enum": "ERROR_CALL_NOT_IMPLEMENTED", "msg": "This function is not supported on this system."}
+		a[121] := {"enum": "ERROR_SEM_TIMEOUT", "msg": "The semaphore timeout period has expired."}
+		a[122] := {"enum": "ERROR_INSUFFICIENT_BUFFER", "msg": "The data area passed to a system call is too small."}
+		a[123] := {"enum": "ERROR_INVALID_NAME", "msg": "The filename, directory name, or volume label syntax is incorrect."}
+		a[124] := {"enum": "ERROR_INVALID_LEVEL", "msg": "The system call level is not correct."}
+		a[125] := {"enum": "ERROR_NO_VOLUME_LABEL", "msg": "The disk has no volume label."}
+		a[126] := {"enum": "ERROR_MOD_NOT_FOUND", "msg": "The specified module could not be found."}
+		a[127] := {"enum": "ERROR_PROC_NOT_FOUND", "msg": "The specified procedure could not be found."}
+		a[128] := {"enum": "ERROR_WAIT_NO_CHILDREN", "msg": "There are no child processes to wait for."}
+		a[129] := {"enum": "ERROR_CHILD_NOT_COMPLETE", "msg": "The `%1 application cannot be run in Win32 mode."}
+		a[130] := {"enum": "ERROR_DIRECT_ACCESS_HANDLE", "msg": "Attempt to use a file handle to an open disk partition for an operation other than raw disk I/O."}
+		a[131] := {"enum": "ERROR_NEGATIVE_SEEK", "msg": "An attempt was made to move the file pointer before the beginning of the file."}
+		a[132] := {"enum": "ERROR_SEEK_ON_DEVICE", "msg": "The file pointer cannot be set on the specified device or file."}
+		a[133] := {"enum": "ERROR_IS_JOIN_TARGET", "msg": "A JOIN or SUBST command cannot be used for a drive that contains previously joined drives."}
+		a[134] := {"enum": "ERROR_IS_JOINED", "msg": "An attempt was made to use a JOIN or SUBST command on a drive that has already been joined."}
+		a[135] := {"enum": "ERROR_IS_SUBSTED", "msg": "An attempt was made to use a JOIN or SUBST command on a drive that has already been substituted."}
+		a[136] := {"enum": "ERROR_NOT_JOINED", "msg": "The system tried to delete the JOIN of a drive that is not joined."}
+		a[137] := {"enum": "ERROR_NOT_SUBSTED", "msg": "The system tried to delete the substitution of a drive that is not substituted."}
+		a[138] := {"enum": "ERROR_JOIN_TO_JOIN", "msg": "The system tried to join a drive to a directory on a joined drive."}
+		a[139] := {"enum": "ERROR_SUBST_TO_SUBST", "msg": "The system tried to substitute a drive to a directory on a substituted drive."}
+		a[140] := {"enum": "ERROR_JOIN_TO_SUBST", "msg": "The system tried to join a drive to a directory on a substituted drive."}
+		a[141] := {"enum": "ERROR_SUBST_TO_JOIN", "msg": "The system tried to SUBST a drive to a directory on a joined drive."}
+		a[142] := {"enum": "ERROR_BUSY_DRIVE", "msg": "The system cannot perform a JOIN or SUBST at this time."}
+		a[143] := {"enum": "ERROR_SAME_DRIVE", "msg": "The system cannot join or substitute a drive to or for a directory on the same drive."}
+		a[144] := {"enum": "ERROR_DIR_NOT_ROOT", "msg": "The directory is not a subdirectory of the root directory."}
+		a[145] := {"enum": "ERROR_DIR_NOT_EMPTY", "msg": "The directory is not empty."}
+		a[146] := {"enum": "ERROR_IS_SUBST_PATH", "msg": "The path specified is being used in a substitute."}
+		a[147] := {"enum": "ERROR_IS_JOIN_PATH", "msg": "Not enough resources are available to process this command."}
+		a[148] := {"enum": "ERROR_PATH_BUSY", "msg": "The path specified cannot be used at this time."}
+		a[149] := {"enum": "ERROR_IS_SUBST_TARGET", "msg": "An attempt was made to join or substitute a drive for which a directory on the drive is the target of a previous substitute."}
+		a[150] := {"enum": "ERROR_SYSTEM_TRACE", "msg": "System trace information was not specified in your CONFIG.SYS file, or tracing is disallowed."}
+		a[151] := {"enum": "ERROR_INVALID_EVENT_COUNT", "msg": "The number of specified semaphore events for DosMuxSemWait is not correct."}
+		a[152] := {"enum": "ERROR_TOO_MANY_MUXWAITERS", "msg": "DosMuxSemWait did not execute; too many semaphores are already set."}
+		a[153] := {"enum": "ERROR_INVALID_LIST_FORMAT", "msg": "The DosMuxSemWait list is not correct."}
+		a[154] := {"enum": "ERROR_LABEL_TOO_LONG", "msg": "The volume label you entered exceeds the label character limit of the target file system."}
+		a[155] := {"enum": "ERROR_TOO_MANY_TCBS", "msg": "Cannot create another thread."}
+		a[156] := {"enum": "ERROR_SIGNAL_REFUSED", "msg": "The recipient process has refused the signal."}
+		a[157] := {"enum": "ERROR_DISCARDED", "msg": "The segment is already discarded and cannot be locked."}
+		a[158] := {"enum": "ERROR_NOT_LOCKED", "msg": "The segment is already unlocked."}
+		a[159] := {"enum": "ERROR_BAD_THREADID_ADDR", "msg": "The address for the thread ID is not correct."}
+		a[160] := {"enum": "ERROR_BAD_ARGUMENTS", "msg": "One or more arguments are not correct."}
+		a[161] := {"enum": "ERROR_BAD_PATHNAME", "msg": "The specified path is invalid."}
+		a[162] := {"enum": "ERROR_SIGNAL_PENDING", "msg": "A signal is already pending."}
+		a[164] := {"enum": "ERROR_MAX_THRDS_REACHED", "msg": "No more threads can be created in the system."}
+		a[167] := {"enum": "ERROR_LOCK_FAILED", "msg": "Unable to lock a region of a file."}
+		a[170] := {"enum": "ERROR_BUSY", "msg": "The requested resource is in use."}
+		a[171] := {"enum": "ERROR_DEVICE_SUPPORT_IN_PROGRESS", "msg": "Device's command support detection is in progress."}
+		a[173] := {"enum": "ERROR_CANCEL_VIOLATION", "msg": "A lock request was not outstanding for the supplied cancel region."}
+		a[174] := {"enum": "ERROR_ATOMIC_LOCKS_NOT_SUPPORTED", "msg": "The file system does not support atomic changes to the lock type."}
+		a[180] := {"enum": "ERROR_INVALID_SEGMENT_NUMBER", "msg": "The system detected a segment number that was not correct."}
+		a[182] := {"enum": "ERROR_INVALID_ORDINAL", "msg": "The operating system cannot run `%1."}
+		a[183] := {"enum": "ERROR_ALREADY_EXISTS", "msg": "Cannot create a file when that file already exists."}
+		a[186] := {"enum": "ERROR_INVALID_FLAG_NUMBER", "msg": "The flag passed is not correct."}
+		a[187] := {"enum": "ERROR_SEM_NOT_FOUND", "msg": "The specified system semaphore name was not found."}
+		a[188] := {"enum": "ERROR_INVALID_STARTING_CODESEG", "msg": "The operating system cannot run `%1."}
+		a[189] := {"enum": "ERROR_INVALID_STACKSEG", "msg": "The operating system cannot run `%1."}
+		a[190] := {"enum": "ERROR_INVALID_MODULETYPE", "msg": "The operating system cannot run `%1."}
+		a[191] := {"enum": "ERROR_INVALID_EXE_SIGNATURE", "msg": "Cannot run `%1 in Win32 mode."}
+		a[192] := {"enum": "ERROR_EXE_MARKED_INVALID", "msg": "The operating system cannot run `%1."}
+		a[193] := {"enum": "ERROR_BAD_EXE_FORMAT", "msg": "`%1 is not a valid Win32 application."}
+		a[194] := {"enum": "ERROR_ITERATED_DATA_EXCEEDS_64k", "msg": "The operating system cannot run `%1."}
+		a[195] := {"enum": "ERROR_INVALID_MINALLOCSIZE", "msg": "The operating system cannot run `%1."}
+		a[196] := {"enum": "ERROR_DYNLINK_FROM_INVALID_RING", "msg": "The operating system cannot run this application program."}
+		a[197] := {"enum": "ERROR_IOPL_NOT_ENABLED", "msg": "The operating system is not presently configured to run this application."}
+		a[198] := {"enum": "ERROR_INVALID_SEGDPL", "msg": "The operating system cannot run `%1."}
+		a[199] := {"enum": "ERROR_AUTODATASEG_EXCEEDS_64k", "msg": "The operating system cannot run this application program."}
+		a[200] := {"enum": "ERROR_RING2SEG_MUST_BE_MOVABLE", "msg": "The code segment cannot be greater than or equal to 64K."}
+		a[201] := {"enum": "ERROR_RELOC_CHAIN_XEEDS_SEGLIM", "msg": "The operating system cannot run `%1."}
+		a[202] := {"enum": "ERROR_INFLOOP_IN_RELOC_CHAIN", "msg": "The operating system cannot run `%1."}
+		a[203] := {"enum": "ERROR_ENVVAR_NOT_FOUND", "msg": "The system could not find the environment option that was entered."}
+		a[205] := {"enum": "ERROR_NO_SIGNAL_SENT", "msg": "No process in the command subtree has a signal handler."}
+		a[206] := {"enum": "ERROR_FILENAME_EXCED_RANGE", "msg": "The filename or extension is too long."}
+		a[207] := {"enum": "ERROR_RING2_STACK_IN_USE", "msg": "The ring 2 stack is in use."}
+		a[208] := {"enum": "ERROR_META_EXPANSION_TOO_LONG", "msg": "The global filename characters, * or ?, are entered incorrectly or too many global filename characters are specified."}
+		a[209] := {"enum": "ERROR_INVALID_SIGNAL_NUMBER", "msg": "The signal being posted is not correct."}
+		a[210] := {"enum": "ERROR_THREAD_1_INACTIVE", "msg": "The signal handler cannot be set."}
+		a[212] := {"enum": "ERROR_LOCKED", "msg": "The segment is locked and cannot be reallocated."}
+		a[214] := {"enum": "ERROR_TOO_MANY_MODULES", "msg": "Too many dynamic-link modules are attached to this program or dynamic-link module."}
+		a[215] := {"enum": "ERROR_NESTING_NOT_ALLOWED", "msg": "Cannot nest calls to LoadModule."}
+		a[216] := {"enum": "ERROR_EXE_MACHINE_TYPE_MISMATCH", "msg": "This version of `%1 is not compatible with the version of Windows you're running. Check your computer's system information and then contact the software publisher."}
+		a[217] := {"enum": "ERROR_EXE_CANNOT_MODIFY_SIGNED_BINARY", "msg": "The image file `%1 is signed, unable to modify."}
+		a[218] := {"enum": "ERROR_EXE_CANNOT_MODIFY_STRONG_SIGNED_BINARY", "msg": "The image file `%1 is strong signed, unable to modify."}
+		a[220] := {"enum": "ERROR_FILE_CHECKED_OUT", "msg": "This file is checked out or locked for editing by another user."}
+		a[221] := {"enum": "ERROR_CHECKOUT_REQUIRED", "msg": "The file must be checked out before saving changes."}
+		a[222] := {"enum": "ERROR_BAD_FILE_TYPE", "msg": "The file type being saved or retrieved has been blocked."}
+		a[223] := {"enum": "ERROR_FILE_TOO_LARGE", "msg": "The file size exceeds the limit allowed and cannot be saved."}
+		a[224] := {"enum": "ERROR_FORMS_AUTH_REQUIRED", "msg": "Access Denied. Before opening files in this location, you must first add the web site to your trusted sites list, browse to the web site, and select the option to login automatically."}
+		a[225] := {"enum": "ERROR_VIRUS_INFECTED", "msg": "Operation did not complete successfully because the file contains a virus or potentially unwanted software."}
+		a[226] := {"enum": "ERROR_VIRUS_DELETED", "msg": "This file contains a virus or potentially unwanted software and cannot be opened. Due to the nature of this virus or potentially unwanted software, the file has been removed from this location."}
+		a[229] := {"enum": "ERROR_PIPE_LOCAL", "msg": "The pipe is local."}
+		a[230] := {"enum": "ERROR_BAD_PIPE", "msg": "The pipe state is invalid."}
+		a[231] := {"enum": "ERROR_PIPE_BUSY", "msg": "All pipe instances are busy."}
+		a[232] := {"enum": "ERROR_NO_DATA", "msg": "The pipe is being closed."}
+		a[233] := {"enum": "ERROR_PIPE_NOT_CONNECTED", "msg": "No process is on the other end of the pipe."}
+		a[234] := {"enum": "ERROR_MORE_DATA", "msg": "More data is available."}
+		a[240] := {"enum": "ERROR_VC_DISCONNECTED", "msg": "The session was canceled."}
+		a[254] := {"enum": "ERROR_INVALID_EA_NAME", "msg": "The specified extended attribute name was invalid."}
+		a[255] := {"enum": "ERROR_EA_LIST_INCONSISTENT", "msg": "The extended attributes are inconsistent."}
+		a[258] := {"enum": "WAIT_TIMEOUT", "msg": "The wait operation timed out."}
+		a[259] := {"enum": "ERROR_NO_MORE_ITEMS", "msg": "No more data is available."}
+		a[266] := {"enum": "ERROR_CANNOT_COPY", "msg": "The copy functions cannot be used."}
+		a[267] := {"enum": "ERROR_DIRECTORY", "msg": "The directory name is invalid."}
+		a[275] := {"enum": "ERROR_EAS_DIDNT_FIT", "msg": "The extended attributes did not fit in the buffer."}
+		a[276] := {"enum": "ERROR_EA_FILE_CORRUPT", "msg": "The extended attribute file on the mounted file system is corrupt."}
+		a[277] := {"enum": "ERROR_EA_TABLE_FULL", "msg": "The extended attribute table file is full."}
+		a[278] := {"enum": "ERROR_INVALID_EA_HANDLE", "msg": "The specified extended attribute handle is invalid."}
+		a[282] := {"enum": "ERROR_EAS_NOT_SUPPORTED", "msg": "The mounted file system does not support extended attributes."}
+		a[288] := {"enum": "ERROR_NOT_OWNER", "msg": "Attempt to release mutex not owned by caller."}
+		a[298] := {"enum": "ERROR_TOO_MANY_POSTS", "msg": "Too many posts were made to a semaphore."}
+		a[299] := {"enum": "ERROR_PARTIAL_COPY", "msg": "Only part of a ReadProcessMemory or WriteProcessMemory request was completed."}
+		a[300] := {"enum": "ERROR_OPLOCK_NOT_GRANTED", "msg": "The oplock request is denied."}
+		a[301] := {"enum": "ERROR_INVALID_OPLOCK_PROTOCOL", "msg": "An invalid oplock acknowledgment was received by the system."}
+		a[302] := {"enum": "ERROR_DISK_TOO_FRAGMENTED", "msg": "The volume is too fragmented to complete this operation."}
+		a[303] := {"enum": "ERROR_DELETE_PENDING", "msg": "The file cannot be opened because it is in the process of being deleted."}
+		a[304] := {"enum": "ERROR_INCOMPATIBLE_WITH_GLOBAL_SHORT_NAME_REGISTRY_SETTING", "msg": "Short name settings may not be changed on this volume due to the global registry setting."}
+		a[305] := {"enum": "ERROR_SHORT_NAMES_NOT_ENABLED_ON_VOLUME", "msg": "Short names are not enabled on this volume."}
+		a[306] := {"enum": "ERROR_SECURITY_STREAM_IS_INCONSISTENT", "msg": "The security stream for the given volume is in an inconsistent state. Please run CHKDSK on the volume."}
+		a[307] := {"enum": "ERROR_INVALID_LOCK_RANGE", "msg": "A requested file lock operation cannot be processed due to an invalid byte range."}
+		a[308] := {"enum": "ERROR_IMAGE_SUBSYSTEM_NOT_PRESENT", "msg": "The subsystem needed to support the image type is not present."}
+		a[309] := {"enum": "ERROR_NOTIFICATION_GUID_ALREADY_DEFINED", "msg": "The specified file already has a notification GUID associated with it."}
+		a[310] := {"enum": "ERROR_INVALID_EXCEPTION_HANDLER", "msg": "An invalid exception handler routine has been detected."}
+		a[311] := {"enum": "ERROR_DUPLICATE_PRIVILEGES", "msg": "Duplicate privileges were specified for the token."}
+		a[312] := {"enum": "ERROR_NO_RANGES_PROCESSED", "msg": "No ranges for the specified operation were able to be processed."}
+		a[313] := {"enum": "ERROR_NOT_ALLOWED_ON_SYSTEM_FILE", "msg": "Operation is not allowed on a file system internal file."}
+		a[314] := {"enum": "ERROR_DISK_RESOURCES_EXHAUSTED", "msg": "The physical resources of this disk have been exhausted."}
+		a[315] := {"enum": "ERROR_INVALID_TOKEN", "msg": "The token representing the data is invalid."}
+		a[316] := {"enum": "ERROR_DEVICE_FEATURE_NOT_SUPPORTED", "msg": "The device does not support the command feature."}
+		a[317] := {"enum": "ERROR_MR_MID_NOT_FOUND", "msg": "The system cannot find message text for message number 0x`%1 in the message file for `%2."}
+		a[318] := {"enum": "ERROR_SCOPE_NOT_FOUND", "msg": "The scope specified was not found."}
+		a[319] := {"enum": "ERROR_UNDEFINED_SCOPE", "msg": "The Central Access Policy specified is not defined on the target machine."}
+		a[320] := {"enum": "ERROR_INVALID_CAP", "msg": "The Central Access Policy obtained from Active Directory is invalid."}
+		a[321] := {"enum": "ERROR_DEVICE_UNREACHABLE", "msg": "The device is unreachable."}
+		a[322] := {"enum": "ERROR_DEVICE_NO_RESOURCES", "msg": "The target device has insufficient resources to complete the operation."}
+		a[323] := {"enum": "ERROR_DATA_CHECKSUM_ERROR", "msg": "A data integrity checksum error occurred. Data in the file stream is corrupt."}
+		a[324] := {"enum": "ERROR_INTERMIXED_KERNEL_EA_OPERATION", "msg": "An attempt was made to modify both a KERNEL and normal Extended Attribute (EA) in the same operation."}
+		a[326] := {"enum": "ERROR_FILE_LEVEL_TRIM_NOT_SUPPORTED", "msg": "Device does not support file-level TRIM."}
+		a[327] := {"enum": "ERROR_OFFSET_ALIGNMENT_VIOLATION", "msg": "The command specified a data offset that does not align to the device's granularity/alignment."}
+		a[328] := {"enum": "ERROR_INVALID_FIELD_IN_PARAMETER_LIST", "msg": "The command specified an invalid field in its parameter list."}
+		a[329] := {"enum": "ERROR_OPERATION_IN_PROGRESS", "msg": "An operation is currently in progress with the device."}
+		a[330] := {"enum": "ERROR_BAD_DEVICE_PATH", "msg": "An attempt was made to send down the command via an invalid path to the target device."}
+		a[331] := {"enum": "ERROR_TOO_MANY_DESCRIPTORS", "msg": "The command specified a number of descriptors that exceeded the maximum supported by the device."}
+		a[332] := {"enum": "ERROR_SCRUB_DATA_DISABLED", "msg": "Scrub is disabled on the specified file."}
+		a[333] := {"enum": "ERROR_NOT_REDUNDANT_STORAGE", "msg": "The storage device does not provide redundancy."}
+		a[334] := {"enum": "ERROR_RESIDENT_FILE_NOT_SUPPORTED", "msg": "An operation is not supported on a resident file."}
+		a[335] := {"enum": "ERROR_COMPRESSED_FILE_NOT_SUPPORTED", "msg": "An operation is not supported on a compressed file."}
+		a[336] := {"enum": "ERROR_DIRECTORY_NOT_SUPPORTED", "msg": "An operation is not supported on a directory."}
+		a[337] := {"enum": "ERROR_NOT_READ_FROM_COPY", "msg": "The specified copy of the requested data could not be read."}
+		a[350] := {"enum": "ERROR_FAIL_NOACTION_REBOOT", "msg": "No action was taken as a system reboot is required."}
+		a[351] := {"enum": "ERROR_FAIL_SHUTDOWN", "msg": "The shutdown operation failed."}
+		a[352] := {"enum": "ERROR_FAIL_RESTART", "msg": "The restart operation failed."}
+		a[353] := {"enum": "ERROR_MAX_SESSIONS_REACHED", "msg": "The maximum number of sessions has been reached."}
+		a[400] := {"enum": "ERROR_THREAD_MODE_ALREADY_BACKGROUND", "msg": "The thread is already in background processing mode."}
+		a[401] := {"enum": "ERROR_THREAD_MODE_NOT_BACKGROUND", "msg": "The thread is not in background processing mode."}
+		a[402] := {"enum": "ERROR_PROCESS_MODE_ALREADY_BACKGROUND", "msg": "The process is already in background processing mode."}
+		a[403] := {"enum": "ERROR_PROCESS_MODE_NOT_BACKGROUND", "msg": "The process is not in background processing mode."}
+		a[487] := {"enum": "ERROR_INVALID_ADDRESS", "msg": "Attempt to access invalid address."}
+		a[500] := {"enum": "ERROR_USER_PROFILE_LOAD", "msg": "User profile cannot be loaded."}
+		a[534] := {"enum": "ERROR_ARITHMETIC_OVERFLOW", "msg": "Arithmetic result exceeded 32 bits."}
+		a[535] := {"enum": "ERROR_PIPE_CONNECTED", "msg": "There is a process on other end of the pipe."}
+		a[536] := {"enum": "ERROR_PIPE_LISTENING", "msg": "Waiting for a process to open the other end of the pipe."}
+		a[537] := {"enum": "ERROR_VERIFIER_STOP", "msg": "Application verifier has found an error in the current process."}
+		a[538] := {"enum": "ERROR_ABIOS_ERROR", "msg": "An error occurred in the ABIOS subsystem."}
+		a[539] := {"enum": "ERROR_WX86_WARNING", "msg": "A warning occurred in the WX86 subsystem."}
+		a[540] := {"enum": "ERROR_WX86_ERROR", "msg": "An error occurred in the WX86 subsystem."}
+		a[541] := {"enum": "ERROR_TIMER_NOT_CANCELED", "msg": "An attempt was made to cancel or set a timer that has an associated APC and the subject thread is not the thread that originally set the timer with an associated APC routine."}
+		a[542] := {"enum": "ERROR_UNWIND", "msg": "Unwind exception code."}
+		a[543] := {"enum": "ERROR_BAD_STACK", "msg": "An invalid or unaligned stack was encountered during an unwind operation."}
+		a[544] := {"enum": "ERROR_INVALID_UNWIND_TARGET", "msg": "An invalid unwind target was encountered during an unwind operation."}
+		a[545] := {"enum": "ERROR_INVALID_PORT_ATTRIBUTES", "msg": "Invalid Object Attributes specified to NtCreatePort or invalid Port Attributes specified to NtConnectPort"}
+		a[546] := {"enum": "ERROR_PORT_MESSAGE_TOO_LONG", "msg": "Length of message passed to NtRequestPort or NtRequestWaitReplyPort was longer than the maximum message allowed by the port."}
+		a[547] := {"enum": "ERROR_INVALID_QUOTA_LOWER", "msg": "An attempt was made to lower a quota limit below the current usage."}
+		a[548] := {"enum": "ERROR_DEVICE_ALREADY_ATTACHED", "msg": "An attempt was made to attach to a device that was already attached to another device."}
+		a[549] := {"enum": "ERROR_INSTRUCTION_MISALIGNMENT", "msg": "An attempt was made to execute an instruction at an unaligned address and the host system does not support unaligned instruction references."}
+		a[550] := {"enum": "ERROR_PROFILING_NOT_STARTED", "msg": "Profiling not started."}
+		a[551] := {"enum": "ERROR_PROFILING_NOT_STOPPED", "msg": "Profiling not stopped."}
+		a[552] := {"enum": "ERROR_COULD_NOT_INTERPRET", "msg": "The passed ACL did not contain the minimum required information."}
+		a[553] := {"enum": "ERROR_PROFILING_AT_LIMIT", "msg": "The number of active profiling objects is at the maximum and no more may be started."}
+		a[554] := {"enum": "ERROR_CANT_WAIT", "msg": "Used to indicate that an operation cannot continue without blocking for I/O."}
+		a[555] := {"enum": "ERROR_CANT_TERMINATE_SELF", "msg": "Indicates that a thread attempted to terminate itself by default (called NtTerminateThread with <strong>NULL</strong>) and it was the last thread in the current process."}
+		a[556] := {"enum": "ERROR_UNEXPECTED_MM_CREATE_ERR", "msg": "If an MM error is returned which is not defined in the standard FsRtl filter, it is converted to one of the following errors which is guaranteed to be in the filter. In this case information is lost, however, the filter correctly handles the exception."}
+		a[557] := {"enum": "ERROR_UNEXPECTED_MM_MAP_ERROR", "msg": "If an MM error is returned which is not defined in the standard FsRtl filter, it is converted to one of the following errors which is guaranteed to be in the filter. In this case information is lost, however, the filter correctly handles the exception."}
+		a[558] := {"enum": "ERROR_UNEXPECTED_MM_EXTEND_ERR", "msg": "If an MM error is returned which is not defined in the standard FsRtl filter, it is converted to one of the following errors which is guaranteed to be in the filter. In this case information is lost, however, the filter correctly handles the exception."}
+		a[559] := {"enum": "ERROR_BAD_FUNCTION_TABLE", "msg": "A malformed function table was encountered during an unwind operation."}
+		a[560] := {"enum": "ERROR_NO_GUID_TRANSLATION", "msg": "Indicates that an attempt was made to assign protection to a file system file or directory and one of the SIDs in the security descriptor could not be translated into a GUID that could be stored by the file system. This causes the protection attempt to fail, which may cause a file creation attempt to fail."}
+		a[561] := {"enum": "ERROR_INVALID_LDT_SIZE", "msg": "Indicates that an attempt was made to grow an LDT by setting its size, or that the size was not an even number of selectors."}
+		a[563] := {"enum": "ERROR_INVALID_LDT_OFFSET", "msg": "Indicates that the starting value for the LDT information was not an integral multiple of the selector size."}
+		a[564] := {"enum": "ERROR_INVALID_LDT_DESCRIPTOR", "msg": "Indicates that the user supplied an invalid descriptor when trying to set up Ldt descriptors."}
+		a[565] := {"enum": "ERROR_TOO_MANY_THREADS", "msg": "Indicates a process has too many threads to perform the requested action. For example, assignment of a primary token may only be performed when a process has zero or one threads."}
+		a[566] := {"enum": "ERROR_THREAD_NOT_IN_PROCESS", "msg": "An attempt was made to operate on a thread within a specific process, but the thread specified is not in the process specified."}
+		a[567] := {"enum": "ERROR_PAGEFILE_QUOTA_EXCEEDED", "msg": "Page file quota was exceeded."}
+		a[568] := {"enum": "ERROR_LOGON_SERVER_CONFLICT", "msg": "The Netlogon service cannot start because another Netlogon service running in the domain conflicts with the specified role."}
+		a[569] := {"enum": "ERROR_SYNCHRONIZATION_REQUIRED", "msg": "The SAM database on a Windows Server is significantly out of synchronization with the copy on the Domain Controller. A complete synchronization is required."}
+		a[570] := {"enum": "ERROR_NET_OPEN_FAILED", "msg": "The NtCreateFile API failed. This error should never be returned to an application, it is a place holder for the Windows Lan Manager Redirector to use in its internal error mapping routines."}
+		a[571] := {"enum": "ERROR_IO_PRIVILEGE_FAILED", "msg": "{Privilege Failed} The I/O permissions for the process could not be changed."}
+		a[572] := {"enum": "ERROR_CONTROL_C_EXIT", "msg": "{Application Exit by CTRL+C} The application terminated as a result of a CTRL+C."}
+		a[573] := {"enum": "ERROR_MISSING_SYSTEMFILE", "msg": "{Missing System File} The required system file `%hs is bad or missing."}
+		a[574] := {"enum": "ERROR_UNHANDLED_EXCEPTION", "msg": "{Application Error} The exception `%s."}
+		a[575] := {"enum": "ERROR_APP_INIT_FAILURE", "msg": "{Application Error} The application was unable to start correctly."}
+		a[576] := {"enum": "ERROR_PAGEFILE_CREATE_FAILED", "msg": "{Unable to Create Paging File} The creation of the paging file `%hs failed (`%lx). The requested size was `%ld."}
+		a[577] := {"enum": "ERROR_INVALID_IMAGE_HASH", "msg": "Windows cannot verify the digital signature for this file. A recent hardware or software change might have installed a file that is signed incorrectly or damaged, or that might be malicious software from an unknown source."}
+		a[578] := {"enum": "ERROR_NO_PAGEFILE", "msg": "{No Paging File Specified} No paging file was specified in the system configuration."}
+		a[579] := {"enum": "ERROR_ILLEGAL_FLOAT_CONTEXT", "msg": "{EXCEPTION} A real-mode application issued a floating-point instruction and floating-point hardware is not present."}
+		a[580] := {"enum": "ERROR_NO_EVENT_PAIR", "msg": "An event pair synchronization operation was performed using the thread specific client/server event pair object, but no event pair object was associated with the thread."}
+		a[581] := {"enum": "ERROR_DOMAIN_CTRLR_CONFIG_ERROR", "msg": "A Windows Server has an incorrect configuration."}
+		a[582] := {"enum": "ERROR_ILLEGAL_CHARACTER", "msg": "An illegal character was encountered. For a multi-byte character set this includes a lead byte without a succeeding trail byte. For the Unicode character set this includes the characters 0xFFFF and 0xFFFE."}
+		a[583] := {"enum": "ERROR_UNDEFINED_CHARACTER", "msg": "The Unicode character is not defined in the Unicode character set installed on the system."}
+		a[584] := {"enum": "ERROR_FLOPPY_VOLUME", "msg": "The paging file cannot be created on a floppy diskette."}
+		a[585] := {"enum": "ERROR_BIOS_FAILED_TO_CONNECT_INTERRUPT", "msg": "The system BIOS failed to connect a system interrupt to the device or bus for which the device is connected."}
+		a[586] := {"enum": "ERROR_BACKUP_CONTROLLER", "msg": "This operation is only allowed for the Primary Domain Controller of the domain."}
+		a[587] := {"enum": "ERROR_MUTANT_LIMIT_EXCEEDED", "msg": "An attempt was made to acquire a mutant such that its maximum count would have been exceeded."}
+		a[588] := {"enum": "ERROR_FS_DRIVER_REQUIRED", "msg": "A volume has been accessed for which a file system driver is required that has not yet been loaded."}
+		a[589] := {"enum": "ERROR_CANNOT_LOAD_REGISTRY_FILE", "msg": "{Registry File Failure} The registry cannot load the hive (file): `%hs or its log or alternate. It is corrupt, absent, or not writable."}
+		a[590] := {"enum": "ERROR_DEBUG_ATTACH_FAILED", "msg": "{Unexpected Failure in `nDebugActiveProcess} An unexpected failure occurred while processing a <strong>DebugActiveProcess</strong> API request. You may choose OK to terminate the process, or Cancel to ignore the error."}
+		a[591] := {"enum": "ERROR_SYSTEM_PROCESS_TERMINATED", "msg": "{Fatal System Error} The `%hs system process terminated unexpectedly with a status of 0x`%08x."}
+		a[592] := {"enum": "ERROR_DATA_NOT_ACCEPTED", "msg": "{Data Not Accepted} The TDI client could not handle the data received during an indication."}
+		a[593] := {"enum": "ERROR_VDM_HARD_ERROR", "msg": "NTVDM encountered a hard error."}
+		a[594] := {"enum": "ERROR_DRIVER_CANCEL_TIMEOUT", "msg": "{Cancel Timeout} The driver `%hs failed to complete a cancelled I/O request in the allotted time."}
+		a[595] := {"enum": "ERROR_REPLY_MESSAGE_MISMATCH", "msg": "{Reply Message Mismatch} An attempt was made to reply to an LPC message, but the thread specified by the client ID in the message was not waiting on that message."}
+		a[596] := {"enum": "ERROR_LOST_WRITEBEHIND_DATA", "msg": "{Delayed Write Failed} Windows was unable to save all the data for the file `%hs. The data has been lost. This error may be caused by a failure of your computer hardware or network connection. Please try to save this file elsewhere."}
+		a[597] := {"enum": "ERROR_CLIENT_SERVER_PARAMETERS_INVALID", "msg": "The parameter(s) passed to the server in the client/server shared memory window were invalid. Too much data may have been put in the shared memory window."}
+		a[598] := {"enum": "ERROR_NOT_TINY_STREAM", "msg": "The stream is not a tiny stream."}
+		a[599] := {"enum": "ERROR_STACK_OVERFLOW_READ", "msg": "The request must be handled by the stack overflow code."}
+		a[600] := {"enum": "ERROR_CONVERT_TO_LARGE", "msg": "Internal OFS status codes indicating how an allocation operation is handled. Either it is retried after the containing onode is moved or the extent stream is converted to a large stream."}
+		a[601] := {"enum": "ERROR_FOUND_OUT_OF_SCOPE", "msg": "The attempt to find the object found an object matching by ID on the volume but it is out of the scope of the handle used for the operation."}
+		a[602] := {"enum": "ERROR_ALLOCATE_BUCKET", "msg": "The bucket array must be grown. Retry transaction after doing so."}
+		a[603] := {"enum": "ERROR_MARSHALL_OVERFLOW", "msg": "The user/kernel marshalling buffer has overflowed."}
+		a[604] := {"enum": "ERROR_INVALID_VARIANT", "msg": "The supplied variant structure contains invalid data."}
+		a[605] := {"enum": "ERROR_BAD_COMPRESSION_BUFFER", "msg": "The specified buffer contains ill-formed data."}
+		a[606] := {"enum": "ERROR_AUDIT_FAILED", "msg": "{Audit Failed} An attempt to generate a security audit failed."}
+		a[607] := {"enum": "ERROR_TIMER_RESOLUTION_NOT_SET", "msg": "The timer resolution was not previously set by the current process."}
+		a[608] := {"enum": "ERROR_INSUFFICIENT_LOGON_INFO", "msg": "There is insufficient account information to log you on."}
+		a[609] := {"enum": "ERROR_BAD_DLL_ENTRYPOINT", "msg": "{Invalid DLL Entrypoint} The dynamic link library `%hs is not written correctly. The stack pointer has been left in an inconsistent state. The entrypoint should be declared as WINAPI or STDCALL. Select YES to fail the DLL load. Select NO to continue execution. Selecting NO may cause the application to operate incorrectly."}
+		a[610] := {"enum": "ERROR_BAD_SERVICE_ENTRYPOINT", "msg": "{Invalid Service Callback Entrypoint} The `%hs service is not written correctly. The stack pointer has been left in an inconsistent state. The callback entrypoint should be declared as WINAPI or STDCALL. Selecting OK will cause the service to continue operation. However, the service process may operate incorrectly."}
+		a[611] := {"enum": "ERROR_IP_ADDRESS_CONFLICT1", "msg": "There is an IP address conflict with another system on the network."}
+		a[612] := {"enum": "ERROR_IP_ADDRESS_CONFLICT2", "msg": "There is an IP address conflict with another system on the network."}
+		a[613] := {"enum": "ERROR_REGISTRY_QUOTA_LIMIT", "msg": "{Low On Registry Space} The system has reached the maximum size allowed for the system part of the registry. Additional storage requests will be ignored."}
+		a[614] := {"enum": "ERROR_NO_CALLBACK_ACTIVE", "msg": "A callback return system service cannot be executed when no callback is active."}
+		a[615] := {"enum": "ERROR_PWD_TOO_SHORT", "msg": "The password provided is too short to meet the policy of your user account. Please choose a longer password."}
+		a[616] := {"enum": "ERROR_PWD_TOO_RECENT", "msg": "The policy of your user account does not allow you to change passwords too frequently. This is done to prevent users from changing back to a familiar, but potentially discovered, password. If you feel your password has been compromised then please contact your administrator immediately to have a new one assigned."}
+		a[617] := {"enum": "ERROR_PWD_HISTORY_CONFLICT", "msg": "You have attempted to change your password to one that you have used in the past. The policy of your user account does not allow this. Please select a password that you have not previously used."}
+		a[618] := {"enum": "ERROR_UNSUPPORTED_COMPRESSION", "msg": "The specified compression format is unsupported."}
+		a[619] := {"enum": "ERROR_INVALID_HW_PROFILE", "msg": "The specified hardware profile configuration is invalid."}
+		a[620] := {"enum": "ERROR_INVALID_PLUGPLAY_DEVICE_PATH", "msg": "The specified Plug and Play registry device path is invalid."}
+		a[621] := {"enum": "ERROR_QUOTA_LIST_INCONSISTENT", "msg": "The specified quota list is internally inconsistent with its descriptor."}
+		a[622] := {"enum": "ERROR_EVALUATION_EXPIRATION", "msg": "{Windows Evaluation Notification} The evaluation period for this installation of Windows has expired. This system will shutdown in 1 hour. To restore access to this installation of Windows, please upgrade this installation using a licensed distribution of this product."}
+		a[623] := {"enum": "ERROR_ILLEGAL_DLL_RELOCATION", "msg": "{Illegal System DLL Relocation} The system DLL `%hs was relocated in memory. The application will not run properly. The relocation occurred because the DLL `%hs occupied an address range reserved for Windows system DLLs. The vendor supplying the DLL should be contacted for a new DLL."}
+		a[624] := {"enum": "ERROR_DLL_INIT_FAILED_LOGOFF", "msg": "{DLL Initialization Failed} The application failed to initialize because the window station is shutting down."}
+		a[625] := {"enum": "ERROR_VALIDATE_CONTINUE", "msg": "The validation process needs to continue on to the next step."}
+		a[626] := {"enum": "ERROR_NO_MORE_MATCHES", "msg": "There are no more matches for the current index enumeration."}
+		a[627] := {"enum": "ERROR_RANGE_LIST_CONFLICT", "msg": "The range could not be added to the range list because of a conflict."}
+		a[628] := {"enum": "ERROR_SERVER_SID_MISMATCH", "msg": "The server process is running under a SID different than that required by client."}
+		a[629] := {"enum": "ERROR_CANT_ENABLE_DENY_ONLY", "msg": "A group marked use for deny only cannot be enabled."}
+		a[630] := {"enum": "ERROR_FLOAT_MULTIPLE_FAULTS", "msg": "{EXCEPTION} Multiple floating point faults."}
+		a[631] := {"enum": "ERROR_FLOAT_MULTIPLE_TRAPS", "msg": "{EXCEPTION} Multiple floating point traps."}
+		a[632] := {"enum": "ERROR_NOINTERFACE", "msg": "The requested interface is not supported."}
+		a[633] := {"enum": "ERROR_DRIVER_FAILED_SLEEP", "msg": "{System Standby Failed} The driver `%hs does not support standby mode. Updating this driver may allow the system to go to standby mode."}
+		a[634] := {"enum": "ERROR_CORRUPT_SYSTEM_FILE", "msg": "The system file `%1 has become corrupt and has been replaced."}
+		a[635] := {"enum": "ERROR_COMMITMENT_MINIMUM", "msg": "{Virtual Memory Minimum Too Low} Your system is low on virtual memory. Windows is increasing the size of your virtual memory paging file. During this process, memory requests for some applications may be denied. For more information, see Help."}
+		a[636] := {"enum": "ERROR_PNP_RESTART_ENUMERATION", "msg": "A device was removed so enumeration must be restarted."}
+		a[637] := {"enum": "ERROR_SYSTEM_IMAGE_BAD_SIGNATURE", "msg": "{Fatal System Error} The system image `%s is not properly signed. The file has been replaced with the signed file. The system has been shut down."}
+		a[638] := {"enum": "ERROR_PNP_REBOOT_REQUIRED", "msg": "Device will not start without a reboot."}
+		a[639] := {"enum": "ERROR_INSUFFICIENT_POWER", "msg": "There is not enough power to complete the requested operation."}
+		a[640] := {"enum": "ERROR_MULTIPLE_FAULT_VIOLATION", "msg": "ERROR_MULTIPLE_FAULT_VIOLATION"}
+		a[641] := {"enum": "ERROR_SYSTEM_SHUTDOWN", "msg": "The system is in the process of shutting down."}
+		a[642] := {"enum": "ERROR_PORT_NOT_SET", "msg": "An attempt to remove a processes DebugPort was made, but a port was not already associated with the process."}
+		a[643] := {"enum": "ERROR_DS_VERSION_CHECK_FAILURE", "msg": "This version of Windows is not compatible with the behavior version of directory forest, domain or domain controller."}
+		a[644] := {"enum": "ERROR_RANGE_NOT_FOUND", "msg": "The specified range could not be found in the range list."}
+		a[646] := {"enum": "ERROR_NOT_SAFE_MODE_DRIVER", "msg": "The driver was not loaded because the system is booting into safe mode."}
+		a[647] := {"enum": "ERROR_FAILED_DRIVER_ENTRY", "msg": "The driver was not loaded because it failed its initialization call."}
+		a[648] := {"enum": "ERROR_DEVICE_ENUMERATION_ERROR", "msg": "The &quot;`%hs&quot; encountered an error while applying power or reading the device configuration. This may be caused by a failure of your hardware or by a poor connection."}
+		a[649] := {"enum": "ERROR_MOUNT_POINT_NOT_RESOLVED", "msg": "The create operation failed because the name contained at least one mount point which resolves to a volume to which the specified device object is not attached."}
+		a[650] := {"enum": "ERROR_INVALID_DEVICE_OBJECT_PARAMETER", "msg": "The device object parameter is either not a valid device object or is not attached to the volume specified by the file name."}
+		a[651] := {"enum": "ERROR_MCA_OCCURED", "msg": "A Machine Check Error has occurred. Please check the system eventlog for additional information."}
+		a[652] := {"enum": "ERROR_DRIVER_DATABASE_ERROR", "msg": "There was error [`%2] processing the driver database."}
+		a[653] := {"enum": "ERROR_SYSTEM_HIVE_TOO_LARGE", "msg": "System hive size has exceeded its limit."}
+		a[654] := {"enum": "ERROR_DRIVER_FAILED_PRIOR_UNLOAD", "msg": "The driver could not be loaded because a previous version of the driver is still in memory."}
+		a[655] := {"enum": "ERROR_VOLSNAP_PREPARE_HIBERNATE", "msg": "{Volume Shadow Copy Service} Please wait while the Volume Shadow Copy Service prepares volume `%hs for hibernation."}
+		a[656] := {"enum": "ERROR_HIBERNATION_FAILURE", "msg": "The system has failed to hibernate (The error code is `%hs). Hibernation will be disabled until the system is restarted."}
+		a[657] := {"enum": "ERROR_PWD_TOO_LONG", "msg": "The password provided is too long to meet the policy of your user account. Please choose a shorter password."}
+		a[665] := {"enum": "ERROR_FILE_SYSTEM_LIMITATION", "msg": "The requested operation could not be completed due to a file system limitation."}
+		a[668] := {"enum": "ERROR_ASSERTION_FAILURE", "msg": "An assertion failure has occurred."}
+		a[669] := {"enum": "ERROR_ACPI_ERROR", "msg": "An error occurred in the ACPI subsystem."}
+		a[670] := {"enum": "ERROR_WOW_ASSERTION", "msg": "WOW Assertion Error."}
+		a[671] := {"enum": "ERROR_PNP_BAD_MPS_TABLE", "msg": "A device is missing in the system BIOS MPS table. This device will not be used. Please contact your system vendor for system BIOS update."}
+		a[672] := {"enum": "ERROR_PNP_TRANSLATION_FAILED", "msg": "A translator failed to translate resources."}
+		a[673] := {"enum": "ERROR_PNP_IRQ_TRANSLATION_FAILED", "msg": "A IRQ translator failed to translate resources."}
+		a[674] := {"enum": "ERROR_PNP_INVALID_ID", "msg": "Driver `%2 returned invalid ID for a child device (`%3)."}
+		a[675] := {"enum": "ERROR_WAKE_SYSTEM_DEBUGGER", "msg": "{Kernel Debugger Awakened} the system debugger was awakened by an interrupt."}
+		a[676] := {"enum": "ERROR_HANDLES_CLOSED", "msg": "{Handles Closed} Handles to objects have been automatically closed as a result of the requested operation."}
+		a[677] := {"enum": "ERROR_EXTRANEOUS_INFORMATION", "msg": "{Too Much Information} The specified access control list (ACL) contained more information than was expected."}
+		a[678] := {"enum": "ERROR_RXACT_COMMIT_NECESSARY", "msg": "This warning level status indicates that the transaction state already exists for the registry sub-tree, but that a transaction commit was previously aborted. The commit has NOT been completed, but has not been rolled back either (so it may still be committed if desired)."}
+		a[679] := {"enum": "ERROR_MEDIA_CHECK", "msg": "{Media Changed} The media may have changed."}
+		a[680] := {"enum": "ERROR_GUID_SUBSTITUTION_MADE", "msg": "{GUID Substitution} During the translation of a global identifier (GUID) to a Windows security ID (SID), no administratively-defined GUID prefix was found. A substitute prefix was used, which will not compromise system security. However, this may provide a more restrictive access than intended."}
+		a[681] := {"enum": "ERROR_STOPPED_ON_SYMLINK", "msg": "The create operation stopped after reaching a symbolic link."}
+		a[682] := {"enum": "ERROR_LONGJUMP", "msg": "A long jump has been executed."}
+		a[683] := {"enum": "ERROR_PLUGPLAY_QUERY_VETOED", "msg": "The Plug and Play query operation was not successful."}
+		a[684] := {"enum": "ERROR_UNWIND_CONSOLIDATE", "msg": "A frame consolidation has been executed."}
+		a[685] := {"enum": "ERROR_REGISTRY_HIVE_RECOVERED", "msg": "{Registry Hive Recovered} Registry hive (file): `%hs was corrupted and it has been recovered. Some data might have been lost."}
+		a[686] := {"enum": "ERROR_DLL_MIGHT_BE_INSECURE", "msg": "The application is attempting to run executable code from the module `%hs. This may be insecure. An alternative, `%hs, is available. Should the application use the secure module `%hs?"}
+		a[687] := {"enum": "ERROR_DLL_MIGHT_BE_INCOMPATIBLE", "msg": "The application is loading executable code from the module `%hs. This is secure, but may be incompatible with previous releases of the operating system. An alternative, `%hs, is available. Should the application use the secure module `%hs?"}
+		a[688] := {"enum": "ERROR_DBG_EXCEPTION_NOT_HANDLED", "msg": "Debugger did not handle the exception."}
+		a[689] := {"enum": "ERROR_DBG_REPLY_LATER", "msg": "Debugger will reply later."}
+		a[690] := {"enum": "ERROR_DBG_UNABLE_TO_PROVIDE_HANDLE", "msg": "Debugger cannot provide handle."}
+		a[691] := {"enum": "ERROR_DBG_TERMINATE_THREAD", "msg": "Debugger terminated thread."}
+		a[692] := {"enum": "ERROR_DBG_TERMINATE_PROCESS", "msg": "Debugger terminated process."}
+		a[693] := {"enum": "ERROR_DBG_CONTROL_C", "msg": "Debugger got control C."}
+		a[694] := {"enum": "ERROR_DBG_PRINTEXCEPTION_C", "msg": "Debugger printed exception on control C."}
+		a[695] := {"enum": "ERROR_DBG_RIPEXCEPTION", "msg": "Debugger received RIP exception."}
+		a[696] := {"enum": "ERROR_DBG_CONTROL_BREAK", "msg": "Debugger received control break."}
+		a[697] := {"enum": "ERROR_DBG_COMMAND_EXCEPTION", "msg": "Debugger command communication exception."}
+		a[698] := {"enum": "ERROR_OBJECT_NAME_EXISTS", "msg": "{Object Exists} An attempt was made to create an object and the object name already existed."}
+		a[699] := {"enum": "ERROR_THREAD_WAS_SUSPENDED", "msg": "{Thread Suspended} A thread termination occurred while the thread was suspended. The thread was resumed, and termination proceeded."}
+		a[700] := {"enum": "ERROR_IMAGE_NOT_AT_BASE", "msg": "{Image Relocated} An image file could not be mapped at the address specified in the image file. Local fixups must be performed on this image."}
+		a[701] := {"enum": "ERROR_RXACT_STATE_CREATED", "msg": "This informational level status indicates that a specified registry sub-tree transaction state did not yet exist and had to be created."}
+		a[702] := {"enum": "ERROR_SEGMENT_NOTIFICATION", "msg": "{Segment Load} A virtual DOS machine (VDM) is loading, unloading, or moving an MS-DOS or Win16 program segment image. An exception is raised so a debugger can load, unload or track symbols and breakpoints within these 16-bit segments."}
+		a[703] := {"enum": "ERROR_BAD_CURRENT_DIRECTORY", "msg": "{Invalid Current Directory} The process cannot switch to the startup current directory `%hs. Select OK to set current directory to `%hs, or select CANCEL to exit."}
+		a[704] := {"enum": "ERROR_FT_READ_RECOVERY_FROM_BACKUP", "msg": "{Redundant Read} To satisfy a read request, the NT fault-tolerant file system successfully read the requested data from a redundant copy. This was done because the file system encountered a failure on a member of the fault-tolerant volume, but was unable to reassign the failing area of the device."}
+		a[705] := {"enum": "ERROR_FT_WRITE_RECOVERY", "msg": "{Redundant Write} To satisfy a write request, the NT fault-tolerant file system successfully wrote a redundant copy of the information. This was done because the file system encountered a failure on a member of the fault-tolerant volume, but was not able to reassign the failing area of the device."}
+		a[706] := {"enum": "ERROR_IMAGE_MACHINE_TYPE_MISMATCH", "msg": "{Machine Type Mismatch} The image file `%hs is valid, but is for a machine type other than the current machine. Select OK to continue, or CANCEL to fail the DLL load."}
+		a[707] := {"enum": "ERROR_RECEIVE_PARTIAL", "msg": "{Partial Data Received} The network transport returned partial data to its client. The remaining data will be sent later."}
+		a[708] := {"enum": "ERROR_RECEIVE_EXPEDITED", "msg": "{Expedited Data Received} The network transport returned data to its client that was marked as expedited by the remote system."}
+		a[709] := {"enum": "ERROR_RECEIVE_PARTIAL_EXPEDITED", "msg": "{Partial Expedited Data Received} The network transport returned partial data to its client and this data was marked as expedited by the remote system. The remaining data will be sent later."}
+		a[710] := {"enum": "ERROR_EVENT_DONE", "msg": "{TDI Event Done} The TDI indication has completed successfully."}
+		a[711] := {"enum": "ERROR_EVENT_PENDING", "msg": "{TDI Event Pending} The TDI indication has entered the pending state."}
+		a[712] := {"enum": "ERROR_CHECKING_FILE_SYSTEM", "msg": "Checking file system on `%wZ."}
+		a[713] := {"enum": "ERROR_FATAL_APP_EXIT", "msg": "{Fatal Application Exit} `%hs."}
+		a[714] := {"enum": "ERROR_PREDEFINED_HANDLE", "msg": "The specified registry key is referenced by a predefined handle."}
+		a[715] := {"enum": "ERROR_WAS_UNLOCKED", "msg": "{Page Unlocked} The page protection of a locked page was changed to 'No Access' and the page was unlocked from memory and from the process."}
+		a[716] := {"enum": "ERROR_SERVICE_NOTIFICATION", "msg": "`%hs"}
+		a[717] := {"enum": "ERROR_WAS_LOCKED", "msg": "{Page Locked} One of the pages to lock was already locked."}
+		a[718] := {"enum": "ERROR_LOG_HARD_ERROR", "msg": "Application popup: `%1 : `%2"}
+		a[719] := {"enum": "ERROR_ALREADY_WIN32", "msg": "ERROR_ALREADY_WIN32"}
+		a[720] := {"enum": "ERROR_IMAGE_MACHINE_TYPE_MISMATCH_EXE", "msg": "{Machine Type Mismatch} The image file `%hs is valid, but is for a machine type other than the current machine."}
+		a[721] := {"enum": "ERROR_NO_YIELD_PERFORMED", "msg": "A yield execution was performed and no thread was available to run."}
+		a[722] := {"enum": "ERROR_TIMER_RESUME_IGNORED", "msg": "The resumable flag to a timer API was ignored."}
+		a[723] := {"enum": "ERROR_ARBITRATION_UNHANDLED", "msg": "The arbiter has deferred arbitration of these resources to its parent."}
+		a[724] := {"enum": "ERROR_CARDBUS_NOT_SUPPORTED", "msg": "The inserted CardBus device cannot be started because of a configuration error on &quot;`%hs&quot;."}
+		a[725] := {"enum": "ERROR_MP_PROCESSOR_MISMATCH", "msg": "The CPUs in this multiprocessor system are not all the same revision level. To use all processors the operating system restricts itself to the features of the least capable processor in the system. Should problems occur with this system, contact the CPU manufacturer to see if this mix of processors is supported."}
+		a[726] := {"enum": "ERROR_HIBERNATED", "msg": "The system was put into hibernation."}
+		a[727] := {"enum": "ERROR_RESUME_HIBERNATION", "msg": "The system was resumed from hibernation."}
+		a[728] := {"enum": "ERROR_FIRMWARE_UPDATED", "msg": "Windows has detected that the system firmware (BIOS) was updated [previous firmware date = `%2, current firmware date `%3]."}
+		a[729] := {"enum": "ERROR_DRIVERS_LEAKING_LOCKED_PAGES", "msg": "A device driver is leaking locked I/O pages causing system degradation. The system has automatically enabled tracking code in order to try and catch the culprit."}
+		a[730] := {"enum": "ERROR_WAKE_SYSTEM", "msg": "The system has awoken."}
+		a[731] := {"enum": "ERROR_WAIT_1", "msg": "ERROR_WAIT_1"}
+		a[732] := {"enum": "ERROR_WAIT_2", "msg": "ERROR_WAIT_2"}
+		a[733] := {"enum": "ERROR_WAIT_3", "msg": "ERROR_WAIT_3"}
+		a[734] := {"enum": "ERROR_WAIT_63", "msg": "ERROR_WAIT_63"}
+		a[735] := {"enum": "ERROR_ABANDONED_WAIT_0", "msg": "ERROR_ABANDONED_WAIT_0"}
+		a[736] := {"enum": "ERROR_ABANDONED_WAIT_63", "msg": "ERROR_ABANDONED_WAIT_63"}
+		a[737] := {"enum": "ERROR_USER_APC", "msg": "ERROR_USER_APC"}
+		a[738] := {"enum": "ERROR_KERNEL_APC", "msg": "ERROR_KERNEL_APC"}
+		a[739] := {"enum": "ERROR_ALERTED", "msg": "ERROR_ALERTED"}
+		a[740] := {"enum": "ERROR_ELEVATION_REQUIRED", "msg": "The requested operation requires elevation."}
+		a[741] := {"enum": "ERROR_REPARSE", "msg": "A reparse should be performed by the Object Manager since the name of the file resulted in a symbolic link."}
+		a[742] := {"enum": "ERROR_OPLOCK_BREAK_IN_PROGRESS", "msg": "An open/create operation completed while an oplock break is underway."}
+		a[743] := {"enum": "ERROR_VOLUME_MOUNTED", "msg": "A new volume has been mounted by a file system."}
+		a[744] := {"enum": "ERROR_RXACT_COMMITTED", "msg": "This success level status indicates that the transaction state already exists for the registry sub-tree, but that a transaction commit was previously aborted. The commit has now been completed."}
+		a[745] := {"enum": "ERROR_NOTIFY_CLEANUP", "msg": "This indicates that a notify change request has been completed due to closing the handle which made the notify change request."}
+		a[746] := {"enum": "ERROR_PRIMARY_TRANSPORT_CONNECT_FAILED", "msg": "{Connect Failure on Primary Transport} An attempt was made to connect to the remote server `%hs on the primary transport, but the connection failed. The computer WAS able to connect on a secondary transport."}
+		a[747] := {"enum": "ERROR_PAGE_FAULT_TRANSITION", "msg": "Page fault was a transition fault."}
+		a[748] := {"enum": "ERROR_PAGE_FAULT_DEMAND_ZERO", "msg": "Page fault was a demand zero fault."}
+		a[749] := {"enum": "ERROR_PAGE_FAULT_COPY_ON_WRITE", "msg": "Page fault was a demand zero fault."}
+		a[750] := {"enum": "ERROR_PAGE_FAULT_GUARD_PAGE", "msg": "Page fault was a demand zero fault."}
+		a[751] := {"enum": "ERROR_PAGE_FAULT_PAGING_FILE", "msg": "Page fault was satisfied by reading from a secondary storage device."}
+		a[752] := {"enum": "ERROR_CACHE_PAGE_LOCKED", "msg": "Cached page was locked during operation."}
+		a[753] := {"enum": "ERROR_CRASH_DUMP", "msg": "Crash dump exists in paging file."}
+		a[754] := {"enum": "ERROR_BUFFER_ALL_ZEROS", "msg": "Specified buffer contains all zeros."}
+		a[755] := {"enum": "ERROR_REPARSE_OBJECT", "msg": "A reparse should be performed by the Object Manager since the name of the file resulted in a symbolic link."}
+		a[756] := {"enum": "ERROR_RESOURCE_REQUIREMENTS_CHANGED", "msg": "The device has succeeded a query-stop and its resource requirements have changed."}
+		a[757] := {"enum": "ERROR_TRANSLATION_COMPLETE", "msg": "The translator has translated these resources into the global space and no further translations should be performed."}
+		a[758] := {"enum": "ERROR_NOTHING_TO_TERMINATE", "msg": "A process being terminated has no threads to terminate."}
+		a[759] := {"enum": "ERROR_PROCESS_NOT_IN_JOB", "msg": "The specified process is not part of a job."}
+		a[760] := {"enum": "ERROR_PROCESS_IN_JOB", "msg": "The specified process is part of a job."}
+		a[761] := {"enum": "ERROR_VOLSNAP_HIBERNATE_READY", "msg": "{Volume Shadow Copy Service} The system is now ready for hibernation."}
+		a[762] := {"enum": "ERROR_FSFILTER_OP_COMPLETED_SUCCESSFULLY", "msg": "A file system or file system filter driver has successfully completed an FsFilter operation."}
+		a[763] := {"enum": "ERROR_INTERRUPT_VECTOR_ALREADY_CONNECTED", "msg": "The specified interrupt vector was already connected."}
+		a[764] := {"enum": "ERROR_INTERRUPT_STILL_CONNECTED", "msg": "The specified interrupt vector is still connected."}
+		a[765] := {"enum": "ERROR_WAIT_FOR_OPLOCK", "msg": "An operation is blocked waiting for an oplock."}
+		a[766] := {"enum": "ERROR_DBG_EXCEPTION_HANDLED", "msg": "Debugger handled exception."}
+		a[767] := {"enum": "ERROR_DBG_CONTINUE", "msg": "Debugger continued."}
+		a[768] := {"enum": "ERROR_CALLBACK_POP_STACK", "msg": "An exception occurred in a user mode callback and the kernel callback frame should be removed."}
+		a[769] := {"enum": "ERROR_COMPRESSION_DISABLED", "msg": "Compression is disabled for this volume."}
+		a[770] := {"enum": "ERROR_CANTFETCHBACKWARDS", "msg": "The data provider cannot fetch backwards through a result set."}
+		a[771] := {"enum": "ERROR_CANTSCROLLBACKWARDS", "msg": "The data provider cannot scroll backwards through a result set."}
+		a[772] := {"enum": "ERROR_ROWSNOTRELEASED", "msg": "The data provider requires that previously fetched data is released before asking for more data."}
+		a[773] := {"enum": "ERROR_BAD_ACCESSOR_FLAGS", "msg": "The data provider was not able to interpret the flags set for a column binding in an accessor."}
+		a[774] := {"enum": "ERROR_ERRORS_ENCOUNTERED", "msg": "One or more errors occurred while processing the request."}
+		a[775] := {"enum": "ERROR_NOT_CAPABLE", "msg": "The implementation is not capable of performing the request."}
+		a[776] := {"enum": "ERROR_REQUEST_OUT_OF_SEQUENCE", "msg": "The client of a component requested an operation which is not valid given the state of the component instance."}
+		a[777] := {"enum": "ERROR_VERSION_PARSE_ERROR", "msg": "A version number could not be parsed."}
+		a[778] := {"enum": "ERROR_BADSTARTPOSITION", "msg": "The iterator's start position is invalid."}
+		a[779] := {"enum": "ERROR_MEMORY_HARDWARE", "msg": "The hardware has reported an uncorrectable memory error."}
+		a[780] := {"enum": "ERROR_DISK_REPAIR_DISABLED", "msg": "The attempted operation required self healing to be enabled."}
+		a[781] := {"enum": "ERROR_INSUFFICIENT_RESOURCE_FOR_SPECIFIED_SHARED_SECTION_SIZE", "msg": "The Desktop heap encountered an error while allocating session memory. There is more information in the system event log."}
+		a[782] := {"enum": "ERROR_SYSTEM_POWERSTATE_TRANSITION", "msg": "The system power state is transitioning from `%2 to `%3."}
+		a[783] := {"enum": "ERROR_SYSTEM_POWERSTATE_COMPLEX_TRANSITION", "msg": "The system power state is transitioning from `%2 to `%3 but could enter `%4."}
+		a[784] := {"enum": "ERROR_MCA_EXCEPTION", "msg": "A thread is getting dispatched with MCA EXCEPTION because of MCA."}
+		a[785] := {"enum": "ERROR_ACCESS_AUDIT_BY_POLICY", "msg": "Access to `%1 is monitored by policy rule `%2."}
+		a[786] := {"enum": "ERROR_ACCESS_DISABLED_NO_SAFER_UI_BY_POLICY", "msg": "Access to `%1 has been restricted by your Administrator by policy rule `%2."}
+		a[787] := {"enum": "ERROR_ABANDON_HIBERFILE", "msg": "A valid hibernation file has been invalidated and should be abandoned."}
+		a[788] := {"enum": "ERROR_LOST_WRITEBEHIND_DATA_NETWORK_DISCONNECTED", "msg": "{Delayed Write Failed} Windows was unable to save all the data for the file `%hs; the data has been lost. This error may be caused by network connectivity issues. Please try to save this file elsewhere."}
+		a[789] := {"enum": "ERROR_LOST_WRITEBEHIND_DATA_NETWORK_SERVER_ERROR", "msg": "{Delayed Write Failed} Windows was unable to save all the data for the file `%hs; the data has been lost. This error was returned by the server on which the file exists. Please try to save this file elsewhere."}
+		a[790] := {"enum": "ERROR_LOST_WRITEBEHIND_DATA_LOCAL_DISK_ERROR", "msg": "{Delayed Write Failed} Windows was unable to save all the data for the file `%hs; the data has been lost. This error may be caused if the device has been removed or the media is write-protected."}
+		a[791] := {"enum": "ERROR_BAD_MCFG_TABLE", "msg": "The resources required for this device conflict with the MCFG table."}
+		a[792] := {"enum": "ERROR_DISK_REPAIR_REDIRECTED", "msg": "The volume repair could not be performed while it is online. Please schedule to take the volume offline so that it can be repaired."}
+		a[793] := {"enum": "ERROR_DISK_REPAIR_UNSUCCESSFUL", "msg": "The volume repair was not successful."}
+		a[794] := {"enum": "ERROR_CORRUPT_LOG_OVERFULL", "msg": "One of the volume corruption logs is full. Further corruptions that may be detected won't be logged."}
+		a[795] := {"enum": "ERROR_CORRUPT_LOG_CORRUPTED", "msg": "One of the volume corruption logs is internally corrupted and needs to be recreated. The volume may contain undetected corruptions and must be scanned."}
+		a[796] := {"enum": "ERROR_CORRUPT_LOG_UNAVAILABLE", "msg": "One of the volume corruption logs is unavailable for being operated on."}
+		a[797] := {"enum": "ERROR_CORRUPT_LOG_DELETED_FULL", "msg": "One of the volume corruption logs was deleted while still having corruption records in them. The volume contains detected corruptions and must be scanned."}
+		a[798] := {"enum": "ERROR_CORRUPT_LOG_CLEARED", "msg": "One of the volume corruption logs was cleared by chkdsk and no longer contains real corruptions."}
+		a[799] := {"enum": "ERROR_ORPHAN_NAME_EXHAUSTED", "msg": "Orphaned files exist on the volume but could not be recovered because no more new names could be created in the recovery directory. Files must be moved from the recovery directory."}
+		a[800] := {"enum": "ERROR_OPLOCK_SWITCHED_TO_NEW_HANDLE", "msg": "The oplock that was associated with this handle is now associated with a different handle."}
+		a[801] := {"enum": "ERROR_CANNOT_GRANT_REQUESTED_OPLOCK", "msg": "An oplock of the requested level cannot be granted. An oplock of a lower level may be available."}
+		a[802] := {"enum": "ERROR_CANNOT_BREAK_OPLOCK", "msg": "The operation did not complete successfully because it would cause an oplock to be broken. The caller has requested that existing oplocks not be broken."}
+		a[803] := {"enum": "ERROR_OPLOCK_HANDLE_CLOSED", "msg": "The handle with which this oplock was associated has been closed. The oplock is now broken."}
+		a[804] := {"enum": "ERROR_NO_ACE_CONDITION", "msg": "The specified access control entry (ACE) does not contain a condition."}
+		a[805] := {"enum": "ERROR_INVALID_ACE_CONDITION", "msg": "The specified access control entry (ACE) contains an invalid condition."}
+		a[806] := {"enum": "ERROR_FILE_HANDLE_REVOKED", "msg": "Access to the specified file handle has been revoked."}
+		a[807] := {"enum": "ERROR_IMAGE_AT_DIFFERENT_BASE", "msg": "An image file was mapped at a different address from the one specified in the image file but fixups will still be automatically performed on the image."}
+		a[994] := {"enum": "ERROR_EA_ACCESS_DENIED", "msg": "Access to the extended attribute was denied."}
+		a[995] := {"enum": "ERROR_OPERATION_ABORTED", "msg": "The I/O operation has been aborted because of either a thread exit or an application request."}
+		a[996] := {"enum": "ERROR_IO_INCOMPLETE", "msg": "Overlapped I/O event is not in a signaled state."}
+		a[997] := {"enum": "ERROR_IO_PENDING", "msg": "Overlapped I/O operation is in progress."}
+		a[998] := {"enum": "ERROR_NOACCESS", "msg": "Invalid access to memory location."}
+		a[999] := {"enum": "ERROR_SWAPERROR", "msg": "Error performing inpage operation."}
+		a[1001] := {"enum": "ERROR_STACK_OVERFLOW", "msg": "Recursion too deep; the stack overflowed."}
+		a[1002] := {"enum": "ERROR_INVALID_MESSAGE", "msg": "The window cannot act on the sent message."}
+		a[1003] := {"enum": "ERROR_CAN_NOT_COMPLETE", "msg": "Cannot complete this function."}
+		a[1004] := {"enum": "ERROR_INVALID_FLAGS", "msg": "Invalid flags."}
+		a[1005] := {"enum": "ERROR_UNRECOGNIZED_VOLUME", "msg": "The volume does not contain a recognized file system. Please make sure that all required file system drivers are loaded and that the volume is not corrupted."}
+		a[1006] := {"enum": "ERROR_FILE_INVALID", "msg": "The volume for a file has been externally altered so that the opened file is no longer valid."}
+		a[1007] := {"enum": "ERROR_FULLSCREEN_MODE", "msg": "The requested operation cannot be performed in full-screen mode."}
+		a[1008] := {"enum": "ERROR_NO_TOKEN", "msg": "An attempt was made to reference a token that does not exist."}
+		a[1009] := {"enum": "ERROR_BADDB", "msg": "The configuration registry database is corrupt."}
+		a[1010] := {"enum": "ERROR_BADKEY", "msg": "The configuration registry key is invalid."}
+		a[1011] := {"enum": "ERROR_CANTOPEN", "msg": "The configuration registry key could not be opened."}
+		a[1012] := {"enum": "ERROR_CANTREAD", "msg": "The configuration registry key could not be read."}
+		a[1013] := {"enum": "ERROR_CANTWRITE", "msg": "The configuration registry key could not be written."}
+		a[1014] := {"enum": "ERROR_REGISTRY_RECOVERED", "msg": "One of the files in the registry database had to be recovered by use of a log or alternate copy. The recovery was successful."}
+		a[1015] := {"enum": "ERROR_REGISTRY_CORRUPT", "msg": "The registry is corrupted. The structure of one of the files containing registry data is corrupted, or the system's memory image of the file is corrupted, or the file could not be recovered because the alternate copy or log was absent or corrupted."}
+		a[1016] := {"enum": "ERROR_REGISTRY_IO_FAILED", "msg": "An I/O operation initiated by the registry failed unrecoverably. The registry could not read in, or write out, or flush, one of the files that contain the system's image of the registry."}
+		a[1017] := {"enum": "ERROR_NOT_REGISTRY_FILE", "msg": "The system has attempted to load or restore a file into the registry, but the specified file is not in a registry file format."}
+		a[1018] := {"enum": "ERROR_KEY_DELETED", "msg": "Illegal operation attempted on a registry key that has been marked for deletion."}
+		a[1019] := {"enum": "ERROR_NO_LOG_SPACE", "msg": "System could not allocate the required space in a registry log."}
+		a[1020] := {"enum": "ERROR_KEY_HAS_CHILDREN", "msg": "Cannot create a symbolic link in a registry key that already has subkeys or values."}
+		a[1021] := {"enum": "ERROR_CHILD_MUST_BE_VOLATILE", "msg": "Cannot create a stable subkey under a volatile parent key."}
+		a[1022] := {"enum": "ERROR_NOTIFY_ENUM_DIR", "msg": "A notify change request is being completed and the information is not being returned in the caller's buffer. The caller now needs to enumerate the files to find the changes."}
+		a[1051] := {"enum": "ERROR_DEPENDENT_SERVICES_RUNNING", "msg": "A stop control has been sent to a service that other running services are dependent on."}
+		a[1052] := {"enum": "ERROR_INVALID_SERVICE_CONTROL", "msg": "The requested control is not valid for this service."}
+		a[1053] := {"enum": "ERROR_SERVICE_REQUEST_TIMEOUT", "msg": "The service did not respond to the start or control request in a timely fashion."}
+		a[1054] := {"enum": "ERROR_SERVICE_NO_THREAD", "msg": "A thread could not be created for the service."}
+		a[1055] := {"enum": "ERROR_SERVICE_DATABASE_LOCKED", "msg": "The service database is locked."}
+		a[1056] := {"enum": "ERROR_SERVICE_ALREADY_RUNNING", "msg": "An instance of the service is already running."}
+		a[1057] := {"enum": "ERROR_INVALID_SERVICE_ACCOUNT", "msg": "The account name is invalid or does not exist, or the password is invalid for the account name specified."}
+		a[1058] := {"enum": "ERROR_SERVICE_DISABLED", "msg": "The service cannot be started, either because it is disabled or because it has no enabled devices associated with it."}
+		a[1059] := {"enum": "ERROR_CIRCULAR_DEPENDENCY", "msg": "Circular service dependency was specified."}
+		a[1060] := {"enum": "ERROR_SERVICE_DOES_NOT_EXIST", "msg": "The specified service does not exist as an installed service."}
+		a[1061] := {"enum": "ERROR_SERVICE_CANNOT_ACCEPT_CTRL", "msg": "The service cannot accept control messages at this time."}
+		a[1062] := {"enum": "ERROR_SERVICE_NOT_ACTIVE", "msg": "The service has not been started."}
+		a[1063] := {"enum": "ERROR_FAILED_SERVICE_CONTROLLER_CONNECT", "msg": "The service process could not connect to the service controller."}
+		a[1064] := {"enum": "ERROR_EXCEPTION_IN_SERVICE", "msg": "An exception occurred in the service when handling the control request."}
+		a[1065] := {"enum": "ERROR_DATABASE_DOES_NOT_EXIST", "msg": "The database specified does not exist."}
+		a[1066] := {"enum": "ERROR_SERVICE_SPECIFIC_ERROR", "msg": "The service has returned a service-specific error code."}
+		a[1067] := {"enum": "ERROR_PROCESS_ABORTED", "msg": "The process terminated unexpectedly."}
+		a[1068] := {"enum": "ERROR_SERVICE_DEPENDENCY_FAIL", "msg": "The dependency service or group failed to start."}
+		a[1069] := {"enum": "ERROR_SERVICE_LOGON_FAILED", "msg": "The service did not start due to a logon failure."}
+		a[1070] := {"enum": "ERROR_SERVICE_START_HANG", "msg": "After starting, the service hung in a start-pending state."}
+		a[1071] := {"enum": "ERROR_INVALID_SERVICE_LOCK", "msg": "The specified service database lock is invalid."}
+		a[1072] := {"enum": "ERROR_SERVICE_MARKED_FOR_DELETE", "msg": "The specified service has been marked for deletion."}
+		a[1073] := {"enum": "ERROR_SERVICE_EXISTS", "msg": "The specified service already exists."}
+		a[1074] := {"enum": "ERROR_ALREADY_RUNNING_LKG", "msg": "The system is currently running with the last-known-good configuration."}
+		a[1075] := {"enum": "ERROR_SERVICE_DEPENDENCY_DELETED", "msg": "The dependency service does not exist or has been marked for deletion."}
+		a[1076] := {"enum": "ERROR_BOOT_ALREADY_ACCEPTED", "msg": "The current boot has already been accepted for use as the last-known-good control set."}
+		a[1077] := {"enum": "ERROR_SERVICE_NEVER_STARTED", "msg": "No attempts to start the service have been made since the last boot."}
+		a[1078] := {"enum": "ERROR_DUPLICATE_SERVICE_NAME", "msg": "The name is already in use as either a service name or a service display name."}
+		a[1079] := {"enum": "ERROR_DIFFERENT_SERVICE_ACCOUNT", "msg": "The account specified for this service is different from the account specified for other services running in the same process."}
+		a[1080] := {"enum": "ERROR_CANNOT_DETECT_DRIVER_FAILURE", "msg": "Failure actions can only be set for Win32 services, not for drivers."}
+		a[1081] := {"enum": "ERROR_CANNOT_DETECT_PROCESS_ABORT", "msg": "This service runs in the same process as the service control manager. Therefore, the service control manager cannot take action if this service's process terminates unexpectedly."}
+		a[1082] := {"enum": "ERROR_NO_RECOVERY_PROGRAM", "msg": "No recovery program has been configured for this service."}
+		a[1083] := {"enum": "ERROR_SERVICE_NOT_IN_EXE", "msg": "The executable program that this service is configured to run in does not implement the service."}
+		a[1084] := {"enum": "ERROR_NOT_SAFEBOOT_SERVICE", "msg": "This service cannot be started in Safe Mode."}
+		a[1100] := {"enum": "ERROR_END_OF_MEDIA", "msg": "The physical end of the tape has been reached."}
+		a[1101] := {"enum": "ERROR_FILEMARK_DETECTED", "msg": "A tape access reached a filemark."}
+		a[1102] := {"enum": "ERROR_BEGINNING_OF_MEDIA", "msg": "The beginning of the tape or a partition was encountered."}
+		a[1103] := {"enum": "ERROR_SETMARK_DETECTED", "msg": "A tape access reached the end of a set of files."}
+		a[1104] := {"enum": "ERROR_NO_DATA_DETECTED", "msg": "No more data is on the tape."}
+		a[1105] := {"enum": "ERROR_PARTITION_FAILURE", "msg": "Tape could not be partitioned."}
+		a[1106] := {"enum": "ERROR_INVALID_BLOCK_LENGTH", "msg": "When accessing a new tape of a multivolume partition, the current block size is incorrect."}
+		a[1107] := {"enum": "ERROR_DEVICE_NOT_PARTITIONED", "msg": "Tape partition information could not be found when loading a tape."}
+		a[1108] := {"enum": "ERROR_UNABLE_TO_LOCK_MEDIA", "msg": "Unable to lock the media eject mechanism."}
+		a[1109] := {"enum": "ERROR_UNABLE_TO_UNLOAD_MEDIA", "msg": "Unable to unload the media."}
+		a[1110] := {"enum": "ERROR_MEDIA_CHANGED", "msg": "The media in the drive may have changed."}
+		a[1111] := {"enum": "ERROR_BUS_RESET", "msg": "The I/O bus was reset."}
+		a[1112] := {"enum": "ERROR_NO_MEDIA_IN_DRIVE", "msg": "No media in drive."}
+		a[1113] := {"enum": "ERROR_NO_UNICODE_TRANSLATION", "msg": "No mapping for the Unicode character exists in the target multi-byte code page."}
+		a[1114] := {"enum": "ERROR_DLL_INIT_FAILED", "msg": "A dynamic link library (DLL) initialization routine failed."}
+		a[1115] := {"enum": "ERROR_SHUTDOWN_IN_PROGRESS", "msg": "A system shutdown is in progress."}
+		a[1116] := {"enum": "ERROR_NO_SHUTDOWN_IN_PROGRESS", "msg": "Unable to abort the system shutdown because no shutdown was in progress."}
+		a[1117] := {"enum": "ERROR_IO_DEVICE", "msg": "The request could not be performed because of an I/O device error."}
+		a[1118] := {"enum": "ERROR_SERIAL_NO_DEVICE", "msg": "No serial device was successfully initialized. The serial driver will unload."}
+		a[1119] := {"enum": "ERROR_IRQ_BUSY", "msg": "Unable to open a device that was sharing an interrupt request (IRQ) with other devices. At least one other device that uses that IRQ was already opened."}
+		a[1120] := {"enum": "ERROR_MORE_WRITES", "msg": "A serial I/O operation was completed by another write to the serial port. The IOCTL_SERIAL_XOFF_COUNTER reached zero.)"}
+		a[1121] := {"enum": "ERROR_COUNTER_TIMEOUT", "msg": "A serial I/O operation completed because the timeout period expired. The IOCTL_SERIAL_XOFF_COUNTER did not reach zero.)"}
+		a[1122] := {"enum": "ERROR_FLOPPY_ID_MARK_NOT_FOUND", "msg": "No ID address mark was found on the floppy disk."}
+		a[1123] := {"enum": "ERROR_FLOPPY_WRONG_CYLINDER", "msg": "Mismatch between the floppy disk sector ID field and the floppy disk controller track address."}
+		a[1124] := {"enum": "ERROR_FLOPPY_UNKNOWN_ERROR", "msg": "The floppy disk controller reported an error that is not recognized by the floppy disk driver."}
+		a[1125] := {"enum": "ERROR_FLOPPY_BAD_REGISTERS", "msg": "The floppy disk controller returned inconsistent results in its registers."}
+		a[1126] := {"enum": "ERROR_DISK_RECALIBRATE_FAILED", "msg": "While accessing the hard disk, a recalibrate operation failed, even after retries."}
+		a[1127] := {"enum": "ERROR_DISK_OPERATION_FAILED", "msg": "While accessing the hard disk, a disk operation failed even after retries."}
+		a[1128] := {"enum": "ERROR_DISK_RESET_FAILED", "msg": "While accessing the hard disk, a disk controller reset was needed, but even that failed."}
+		a[1129] := {"enum": "ERROR_EOM_OVERFLOW", "msg": "Physical end of tape encountered."}
+		a[1130] := {"enum": "ERROR_NOT_ENOUGH_SERVER_MEMORY", "msg": "Not enough server storage is available to process this command."}
+		a[1131] := {"enum": "ERROR_POSSIBLE_DEADLOCK", "msg": "A potential deadlock condition has been detected."}
+		a[1132] := {"enum": "ERROR_MAPPED_ALIGNMENT", "msg": "The base address or the file offset specified does not have the proper alignment."}
+		a[1140] := {"enum": "ERROR_SET_POWER_STATE_VETOED", "msg": "An attempt to change the system power state was vetoed by another application or driver."}
+		a[1141] := {"enum": "ERROR_SET_POWER_STATE_FAILED", "msg": "The system BIOS failed an attempt to change the system power state."}
+		a[1142] := {"enum": "ERROR_TOO_MANY_LINKS", "msg": "An attempt was made to create more links on a file than the file system supports."}
+		a[1150] := {"enum": "ERROR_OLD_WIN_VERSION", "msg": "The specified program requires a newer version of Windows."}
+		a[1151] := {"enum": "ERROR_APP_WRONG_OS", "msg": "The specified program is not a Windows or MS-DOS program."}
+		a[1152] := {"enum": "ERROR_SINGLE_INSTANCE_APP", "msg": "Cannot start more than one instance of the specified program."}
+		a[1153] := {"enum": "ERROR_RMODE_APP", "msg": "The specified program was written for an earlier version of Windows."}
+		a[1154] := {"enum": "ERROR_INVALID_DLL", "msg": "One of the library files needed to run this application is damaged."}
+		a[1155] := {"enum": "ERROR_NO_ASSOCIATION", "msg": "No application is associated with the specified file for this operation."}
+		a[1156] := {"enum": "ERROR_DDE_FAIL", "msg": "An error occurred in sending the command to the application."}
+		a[1157] := {"enum": "ERROR_DLL_NOT_FOUND", "msg": "One of the library files needed to run this application cannot be found."}
+		a[1158] := {"enum": "ERROR_NO_MORE_USER_HANDLES", "msg": "The current process has used all of its system allowance of handles for Window Manager objects."}
+		a[1159] := {"enum": "ERROR_MESSAGE_SYNC_ONLY", "msg": "The message can be used only with synchronous operations."}
+		a[1160] := {"enum": "ERROR_SOURCE_ELEMENT_EMPTY", "msg": "The indicated source element has no media."}
+		a[1161] := {"enum": "ERROR_DESTINATION_ELEMENT_FULL", "msg": "The indicated destination element already contains media."}
+		a[1162] := {"enum": "ERROR_ILLEGAL_ELEMENT_ADDRESS", "msg": "The indicated element does not exist."}
+		a[1163] := {"enum": "ERROR_MAGAZINE_NOT_PRESENT", "msg": "The indicated element is part of a magazine that is not present."}
+		a[1164] := {"enum": "ERROR_DEVICE_REINITIALIZATION_NEEDED", "msg": "The indicated device requires reinitialization due to hardware errors."}
+		a[1165] := {"enum": "ERROR_DEVICE_REQUIRES_CLEANING", "msg": "The device has indicated that cleaning is required before further operations are attempted."}
+		a[1166] := {"enum": "ERROR_DEVICE_DOOR_OPEN", "msg": "The device has indicated that its door is open."}
+		a[1167] := {"enum": "ERROR_DEVICE_NOT_CONNECTED", "msg": "The device is not connected."}
+		a[1168] := {"enum": "ERROR_NOT_FOUND", "msg": "Element not found."}
+		a[1169] := {"enum": "ERROR_NO_MATCH", "msg": "There was no match for the specified key in the index."}
+		a[1170] := {"enum": "ERROR_SET_NOT_FOUND", "msg": "The property set specified does not exist on the object."}
+		a[1171] := {"enum": "ERROR_POINT_NOT_FOUND", "msg": "The point passed to GetMouseMovePoints is not in the buffer."}
+		a[1172] := {"enum": "ERROR_NO_TRACKING_SERVICE", "msg": "The tracking (workstation) service is not running."}
+		a[1173] := {"enum": "ERROR_NO_VOLUME_ID", "msg": "The Volume ID could not be found."}
+		a[1175] := {"enum": "ERROR_UNABLE_TO_REMOVE_REPLACED", "msg": "Unable to remove the file to be replaced."}
+		a[1176] := {"enum": "ERROR_UNABLE_TO_MOVE_REPLACEMENT", "msg": "Unable to move the replacement file to the file to be replaced. The file to be replaced has retained its original name."}
+		a[1177] := {"enum": "ERROR_UNABLE_TO_MOVE_REPLACEMENT_2", "msg": "Unable to move the replacement file to the file to be replaced. The file to be replaced has been renamed using the backup name."}
+		a[1178] := {"enum": "ERROR_JOURNAL_DELETE_IN_PROGRESS", "msg": "The volume change journal is being deleted."}
+		a[1179] := {"enum": "ERROR_JOURNAL_NOT_ACTIVE", "msg": "The volume change journal is not active."}
+		a[1180] := {"enum": "ERROR_POTENTIAL_FILE_FOUND", "msg": "A file was found, but it may not be the correct file."}
+		a[1181] := {"enum": "ERROR_JOURNAL_ENTRY_DELETED", "msg": "The journal entry has been deleted from the journal."}
+		a[1190] := {"enum": "ERROR_SHUTDOWN_IS_SCHEDULED", "msg": "A system shutdown has already been scheduled."}
+		a[1191] := {"enum": "ERROR_SHUTDOWN_USERS_LOGGED_ON", "msg": "The system shutdown cannot be initiated because there are other users logged on to the computer."}
+		a[1200] := {"enum": "ERROR_BAD_DEVICE", "msg": "The specified device name is invalid."}
+		a[1201] := {"enum": "ERROR_CONNECTION_UNAVAIL", "msg": "The device is not currently connected but it is a remembered connection."}
+		a[1202] := {"enum": "ERROR_DEVICE_ALREADY_REMEMBERED", "msg": "The local device name has a remembered connection to another network resource."}
+		a[1203] := {"enum": "ERROR_NO_NET_OR_BAD_PATH", "msg": "The network path was either typed incorrectly, does not exist, or the network provider is not currently available. Please try retyping the path or contact your network administrator."}
+		a[1204] := {"enum": "ERROR_BAD_PROVIDER", "msg": "The specified network provider name is invalid."}
+		a[1205] := {"enum": "ERROR_CANNOT_OPEN_PROFILE", "msg": "Unable to open the network connection profile."}
+		a[1206] := {"enum": "ERROR_BAD_PROFILE", "msg": "The network connection profile is corrupted."}
+		a[1207] := {"enum": "ERROR_NOT_CONTAINER", "msg": "Cannot enumerate a noncontainer."}
+		a[1208] := {"enum": "ERROR_EXTENDED_ERROR", "msg": "An extended error has occurred."}
+		a[1209] := {"enum": "ERROR_INVALID_GROUPNAME", "msg": "The format of the specified group name is invalid."}
+		a[1210] := {"enum": "ERROR_INVALID_COMPUTERNAME", "msg": "The format of the specified computer name is invalid."}
+		a[1211] := {"enum": "ERROR_INVALID_EVENTNAME", "msg": "The format of the specified event name is invalid."}
+		a[1212] := {"enum": "ERROR_INVALID_DOMAINNAME", "msg": "The format of the specified domain name is invalid."}
+		a[1213] := {"enum": "ERROR_INVALID_SERVICENAME", "msg": "The format of the specified service name is invalid."}
+		a[1214] := {"enum": "ERROR_INVALID_NETNAME", "msg": "The format of the specified network name is invalid."}
+		a[1215] := {"enum": "ERROR_INVALID_SHARENAME", "msg": "The format of the specified share name is invalid."}
+		a[1216] := {"enum": "ERROR_INVALID_PASSWORDNAME", "msg": "The format of the specified password is invalid."}
+		a[1217] := {"enum": "ERROR_INVALID_MESSAGENAME", "msg": "The format of the specified message name is invalid."}
+		a[1218] := {"enum": "ERROR_INVALID_MESSAGEDEST", "msg": "The format of the specified message destination is invalid."}
+		a[1219] := {"enum": "ERROR_SESSION_CREDENTIAL_CONFLICT", "msg": "Multiple connections to a server or shared resource by the same user, using more than one user name, are not allowed. Disconnect all previous connections to the server or shared resource and try again."}
+		a[1220] := {"enum": "ERROR_REMOTE_SESSION_LIMIT_EXCEEDED", "msg": "An attempt was made to establish a session to a network server, but there are already too many sessions established to that server."}
+		a[1221] := {"enum": "ERROR_DUP_DOMAINNAME", "msg": "The workgroup or domain name is already in use by another computer on the network."}
+		a[1222] := {"enum": "ERROR_NO_NETWORK", "msg": "The network is not present or not started."}
+		a[1223] := {"enum": "ERROR_CANCELLED", "msg": "The operation was canceled by the user."}
+		a[1224] := {"enum": "ERROR_USER_MAPPED_FILE", "msg": "The requested operation cannot be performed on a file with a user-mapped section open."}
+		a[1225] := {"enum": "ERROR_CONNECTION_REFUSED", "msg": "The remote computer refused the network connection."}
+		a[1226] := {"enum": "ERROR_GRACEFUL_DISCONNECT", "msg": "The network connection was gracefully closed."}
+		a[1227] := {"enum": "ERROR_ADDRESS_ALREADY_ASSOCIATED", "msg": "The network transport endpoint already has an address associated with it."}
+		a[1228] := {"enum": "ERROR_ADDRESS_NOT_ASSOCIATED", "msg": "An address has not yet been associated with the network endpoint."}
+		a[1229] := {"enum": "ERROR_CONNECTION_INVALID", "msg": "An operation was attempted on a nonexistent network connection."}
+		a[1230] := {"enum": "ERROR_CONNECTION_ACTIVE", "msg": "An invalid operation was attempted on an active network connection."}
+		a[1231] := {"enum": "ERROR_NETWORK_UNREACHABLE", "msg": "The network location cannot be reached. For information about network troubleshooting, see Windows Help."}
+		a[1232] := {"enum": "ERROR_HOST_UNREACHABLE", "msg": "The network location cannot be reached. For information about network troubleshooting, see Windows Help."}
+		a[1233] := {"enum": "ERROR_PROTOCOL_UNREACHABLE", "msg": "The network location cannot be reached. For information about network troubleshooting, see Windows Help."}
+		a[1234] := {"enum": "ERROR_PORT_UNREACHABLE", "msg": "No service is operating at the destination network endpoint on the remote system."}
+		a[1235] := {"enum": "ERROR_REQUEST_ABORTED", "msg": "The request was aborted."}
+		a[1236] := {"enum": "ERROR_CONNECTION_ABORTED", "msg": "The network connection was aborted by the local system."}
+		a[1237] := {"enum": "ERROR_RETRY", "msg": "The operation could not be completed. A retry should be performed."}
+		a[1238] := {"enum": "ERROR_CONNECTION_COUNT_LIMIT", "msg": "A connection to the server could not be made because the limit on the number of concurrent connections for this account has been reached."}
+		a[1239] := {"enum": "ERROR_LOGIN_TIME_RESTRICTION", "msg": "Attempting to log in during an unauthorized time of day for this account."}
+		a[1240] := {"enum": "ERROR_LOGIN_WKSTA_RESTRICTION", "msg": "The account is not authorized to log in from this station."}
+		a[1241] := {"enum": "ERROR_INCORRECT_ADDRESS", "msg": "The network address could not be used for the operation requested."}
+		a[1242] := {"enum": "ERROR_ALREADY_REGISTERED", "msg": "The service is already registered."}
+		a[1243] := {"enum": "ERROR_SERVICE_NOT_FOUND", "msg": "The specified service does not exist."}
+		a[1244] := {"enum": "ERROR_NOT_AUTHENTICATED", "msg": "The operation being requested was not performed because the user has not been authenticated."}
+		a[1245] := {"enum": "ERROR_NOT_LOGGED_ON", "msg": "The operation being requested was not performed because the user has not logged on to the network. The specified service does not exist."}
+		a[1246] := {"enum": "ERROR_CONTINUE", "msg": "Continue with work in progress."}
+		a[1247] := {"enum": "ERROR_ALREADY_INITIALIZED", "msg": "An attempt was made to perform an initialization operation when initialization has already been completed."}
+		a[1248] := {"enum": "ERROR_NO_MORE_DEVICES", "msg": "No more local devices."}
+		a[1249] := {"enum": "ERROR_NO_SUCH_SITE", "msg": "The specified site does not exist."}
+		a[1250] := {"enum": "ERROR_DOMAIN_CONTROLLER_EXISTS", "msg": "A domain controller with the specified name already exists."}
+		a[1251] := {"enum": "ERROR_ONLY_IF_CONNECTED", "msg": "This operation is supported only when you are connected to the server."}
+		a[1252] := {"enum": "ERROR_OVERRIDE_NOCHANGES", "msg": "The group policy framework should call the extension even if there are no changes."}
+		a[1253] := {"enum": "ERROR_BAD_USER_PROFILE", "msg": "The specified user does not have a valid profile."}
+		a[1254] := {"enum": "ERROR_NOT_SUPPORTED_ON_SBS", "msg": "This operation is not supported on a computer running Windows Server 2003 for Small Business Server."}
+		a[1255] := {"enum": "ERROR_SERVER_SHUTDOWN_IN_PROGRESS", "msg": "The server machine is shutting down."}
+		a[1256] := {"enum": "ERROR_HOST_DOWN", "msg": "The remote system is not available. For information about network troubleshooting, see Windows Help."}
+		a[1257] := {"enum": "ERROR_NON_ACCOUNT_SID", "msg": "The security identifier provided is not from an account domain."}
+		a[1258] := {"enum": "ERROR_NON_DOMAIN_SID", "msg": "The security identifier provided does not have a domain component."}
+		a[1259] := {"enum": "ERROR_APPHELP_BLOCK", "msg": "AppHelp dialog canceled thus preventing the application from starting."}
+		a[1260] := {"enum": "ERROR_ACCESS_DISABLED_BY_POLICY", "msg": "This program is blocked by group policy. For more information, contact your system administrator."}
+		a[1261] := {"enum": "ERROR_REG_NAT_CONSUMPTION", "msg": "A program attempt to use an invalid register value. Normally caused by an uninitialized register. This error is Itanium specific."}
+		a[1262] := {"enum": "ERROR_CSCSHARE_OFFLINE", "msg": "The share is currently offline or does not exist."}
+		a[1263] := {"enum": "ERROR_PKINIT_FAILURE", "msg": "The Kerberos protocol encountered an error while validating the KDC certificate during smartcard logon. There is more information in the system event log."}
+		a[1264] := {"enum": "ERROR_SMARTCARD_SUBSYSTEM_FAILURE", "msg": "The Kerberos protocol encountered an error while attempting to utilize the smartcard subsystem."}
+		a[1265] := {"enum": "ERROR_DOWNGRADE_DETECTED", "msg": "The system cannot contact a domain controller to service the authentication request. Please try again later."}
+		a[1271] := {"enum": "ERROR_MACHINE_LOCKED", "msg": "The machine is locked and cannot be shut down without the force option."}
+		a[1273] := {"enum": "ERROR_CALLBACK_SUPPLIED_INVALID_DATA", "msg": "An application-defined callback gave invalid data when called."}
+		a[1274] := {"enum": "ERROR_SYNC_FOREGROUND_REFRESH_REQUIRED", "msg": "The group policy framework should call the extension in the synchronous foreground policy refresh."}
+		a[1275] := {"enum": "ERROR_DRIVER_BLOCKED", "msg": "This driver has been blocked from loading."}
+		a[1276] := {"enum": "ERROR_INVALID_IMPORT_OF_NON_DLL", "msg": "A dynamic link library (DLL) referenced a module that was neither a DLL nor the process's executable image."}
+		a[1277] := {"enum": "ERROR_ACCESS_DISABLED_WEBBLADE", "msg": "Windows cannot open this program since it has been disabled."}
+		a[1278] := {"enum": "ERROR_ACCESS_DISABLED_WEBBLADE_TAMPER", "msg": "Windows cannot open this program because the license enforcement system has been tampered with or become corrupted."}
+		a[1279] := {"enum": "ERROR_RECOVERY_FAILURE", "msg": "A transaction recover failed."}
+		a[1280] := {"enum": "ERROR_ALREADY_FIBER", "msg": "The current thread has already been converted to a fiber."}
+		a[1281] := {"enum": "ERROR_ALREADY_THREAD", "msg": "The current thread has already been converted from a fiber."}
+		a[1282] := {"enum": "ERROR_STACK_BUFFER_OVERRUN", "msg": "The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application."}
+		a[1283] := {"enum": "ERROR_PARAMETER_QUOTA_EXCEEDED", "msg": "Data present in one of the parameters is more than the function can operate on."}
+		a[1284] := {"enum": "ERROR_DEBUGGER_INACTIVE", "msg": "An attempt to do an operation on a debug object failed because the object is in the process of being deleted."}
+		a[1285] := {"enum": "ERROR_DELAY_LOAD_FAILED", "msg": "An attempt to delay-load a .dll or get a function address in a delay-loaded .dll failed."}
+		a[1286] := {"enum": "ERROR_VDM_DISALLOWED", "msg": "`%1 is a 16-bit application. You do not have permissions to execute 16-bit applications. Check your permissions with your system administrator."}
+		a[1287] := {"enum": "ERROR_UNIDENTIFIED_ERROR", "msg": "Insufficient information exists to identify the cause of failure."}
+		a[1288] := {"enum": "ERROR_INVALID_CRUNTIME_PARAMETER", "msg": "The parameter passed to a C runtime function is incorrect."}
+		a[1289] := {"enum": "ERROR_BEYOND_VDL", "msg": "The operation occurred beyond the valid data length of the file."}
+		a[1290] := {"enum": "ERROR_INCOMPATIBLE_SERVICE_SID_TYPE", "msg": "The service start failed since one or more services in the same process have an incompatible service SID type setting. A service with restricted service SID type can only coexist in the same process with other services with a restricted SID type. If the service SID type for this service was just configured, the hosting process must be restarted in order to start this service.`nOn Windows Server 2003 and Windows XP, an unrestricted service cannot coexist in the same process with other services. The service with the unrestricted service SID type must be moved to an owned process in order to start this service."}
+		a[1291] := {"enum": "ERROR_DRIVER_PROCESS_TERMINATED", "msg": "The process hosting the driver for this device has been terminated."}
+		a[1292] := {"enum": "ERROR_IMPLEMENTATION_LIMIT", "msg": "An operation attempted to exceed an implementation-defined limit."}
+		a[1293] := {"enum": "ERROR_PROCESS_IS_PROTECTED", "msg": "Either the target process, or the target thread's containing process, is a protected process."}
+		a[1294] := {"enum": "ERROR_SERVICE_NOTIFY_CLIENT_LAGGING", "msg": "The service notification client is lagging too far behind the current state of services in the machine."}
+		a[1295] := {"enum": "ERROR_DISK_QUOTA_EXCEEDED", "msg": "The requested file operation failed because the storage quota was exceeded. To free up disk space, move files to a different location or delete unnecessary files. For more information, contact your system administrator."}
+		a[1296] := {"enum": "ERROR_CONTENT_BLOCKED", "msg": "The requested file operation failed because the storage policy blocks that type of file. For more information, contact your system administrator."}
+		a[1297] := {"enum": "ERROR_INCOMPATIBLE_SERVICE_PRIVILEGE", "msg": "A privilege that the service requires to function properly does not exist in the service account configuration. You may use the Services Microsoft Management Console (MMC) snap-in (services.msc) and the Local Security Settings MMC snap-in (secpol.msc) to view the service configuration and the account configuration."}
+		a[1298] := {"enum": "ERROR_APP_HANG", "msg": "A thread involved in this operation appears to be unresponsive."}
+		a[1299] := {"enum": "ERROR_INVALID_LABEL", "msg": "Indicates a particular Security ID may not be assigned as the label of an object."}
+		a[1300] := {"enum": "ERROR_NOT_ALL_ASSIGNED", "msg": "Not all privileges or groups referenced are assigned to the caller."}
+		a[1301] := {"enum": "ERROR_SOME_NOT_MAPPED", "msg": "Some mapping between account names and security IDs was not done."}
+		a[1302] := {"enum": "ERROR_NO_QUOTAS_FOR_ACCOUNT", "msg": "No system quota limits are specifically set for this account."}
+		a[1303] := {"enum": "ERROR_LOCAL_USER_SESSION_KEY", "msg": "No encryption key is available. A well-known encryption key was returned."}
+		a[1304] := {"enum": "ERROR_NULL_LM_PASSWORD", "msg": "The password is too complex to be converted to a LAN Manager password. The LAN Manager password returned is a <strong>NULL</strong> string."}
+		a[1305] := {"enum": "ERROR_UNKNOWN_REVISION", "msg": "The revision level is unknown."}
+		a[1306] := {"enum": "ERROR_REVISION_MISMATCH", "msg": "Indicates two revision levels are incompatible."}
+		a[1307] := {"enum": "ERROR_INVALID_OWNER", "msg": "This security ID may not be assigned as the owner of this object."}
+		a[1308] := {"enum": "ERROR_INVALID_PRIMARY_GROUP", "msg": "This security ID may not be assigned as the primary group of an object."}
+		a[1309] := {"enum": "ERROR_NO_IMPERSONATION_TOKEN", "msg": "An attempt has been made to operate on an impersonation token by a thread that is not currently impersonating a client."}
+		a[1310] := {"enum": "ERROR_CANT_DISABLE_MANDATORY", "msg": "The group may not be disabled."}
+		a[1311] := {"enum": "ERROR_NO_LOGON_SERVERS", "msg": "There are currently no logon servers available to service the logon request."}
+		a[1312] := {"enum": "ERROR_NO_SUCH_LOGON_SESSION", "msg": "A specified logon session does not exist. It may already have been terminated."}
+		a[1313] := {"enum": "ERROR_NO_SUCH_PRIVILEGE", "msg": "A specified privilege does not exist."}
+		a[1314] := {"enum": "ERROR_PRIVILEGE_NOT_HELD", "msg": "A required privilege is not held by the client."}
+		a[1315] := {"enum": "ERROR_INVALID_ACCOUNT_NAME", "msg": "The name provided is not a properly formed account name."}
+		a[1316] := {"enum": "ERROR_USER_EXISTS", "msg": "The specified account already exists."}
+		a[1317] := {"enum": "ERROR_NO_SUCH_USER", "msg": "The specified account does not exist."}
+		a[1318] := {"enum": "ERROR_GROUP_EXISTS", "msg": "The specified group already exists."}
+		a[1319] := {"enum": "ERROR_NO_SUCH_GROUP", "msg": "The specified group does not exist."}
+		a[1320] := {"enum": "ERROR_MEMBER_IN_GROUP", "msg": "Either the specified user account is already a member of the specified group, or the specified group cannot be deleted because it contains a member."}
+		a[1321] := {"enum": "ERROR_MEMBER_NOT_IN_GROUP", "msg": "The specified user account is not a member of the specified group account."}
+		a[1322] := {"enum": "ERROR_LAST_ADMIN", "msg": "This operation is disallowed as it could result in an administration account being disabled, deleted or unable to log on."}
+		a[1323] := {"enum": "ERROR_WRONG_PASSWORD", "msg": "Unable to update the password. The value provided as the current password is incorrect."}
+		a[1324] := {"enum": "ERROR_ILL_FORMED_PASSWORD", "msg": "Unable to update the password. The value provided for the new password contains values that are not allowed in passwords."}
+		a[1325] := {"enum": "ERROR_PASSWORD_RESTRICTION", "msg": "Unable to update the password. The value provided for the new password does not meet the length, complexity, or history requirements of the domain."}
+		a[1326] := {"enum": "ERROR_LOGON_FAILURE", "msg": "The user name or password is incorrect."}
+		a[1327] := {"enum": "ERROR_ACCOUNT_RESTRICTION", "msg": "Account restrictions are preventing this user from signing in. For example: blank passwords aren't allowed, sign-in times are limited, or a policy restriction has been enforced."}
+		a[1328] := {"enum": "ERROR_INVALID_LOGON_HOURS", "msg": "Your account has time restrictions that keep you from signing in right now."}
+		a[1329] := {"enum": "ERROR_INVALID_WORKSTATION", "msg": "This user isn't allowed to sign in to this computer."}
+		a[1330] := {"enum": "ERROR_PASSWORD_EXPIRED", "msg": "The password for this account has expired."}
+		a[1331] := {"enum": "ERROR_ACCOUNT_DISABLED", "msg": "This user can't sign in because this account is currently disabled."}
+		a[1332] := {"enum": "ERROR_NONE_MAPPED", "msg": "No mapping between account names and security IDs was done."}
+		a[1333] := {"enum": "ERROR_TOO_MANY_LUIDS_REQUESTED", "msg": "Too many local user identifiers (LUIDs) were requested at one time."}
+		a[1334] := {"enum": "ERROR_LUIDS_EXHAUSTED", "msg": "No more local user identifiers (LUIDs) are available."}
+		a[1335] := {"enum": "ERROR_INVALID_SUB_AUTHORITY", "msg": "The subauthority part of a security ID is invalid for this particular use."}
+		a[1336] := {"enum": "ERROR_INVALID_ACL", "msg": "The access control list (ACL) structure is invalid."}
+		a[1337] := {"enum": "ERROR_INVALID_SID", "msg": "The security ID structure is invalid."}
+		a[1338] := {"enum": "ERROR_INVALID_SECURITY_DESCR", "msg": "The security descriptor structure is invalid."}
+		a[1340] := {"enum": "ERROR_BAD_INHERITANCE_ACL", "msg": "The inherited access control list (ACL) or access control entry (ACE) could not be built."}
+		a[1341] := {"enum": "ERROR_SERVER_DISABLED", "msg": "The server is currently disabled."}
+		a[1342] := {"enum": "ERROR_SERVER_NOT_DISABLED", "msg": "The server is currently enabled."}
+		a[1343] := {"enum": "ERROR_INVALID_ID_AUTHORITY", "msg": "The value provided was an invalid value for an identifier authority."}
+		a[1344] := {"enum": "ERROR_ALLOTTED_SPACE_EXCEEDED", "msg": "No more memory is available for security information updates."}
+		a[1345] := {"enum": "ERROR_INVALID_GROUP_ATTRIBUTES", "msg": "The specified attributes are invalid, or incompatible with the attributes for the group as a whole."}
+		a[1346] := {"enum": "ERROR_BAD_IMPERSONATION_LEVEL", "msg": "Either a required impersonation level was not provided, or the provided impersonation level is invalid."}
+		a[1347] := {"enum": "ERROR_CANT_OPEN_ANONYMOUS", "msg": "Cannot open an anonymous level security token."}
+		a[1348] := {"enum": "ERROR_BAD_VALIDATION_CLASS", "msg": "The validation information class requested was invalid."}
+		a[1349] := {"enum": "ERROR_BAD_TOKEN_TYPE", "msg": "The type of the token is inappropriate for its attempted use."}
+		a[1350] := {"enum": "ERROR_NO_SECURITY_ON_OBJECT", "msg": "Unable to perform a security operation on an object that has no associated security."}
+		a[1351] := {"enum": "ERROR_CANT_ACCESS_DOMAIN_INFO", "msg": "Configuration information could not be read from the domain controller, either because the machine is unavailable, or access has been denied."}
+		a[1352] := {"enum": "ERROR_INVALID_SERVER_STATE", "msg": "The security account manager (SAM) or local security authority (LSA) server was in the wrong state to perform the security operation."}
+		a[1353] := {"enum": "ERROR_INVALID_DOMAIN_STATE", "msg": "The domain was in the wrong state to perform the security operation."}
+		a[1354] := {"enum": "ERROR_INVALID_DOMAIN_ROLE", "msg": "This operation is only allowed for the Primary Domain Controller of the domain."}
+		a[1355] := {"enum": "ERROR_NO_SUCH_DOMAIN", "msg": "The specified domain either does not exist or could not be contacted."}
+		a[1356] := {"enum": "ERROR_DOMAIN_EXISTS", "msg": "The specified domain already exists."}
+		a[1357] := {"enum": "ERROR_DOMAIN_LIMIT_EXCEEDED", "msg": "An attempt was made to exceed the limit on the number of domains per server."}
+		a[1358] := {"enum": "ERROR_INTERNAL_DB_CORRUPTION", "msg": "Unable to complete the requested operation because of either a catastrophic media failure or a data structure corruption on the disk."}
+		a[1359] := {"enum": "ERROR_INTERNAL_ERROR", "msg": "An internal error occurred."}
+		a[1360] := {"enum": "ERROR_GENERIC_NOT_MAPPED", "msg": "Generic access types were contained in an access mask which should already be mapped to nongeneric types."}
+		a[1361] := {"enum": "ERROR_BAD_DESCRIPTOR_FORMAT", "msg": "A security descriptor is not in the right format (absolute or self-relative)."}
+		a[1362] := {"enum": "ERROR_NOT_LOGON_PROCESS", "msg": "The requested action is restricted for use by logon processes only. The calling process has not registered as a logon process."}
+		a[1363] := {"enum": "ERROR_LOGON_SESSION_EXISTS", "msg": "Cannot start a new logon session with an ID that is already in use."}
+		a[1364] := {"enum": "ERROR_NO_SUCH_PACKAGE", "msg": "A specified authentication package is unknown."}
+		a[1365] := {"enum": "ERROR_BAD_LOGON_SESSION_STATE", "msg": "The logon session is not in a state that is consistent with the requested operation."}
+		a[1366] := {"enum": "ERROR_LOGON_SESSION_COLLISION", "msg": "The logon session ID is already in use."}
+		a[1367] := {"enum": "ERROR_INVALID_LOGON_TYPE", "msg": "A logon request contained an invalid logon type value."}
+		a[1368] := {"enum": "ERROR_CANNOT_IMPERSONATE", "msg": "Unable to impersonate using a named pipe until data has been read from that pipe."}
+		a[1369] := {"enum": "ERROR_RXACT_INVALID_STATE", "msg": "The transaction state of a registry subtree is incompatible with the requested operation."}
+		a[1370] := {"enum": "ERROR_RXACT_COMMIT_FAILURE", "msg": "An internal security database corruption has been encountered."}
+		a[1371] := {"enum": "ERROR_SPECIAL_ACCOUNT", "msg": "Cannot perform this operation on built-in accounts."}
+		a[1372] := {"enum": "ERROR_SPECIAL_GROUP", "msg": "Cannot perform this operation on this built-in special group."}
+		a[1373] := {"enum": "ERROR_SPECIAL_USER", "msg": "Cannot perform this operation on this built-in special user."}
+		a[1374] := {"enum": "ERROR_MEMBERS_PRIMARY_GROUP", "msg": "The user cannot be removed from a group because the group is currently the user's primary group."}
+		a[1375] := {"enum": "ERROR_TOKEN_ALREADY_IN_USE", "msg": "The token is already in use as a primary token."}
+		a[1376] := {"enum": "ERROR_NO_SUCH_ALIAS", "msg": "The specified local group does not exist."}
+		a[1377] := {"enum": "ERROR_MEMBER_NOT_IN_ALIAS", "msg": "The specified account name is not a member of the group."}
+		a[1378] := {"enum": "ERROR_MEMBER_IN_ALIAS", "msg": "The specified account name is already a member of the group."}
+		a[1379] := {"enum": "ERROR_ALIAS_EXISTS", "msg": "The specified local group already exists."}
+		a[1380] := {"enum": "ERROR_LOGON_NOT_GRANTED", "msg": "Logon failure: the user has not been granted the requested logon type at this computer."}
+		a[1381] := {"enum": "ERROR_TOO_MANY_SECRETS", "msg": "The maximum number of secrets that may be stored in a single system has been exceeded."}
+		a[1382] := {"enum": "ERROR_SECRET_TOO_LONG", "msg": "The length of a secret exceeds the maximum length allowed."}
+		a[1383] := {"enum": "ERROR_INTERNAL_DB_ERROR", "msg": "The local security authority database contains an internal inconsistency."}
+		a[1384] := {"enum": "ERROR_TOO_MANY_CONTEXT_IDS", "msg": "During a logon attempt, the user's security context accumulated too many security IDs."}
+		a[1385] := {"enum": "ERROR_LOGON_TYPE_NOT_GRANTED", "msg": "Logon failure: the user has not been granted the requested logon type at this computer."}
+		a[1386] := {"enum": "ERROR_NT_CROSS_ENCRYPTION_REQUIRED", "msg": "A cross-encrypted password is necessary to change a user password."}
+		a[1387] := {"enum": "ERROR_NO_SUCH_MEMBER", "msg": "A member could not be added to or removed from the local group because the member does not exist."}
+		a[1388] := {"enum": "ERROR_INVALID_MEMBER", "msg": "A new member could not be added to a local group because the member has the wrong account type."}
+		a[1389] := {"enum": "ERROR_TOO_MANY_SIDS", "msg": "Too many security IDs have been specified."}
+		a[1390] := {"enum": "ERROR_LM_CROSS_ENCRYPTION_REQUIRED", "msg": "A cross-encrypted password is necessary to change this user password."}
+		a[1391] := {"enum": "ERROR_NO_INHERITANCE", "msg": "Indicates an ACL contains no inheritable components."}
+		a[1392] := {"enum": "ERROR_FILE_CORRUPT", "msg": "The file or directory is corrupted and unreadable."}
+		a[1393] := {"enum": "ERROR_DISK_CORRUPT", "msg": "The disk structure is corrupted and unreadable."}
+		a[1394] := {"enum": "ERROR_NO_USER_SESSION_KEY", "msg": "There is no user session key for the specified logon session."}
+		a[1395] := {"enum": "ERROR_LICENSE_QUOTA_EXCEEDED", "msg": "The service being accessed is licensed for a particular number of connections. No more connections can be made to the service at this time because there are already as many connections as the service can accept."}
+		a[1396] := {"enum": "ERROR_WRONG_TARGET_NAME", "msg": "The target account name is incorrect."}
+		a[1397] := {"enum": "ERROR_MUTUAL_AUTH_FAILED", "msg": "Mutual Authentication failed. The server's password is out of date at the domain controller."}
+		a[1398] := {"enum": "ERROR_TIME_SKEW", "msg": "There is a time and/or date difference between the client and server."}
+		a[1399] := {"enum": "ERROR_CURRENT_DOMAIN_NOT_ALLOWED", "msg": "This operation cannot be performed on the current domain."}
+		a[1400] := {"enum": "ERROR_INVALID_WINDOW_HANDLE", "msg": "Invalid window handle."}
+		a[1401] := {"enum": "ERROR_INVALID_MENU_HANDLE", "msg": "Invalid menu handle."}
+		a[1402] := {"enum": "ERROR_INVALID_CURSOR_HANDLE", "msg": "Invalid cursor handle."}
+		a[1403] := {"enum": "ERROR_INVALID_ACCEL_HANDLE", "msg": "Invalid accelerator table handle."}
+		a[1404] := {"enum": "ERROR_INVALID_HOOK_HANDLE", "msg": "Invalid hook handle."}
+		a[1405] := {"enum": "ERROR_INVALID_DWP_HANDLE", "msg": "Invalid handle to a multiple-window position structure."}
+		a[1406] := {"enum": "ERROR_TLW_WITH_WSCHILD", "msg": "Cannot create a top-level child window."}
+		a[1407] := {"enum": "ERROR_CANNOT_FIND_WND_CLASS", "msg": "Cannot find window class."}
+		a[1408] := {"enum": "ERROR_WINDOW_OF_OTHER_THREAD", "msg": "Invalid window; it belongs to other thread."}
+		a[1409] := {"enum": "ERROR_HOTKEY_ALREADY_REGISTERED", "msg": "Hot key is already registered."}
+		a[1410] := {"enum": "ERROR_CLASS_ALREADY_EXISTS", "msg": "Class already exists."}
+		a[1411] := {"enum": "ERROR_CLASS_DOES_NOT_EXIST", "msg": "Class does not exist."}
+		a[1412] := {"enum": "ERROR_CLASS_HAS_WINDOWS", "msg": "Class still has open windows."}
+		a[1413] := {"enum": "ERROR_INVALID_INDEX", "msg": "Invalid index."}
+		a[1414] := {"enum": "ERROR_INVALID_ICON_HANDLE", "msg": "Invalid icon handle."}
+		a[1415] := {"enum": "ERROR_PRIVATE_DIALOG_INDEX", "msg": "Using private DIALOG window words."}
+		a[1416] := {"enum": "ERROR_LISTBOX_ID_NOT_FOUND", "msg": "The list box identifier was not found."}
+		a[1417] := {"enum": "ERROR_NO_WILDCARD_CHARACTERS", "msg": "No wildcards were found."}
+		a[1418] := {"enum": "ERROR_CLIPBOARD_NOT_OPEN", "msg": "Thread does not have a clipboard open."}
+		a[1419] := {"enum": "ERROR_HOTKEY_NOT_REGISTERED", "msg": "Hot key is not registered."}
+		a[1420] := {"enum": "ERROR_WINDOW_NOT_DIALOG", "msg": "The window is not a valid dialog window."}
+		a[1421] := {"enum": "ERROR_CONTROL_ID_NOT_FOUND", "msg": "Control ID not found."}
+		a[1422] := {"enum": "ERROR_INVALID_COMBOBOX_MESSAGE", "msg": "Invalid message for a combo box because it does not have an edit control."}
+		a[1423] := {"enum": "ERROR_WINDOW_NOT_COMBOBOX", "msg": "The window is not a combo box."}
+		a[1424] := {"enum": "ERROR_INVALID_EDIT_HEIGHT", "msg": "Height must be less than 256."}
+		a[1425] := {"enum": "ERROR_DC_NOT_FOUND", "msg": "Invalid device context (DC) handle."}
+		a[1426] := {"enum": "ERROR_INVALID_HOOK_FILTER", "msg": "Invalid hook procedure type."}
+		a[1427] := {"enum": "ERROR_INVALID_FILTER_PROC", "msg": "Invalid hook procedure."}
+		a[1428] := {"enum": "ERROR_HOOK_NEEDS_HMOD", "msg": "Cannot set nonlocal hook without a module handle."}
+		a[1429] := {"enum": "ERROR_GLOBAL_ONLY_HOOK", "msg": "This hook procedure can only be set globally."}
+		a[1430] := {"enum": "ERROR_JOURNAL_HOOK_SET", "msg": "The journal hook procedure is already installed."}
+		a[1431] := {"enum": "ERROR_HOOK_NOT_INSTALLED", "msg": "The hook procedure is not installed."}
+		a[1432] := {"enum": "ERROR_INVALID_LB_MESSAGE", "msg": "Invalid message for single-selection list box."}
+		a[1433] := {"enum": "ERROR_SETCOUNT_ON_BAD_LB", "msg": "LB_SETCOUNT sent to non-lazy list box."}
+		a[1434] := {"enum": "ERROR_LB_WITHOUT_TABSTOPS", "msg": "This list box does not support tab stops."}
+		a[1435] := {"enum": "ERROR_DESTROY_OBJECT_OF_OTHER_THREAD", "msg": "Cannot destroy object created by another thread."}
+		a[1436] := {"enum": "ERROR_CHILD_WINDOW_MENU", "msg": "Child windows cannot have menus."}
+		a[1437] := {"enum": "ERROR_NO_SYSTEM_MENU", "msg": "The window does not have a system menu."}
+		a[1438] := {"enum": "ERROR_INVALID_MSGBOX_STYLE", "msg": "Invalid message box style."}
+		a[1439] := {"enum": "ERROR_INVALID_SPI_VALUE", "msg": "Invalid system-wide (SPI_*) parameter."}
+		a[1440] := {"enum": "ERROR_SCREEN_ALREADY_LOCKED", "msg": "Screen already locked."}
+		a[1441] := {"enum": "ERROR_HWNDS_HAVE_DIFF_PARENT", "msg": "All handles to windows in a multiple-window position structure must have the same parent."}
+		a[1442] := {"enum": "ERROR_NOT_CHILD_WINDOW", "msg": "The window is not a child window."}
+		a[1443] := {"enum": "ERROR_INVALID_GW_COMMAND", "msg": "Invalid GW_* command."}
+		a[1444] := {"enum": "ERROR_INVALID_THREAD_ID", "msg": "Invalid thread identifier."}
+		a[1445] := {"enum": "ERROR_NON_MDICHILD_WINDOW", "msg": "Cannot process a message from a window that is not a multiple document interface (MDI) window."}
+		a[1446] := {"enum": "ERROR_POPUP_ALREADY_ACTIVE", "msg": "Popup menu already active."}
+		a[1447] := {"enum": "ERROR_NO_SCROLLBARS", "msg": "The window does not have scroll bars."}
+		a[1448] := {"enum": "ERROR_INVALID_SCROLLBAR_RANGE", "msg": "Scroll bar range cannot be greater than MAXLONG."}
+		a[1449] := {"enum": "ERROR_INVALID_SHOWWIN_COMMAND", "msg": "Cannot show or remove the window in the way specified."}
+		a[1450] := {"enum": "ERROR_NO_SYSTEM_RESOURCES", "msg": "Insufficient system resources exist to complete the requested service."}
+		a[1451] := {"enum": "ERROR_NONPAGED_SYSTEM_RESOURCES", "msg": "Insufficient system resources exist to complete the requested service."}
+		a[1452] := {"enum": "ERROR_PAGED_SYSTEM_RESOURCES", "msg": "Insufficient system resources exist to complete the requested service."}
+		a[1453] := {"enum": "ERROR_WORKING_SET_QUOTA", "msg": "Insufficient quota to complete the requested service."}
+		a[1454] := {"enum": "ERROR_PAGEFILE_QUOTA", "msg": "Insufficient quota to complete the requested service."}
+		a[1455] := {"enum": "ERROR_COMMITMENT_LIMIT", "msg": "The paging file is too small for this operation to complete."}
+		a[1456] := {"enum": "ERROR_MENU_ITEM_NOT_FOUND", "msg": "A menu item was not found."}
+		a[1457] := {"enum": "ERROR_INVALID_KEYBOARD_HANDLE", "msg": "Invalid keyboard layout handle."}
+		a[1458] := {"enum": "ERROR_HOOK_TYPE_NOT_ALLOWED", "msg": "Hook type not allowed."}
+		a[1459] := {"enum": "ERROR_REQUIRES_INTERACTIVE_WINDOWSTATION", "msg": "This operation requires an interactive window station."}
+		a[1460] := {"enum": "ERROR_TIMEOUT", "msg": "This operation returned because the timeout period expired."}
+		a[1461] := {"enum": "ERROR_INVALID_MONITOR_HANDLE", "msg": "Invalid monitor handle."}
+		a[1462] := {"enum": "ERROR_INCORRECT_SIZE", "msg": "Incorrect size argument."}
+		a[1463] := {"enum": "ERROR_SYMLINK_CLASS_DISABLED", "msg": "The symbolic link cannot be followed because its type is disabled."}
+		a[1464] := {"enum": "ERROR_SYMLINK_NOT_SUPPORTED", "msg": "This application does not support the current operation on symbolic links."}
+		a[1465] := {"enum": "ERROR_XML_PARSE_ERROR", "msg": "Windows was unable to parse the requested XML data."}
+		a[1466] := {"enum": "ERROR_XMLDSIG_ERROR", "msg": "An error was encountered while processing an XML digital signature."}
+		a[1467] := {"enum": "ERROR_RESTART_APPLICATION", "msg": "This application must be restarted."}
+		a[1468] := {"enum": "ERROR_WRONG_COMPARTMENT", "msg": "The caller made the connection request in the wrong routing compartment."}
+		a[1469] := {"enum": "ERROR_AUTHIP_FAILURE", "msg": "There was an AuthIP failure when attempting to connect to the remote host."}
+		a[1470] := {"enum": "ERROR_NO_NVRAM_RESOURCES", "msg": "Insufficient NVRAM resources exist to complete the requested service. A reboot might be required."}
+		a[1471] := {"enum": "ERROR_NOT_GUI_PROCESS", "msg": "Unable to finish the requested operation because the specified process is not a GUI process."}
+		a[1500] := {"enum": "ERROR_EVENTLOG_FILE_CORRUPT", "msg": "The event log file is corrupted."}
+		a[1501] := {"enum": "ERROR_EVENTLOG_CANT_START", "msg": "No event log file could be opened, so the event logging service did not start."}
+		a[1502] := {"enum": "ERROR_LOG_FILE_FULL", "msg": "The event log file is full."}
+		a[1503] := {"enum": "ERROR_EVENTLOG_FILE_CHANGED", "msg": "The event log file has changed between read operations."}
+		a[1550] := {"enum": "ERROR_INVALID_TASK_NAME", "msg": "The specified task name is invalid."}
+		a[1551] := {"enum": "ERROR_INVALID_TASK_INDEX", "msg": "The specified task index is invalid."}
+		a[1552] := {"enum": "ERROR_THREAD_ALREADY_IN_TASK", "msg": "The specified thread is already joining a task."}
+		a[1601] := {"enum": "ERROR_INSTALL_SERVICE_FAILURE", "msg": "The Windows Installer Service could not be accessed. This can occur if the Windows Installer is not correctly installed. Contact your support personnel for assistance."}
+		a[1602] := {"enum": "ERROR_INSTALL_USEREXIT", "msg": "User cancelled installation."}
+		a[1603] := {"enum": "ERROR_INSTALL_FAILURE", "msg": "Fatal error during installation."}
+		a[1604] := {"enum": "ERROR_INSTALL_SUSPEND", "msg": "Installation suspended, incomplete."}
+		a[1605] := {"enum": "ERROR_UNKNOWN_PRODUCT", "msg": "This action is only valid for products that are currently installed."}
+		a[1606] := {"enum": "ERROR_UNKNOWN_FEATURE", "msg": "Feature ID not registered."}
+		a[1607] := {"enum": "ERROR_UNKNOWN_COMPONENT", "msg": "Component ID not registered."}
+		a[1608] := {"enum": "ERROR_UNKNOWN_PROPERTY", "msg": "Unknown property."}
+		a[1609] := {"enum": "ERROR_INVALID_HANDLE_STATE", "msg": "Handle is in an invalid state."}
+		a[1610] := {"enum": "ERROR_BAD_CONFIGURATION", "msg": "The configuration data for this product is corrupt. Contact your support personnel."}
+		a[1611] := {"enum": "ERROR_INDEX_ABSENT", "msg": "Component qualifier not present."}
+		a[1612] := {"enum": "ERROR_INSTALL_SOURCE_ABSENT", "msg": "The installation source for this product is not available. Verify that the source exists and that you can access it."}
+		a[1613] := {"enum": "ERROR_INSTALL_PACKAGE_VERSION", "msg": "This installation package cannot be installed by the Windows Installer service. You must install a Windows service pack that contains a newer version of the Windows Installer service."}
+		a[1614] := {"enum": "ERROR_PRODUCT_UNINSTALLED", "msg": "Product is uninstalled."}
+		a[1615] := {"enum": "ERROR_BAD_QUERY_SYNTAX", "msg": "SQL query syntax invalid or unsupported."}
+		a[1616] := {"enum": "ERROR_INVALID_FIELD", "msg": "Record field does not exist."}
+		a[1617] := {"enum": "ERROR_DEVICE_REMOVED", "msg": "The device has been removed."}
+		a[1618] := {"enum": "ERROR_INSTALL_ALREADY_RUNNING", "msg": "Another installation is already in progress. Complete that installation before proceeding with this install."}
+		a[1619] := {"enum": "ERROR_INSTALL_PACKAGE_OPEN_FAILED", "msg": "This installation package could not be opened. Verify that the package exists and that you can access it, or contact the application vendor to verify that this is a valid Windows Installer package."}
+		a[1620] := {"enum": "ERROR_INSTALL_PACKAGE_INVALID", "msg": "This installation package could not be opened. Contact the application vendor to verify that this is a valid Windows Installer package."}
+		a[1621] := {"enum": "ERROR_INSTALL_UI_FAILURE", "msg": "There was an error starting the Windows Installer service user interface. Contact your support personnel."}
+		a[1622] := {"enum": "ERROR_INSTALL_LOG_FAILURE", "msg": "Error opening installation log file. Verify that the specified log file location exists and that you can write to it."}
+		a[1623] := {"enum": "ERROR_INSTALL_LANGUAGE_UNSUPPORTED", "msg": "The language of this installation package is not supported by your system."}
+		a[1624] := {"enum": "ERROR_INSTALL_TRANSFORM_FAILURE", "msg": "Error applying transforms. Verify that the specified transform paths are valid."}
+		a[1625] := {"enum": "ERROR_INSTALL_PACKAGE_REJECTED", "msg": "This installation is forbidden by system policy. Contact your system administrator."}
+		a[1626] := {"enum": "ERROR_FUNCTION_NOT_CALLED", "msg": "Function could not be executed."}
+		a[1627] := {"enum": "ERROR_FUNCTION_FAILED", "msg": "Function failed during execution."}
+		a[1628] := {"enum": "ERROR_INVALID_TABLE", "msg": "Invalid or unknown table specified."}
+		a[1629] := {"enum": "ERROR_DATATYPE_MISMATCH", "msg": "Data supplied is of wrong type."}
+		a[1630] := {"enum": "ERROR_UNSUPPORTED_TYPE", "msg": "Data of this type is not supported."}
+		a[1631] := {"enum": "ERROR_CREATE_FAILED", "msg": "The Windows Installer service failed to start. Contact your support personnel."}
+		a[1632] := {"enum": "ERROR_INSTALL_TEMP_UNWRITABLE", "msg": "The Temp folder is on a drive that is full or is inaccessible. Free up space on the drive or verify that you have write permission on the Temp folder."}
+		a[1633] := {"enum": "ERROR_INSTALL_PLATFORM_UNSUPPORTED", "msg": "This installation package is not supported by this processor type. Contact your product vendor."}
+		a[1634] := {"enum": "ERROR_INSTALL_NOTUSED", "msg": "Component not used on this computer."}
+		a[1635] := {"enum": "ERROR_PATCH_PACKAGE_OPEN_FAILED", "msg": "This update package could not be opened. Verify that the update package exists and that you can access it, or contact the application vendor to verify that this is a valid Windows Installer update package."}
+		a[1636] := {"enum": "ERROR_PATCH_PACKAGE_INVALID", "msg": "This update package could not be opened. Contact the application vendor to verify that this is a valid Windows Installer update package."}
+		a[1637] := {"enum": "ERROR_PATCH_PACKAGE_UNSUPPORTED", "msg": "This update package cannot be processed by the Windows Installer service. You must install a Windows service pack that contains a newer version of the Windows Installer service."}
+		a[1638] := {"enum": "ERROR_PRODUCT_VERSION", "msg": "Another version of this product is already installed. Installation of this version cannot continue. To configure or remove the existing version of this product, use Add/Remove Programs on the Control Panel."}
+		a[1639] := {"enum": "ERROR_INVALID_COMMAND_LINE", "msg": "Invalid command line argument. Consult the Windows Installer SDK for detailed command line help."}
+		a[1640] := {"enum": "ERROR_INSTALL_REMOTE_DISALLOWED", "msg": "Only administrators have permission to add, remove, or configure server software during a Terminal services remote session. If you want to install or configure software on the server, contact your network administrator."}
+		a[1641] := {"enum": "ERROR_SUCCESS_REBOOT_INITIATED", "msg": "The requested operation completed successfully. The system will be restarted so the changes can take effect."}
+		a[1642] := {"enum": "ERROR_PATCH_TARGET_NOT_FOUND", "msg": "The upgrade cannot be installed by the Windows Installer service because the program to be upgraded may be missing, or the upgrade may update a different version of the program. Verify that the program to be upgraded exists on your computer and that you have the correct upgrade."}
+		a[1643] := {"enum": "ERROR_PATCH_PACKAGE_REJECTED", "msg": "The update package is not permitted by software restriction policy."}
+		a[1644] := {"enum": "ERROR_INSTALL_TRANSFORM_REJECTED", "msg": "One or more customizations are not permitted by software restriction policy."}
+		a[1645] := {"enum": "ERROR_INSTALL_REMOTE_PROHIBITED", "msg": "The Windows Installer does not permit installation from a Remote Desktop Connection."}
+		a[1646] := {"enum": "ERROR_PATCH_REMOVAL_UNSUPPORTED", "msg": "Uninstallation of the update package is not supported."}
+		a[1647] := {"enum": "ERROR_UNKNOWN_PATCH", "msg": "The update is not applied to this product."}
+		a[1648] := {"enum": "ERROR_PATCH_NO_SEQUENCE", "msg": "No valid sequence could be found for the set of updates."}
+		a[1649] := {"enum": "ERROR_PATCH_REMOVAL_DISALLOWED", "msg": "Update removal was disallowed by policy."}
+		a[1650] := {"enum": "ERROR_INVALID_PATCH_XML", "msg": "The XML update data is invalid."}
+		a[1651] := {"enum": "ERROR_PATCH_MANAGED_ADVERTISED_PRODUCT", "msg": "Windows Installer does not permit updating of managed advertised products. At least one feature of the product must be installed before applying the update."}
+		a[1652] := {"enum": "ERROR_INSTALL_SERVICE_SAFEBOOT", "msg": "The Windows Installer service is not accessible in Safe Mode. Please try again when your computer is not in Safe Mode or you can use System Restore to return your machine to a previous good state."}
+		a[1653] := {"enum": "ERROR_FAIL_FAST_EXCEPTION", "msg": "A fail fast exception occurred. Exception handlers will not be invoked and the process will be terminated immediately."}
+		a[1654] := {"enum": "ERROR_INSTALL_REJECTED", "msg": "The app that you are trying to run is not supported on this version of Windows."}
+		a[1700] := {"enum": "RPC_S_INVALID_STRING_BINDING", "msg": "The string binding is invalid."}
+		a[1701] := {"enum": "RPC_S_WRONG_KIND_OF_BINDING", "msg": "The binding handle is not the correct type."}
+		a[1702] := {"enum": "RPC_S_INVALID_BINDING", "msg": "The binding handle is invalid."}
+		a[1703] := {"enum": "RPC_S_PROTSEQ_NOT_SUPPORTED", "msg": "The RPC protocol sequence is not supported."}
+		a[1704] := {"enum": "RPC_S_INVALID_RPC_PROTSEQ", "msg": "The RPC protocol sequence is invalid."}
+		a[1705] := {"enum": "RPC_S_INVALID_STRING_UUID", "msg": "The string universal unique identifier (UUID) is invalid."}
+		a[1706] := {"enum": "RPC_S_INVALID_ENDPOINT_FORMAT", "msg": "The endpoint format is invalid."}
+		a[1707] := {"enum": "RPC_S_INVALID_NET_ADDR", "msg": "The network address is invalid."}
+		a[1708] := {"enum": "RPC_S_NO_ENDPOINT_FOUND", "msg": "No endpoint was found."}
+		a[1709] := {"enum": "RPC_S_INVALID_TIMEOUT", "msg": "The timeout value is invalid."}
+		a[1710] := {"enum": "RPC_S_OBJECT_NOT_FOUND", "msg": "The object universal unique identifier (UUID) was not found."}
+		a[1711] := {"enum": "RPC_S_ALREADY_REGISTERED", "msg": "The object universal unique identifier (UUID) has already been registered."}
+		a[1712] := {"enum": "RPC_S_TYPE_ALREADY_REGISTERED", "msg": "The type universal unique identifier (UUID) has already been registered."}
+		a[1713] := {"enum": "RPC_S_ALREADY_LISTENING", "msg": "The RPC server is already listening."}
+		a[1714] := {"enum": "RPC_S_NO_PROTSEQS_REGISTERED", "msg": "No protocol sequences have been registered."}
+		a[1715] := {"enum": "RPC_S_NOT_LISTENING", "msg": "The RPC server is not listening."}
+		a[1716] := {"enum": "RPC_S_UNKNOWN_MGR_TYPE", "msg": "The manager type is unknown."}
+		a[1717] := {"enum": "RPC_S_UNKNOWN_IF", "msg": "The interface is unknown."}
+		a[1718] := {"enum": "RPC_S_NO_BINDINGS", "msg": "There are no bindings."}
+		a[1719] := {"enum": "RPC_S_NO_PROTSEQS", "msg": "There are no protocol sequences."}
+		a[1720] := {"enum": "RPC_S_CANT_CREATE_ENDPOINT", "msg": "The endpoint cannot be created."}
+		a[1721] := {"enum": "RPC_S_OUT_OF_RESOURCES", "msg": "Not enough resources are available to complete this operation."}
+		a[1722] := {"enum": "RPC_S_SERVER_UNAVAILABLE", "msg": "The RPC server is unavailable."}
+		a[1723] := {"enum": "RPC_S_SERVER_TOO_BUSY", "msg": "The RPC server is too busy to complete this operation."}
+		a[1724] := {"enum": "RPC_S_INVALID_NETWORK_OPTIONS", "msg": "The network options are invalid."}
+		a[1725] := {"enum": "RPC_S_NO_CALL_ACTIVE", "msg": "There are no remote procedure calls active on this thread."}
+		a[1726] := {"enum": "RPC_S_CALL_FAILED", "msg": "The remote procedure call failed."}
+		a[1727] := {"enum": "RPC_S_CALL_FAILED_DNE", "msg": "The remote procedure call failed and did not execute."}
+		a[1728] := {"enum": "RPC_S_PROTOCOL_ERROR", "msg": "A remote procedure call (RPC) protocol error occurred."}
+		a[1729] := {"enum": "RPC_S_PROXY_ACCESS_DENIED", "msg": "Access to the HTTP proxy is denied."}
+		a[1730] := {"enum": "RPC_S_UNSUPPORTED_TRANS_SYN", "msg": "The transfer syntax is not supported by the RPC server."}
+		a[1732] := {"enum": "RPC_S_UNSUPPORTED_TYPE", "msg": "The universal unique identifier (UUID) type is not supported."}
+		a[1733] := {"enum": "RPC_S_INVALID_TAG", "msg": "The tag is invalid."}
+		a[1734] := {"enum": "RPC_S_INVALID_BOUND", "msg": "The array bounds are invalid."}
+		a[1735] := {"enum": "RPC_S_NO_ENTRY_NAME", "msg": "The binding does not contain an entry name."}
+		a[1736] := {"enum": "RPC_S_INVALID_NAME_SYNTAX", "msg": "The name syntax is invalid."}
+		a[1737] := {"enum": "RPC_S_UNSUPPORTED_NAME_SYNTAX", "msg": "The name syntax is not supported."}
+		a[1739] := {"enum": "RPC_S_UUID_NO_ADDRESS", "msg": "No network address is available to use to construct a universal unique identifier (UUID)."}
+		a[1740] := {"enum": "RPC_S_DUPLICATE_ENDPOINT", "msg": "The endpoint is a duplicate."}
+		a[1741] := {"enum": "RPC_S_UNKNOWN_AUTHN_TYPE", "msg": "The authentication type is unknown."}
+		a[1742] := {"enum": "RPC_S_MAX_CALLS_TOO_SMALL", "msg": "The maximum number of calls is too small."}
+		a[1743] := {"enum": "RPC_S_STRING_TOO_LONG", "msg": "The string is too long."}
+		a[1744] := {"enum": "RPC_S_PROTSEQ_NOT_FOUND", "msg": "The RPC protocol sequence was not found."}
+		a[1745] := {"enum": "RPC_S_PROCNUM_OUT_OF_RANGE", "msg": "The procedure number is out of range."}
+		a[1746] := {"enum": "RPC_S_BINDING_HAS_NO_AUTH", "msg": "The binding does not contain any authentication information."}
+		a[1747] := {"enum": "RPC_S_UNKNOWN_AUTHN_SERVICE", "msg": "The authentication service is unknown."}
+		a[1748] := {"enum": "RPC_S_UNKNOWN_AUTHN_LEVEL", "msg": "The authentication level is unknown."}
+		a[1749] := {"enum": "RPC_S_INVALID_AUTH_IDENTITY", "msg": "The security context is invalid."}
+		a[1750] := {"enum": "RPC_S_UNKNOWN_AUTHZ_SERVICE", "msg": "The authorization service is unknown."}
+		a[1751] := {"enum": "EPT_S_INVALID_ENTRY", "msg": "The entry is invalid."}
+		a[1752] := {"enum": "EPT_S_CANT_PERFORM_OP", "msg": "The server endpoint cannot perform the operation."}
+		a[1753] := {"enum": "EPT_S_NOT_REGISTERED", "msg": "There are no more endpoints available from the endpoint mapper."}
+		a[1754] := {"enum": "RPC_S_NOTHING_TO_EXPORT", "msg": "No interfaces have been exported."}
+		a[1755] := {"enum": "RPC_S_INCOMPLETE_NAME", "msg": "The entry name is incomplete."}
+		a[1756] := {"enum": "RPC_S_INVALID_VERS_OPTION", "msg": "The version option is invalid."}
+		a[1757] := {"enum": "RPC_S_NO_MORE_MEMBERS", "msg": "There are no more members."}
+		a[1758] := {"enum": "RPC_S_NOT_ALL_OBJS_UNEXPORTED", "msg": "There is nothing to unexport."}
+		a[1759] := {"enum": "RPC_S_INTERFACE_NOT_FOUND", "msg": "The interface was not found."}
+		a[1760] := {"enum": "RPC_S_ENTRY_ALREADY_EXISTS", "msg": "The entry already exists."}
+		a[1761] := {"enum": "RPC_S_ENTRY_NOT_FOUND", "msg": "The entry is not found."}
+		a[1762] := {"enum": "RPC_S_NAME_SERVICE_UNAVAILABLE", "msg": "The name service is unavailable."}
+		a[1763] := {"enum": "RPC_S_INVALID_NAF_ID", "msg": "The network address family is invalid."}
+		a[1764] := {"enum": "RPC_S_CANNOT_SUPPORT", "msg": "The requested operation is not supported."}
+		a[1765] := {"enum": "RPC_S_NO_CONTEXT_AVAILABLE", "msg": "No security context is available to allow impersonation."}
+		a[1766] := {"enum": "RPC_S_INTERNAL_ERROR", "msg": "An internal error occurred in a remote procedure call (RPC)."}
+		a[1767] := {"enum": "RPC_S_ZERO_DIVIDE", "msg": "The RPC server attempted an integer division by zero."}
+		a[1768] := {"enum": "RPC_S_ADDRESS_ERROR", "msg": "An addressing error occurred in the RPC server."}
+		a[1769] := {"enum": "RPC_S_FP_DIV_ZERO", "msg": "A floating-point operation at the RPC server caused a division by zero."}
+		a[1770] := {"enum": "RPC_S_FP_UNDERFLOW", "msg": "A floating-point underflow occurred at the RPC server."}
+		a[1771] := {"enum": "RPC_S_FP_OVERFLOW", "msg": "A floating-point overflow occurred at the RPC server."}
+		a[1772] := {"enum": "RPC_X_NO_MORE_ENTRIES", "msg": "The list of RPC servers available for the binding of auto handles has been exhausted."}
+		a[1773] := {"enum": "RPC_X_SS_CHAR_TRANS_OPEN_FAIL", "msg": "Unable to open the character translation table file."}
+		a[1774] := {"enum": "RPC_X_SS_CHAR_TRANS_SHORT_FILE", "msg": "The file containing the character translation table has fewer than 512 bytes."}
+		a[1775] := {"enum": "RPC_X_SS_IN_NULL_CONTEXT", "msg": "A null context handle was passed from the client to the host during a remote procedure call."}
+		a[1777] := {"enum": "RPC_X_SS_CONTEXT_DAMAGED", "msg": "The context handle changed during a remote procedure call."}
+		a[1778] := {"enum": "RPC_X_SS_HANDLES_MISMATCH", "msg": "The binding handles passed to a remote procedure call do not match."}
+		a[1779] := {"enum": "RPC_X_SS_CANNOT_GET_CALL_HANDLE", "msg": "The stub is unable to get the remote procedure call handle."}
+		a[1780] := {"enum": "RPC_X_NULL_REF_POINTER", "msg": "A null reference pointer was passed to the stub."}
+		a[1781] := {"enum": "RPC_X_ENUM_VALUE_OUT_OF_RANGE", "msg": "The enumeration value is out of range."}
+		a[1782] := {"enum": "RPC_X_BYTE_COUNT_TOO_SMALL", "msg": "The byte count is too small."}
+		a[1783] := {"enum": "RPC_X_BAD_STUB_DATA", "msg": "The stub received bad data."}
+		a[1784] := {"enum": "ERROR_INVALID_USER_BUFFER", "msg": "The supplied user buffer is not valid for the requested operation."}
+		a[1785] := {"enum": "ERROR_UNRECOGNIZED_MEDIA", "msg": "The disk media is not recognized. It may not be formatted."}
+		a[1786] := {"enum": "ERROR_NO_TRUST_LSA_SECRET", "msg": "The workstation does not have a trust secret."}
+		a[1787] := {"enum": "ERROR_NO_TRUST_SAM_ACCOUNT", "msg": "The security database on the server does not have a computer account for this workstation trust relationship."}
+		a[1788] := {"enum": "ERROR_TRUSTED_DOMAIN_FAILURE", "msg": "The trust relationship between the primary domain and the trusted domain failed."}
+		a[1789] := {"enum": "ERROR_TRUSTED_RELATIONSHIP_FAILURE", "msg": "The trust relationship between this workstation and the primary domain failed."}
+		a[1790] := {"enum": "ERROR_TRUST_FAILURE", "msg": "The network logon failed."}
+		a[1791] := {"enum": "RPC_S_CALL_IN_PROGRESS", "msg": "A remote procedure call is already in progress for this thread."}
+		a[1792] := {"enum": "ERROR_NETLOGON_NOT_STARTED", "msg": "An attempt was made to logon, but the network logon service was not started."}
+		a[1793] := {"enum": "ERROR_ACCOUNT_EXPIRED", "msg": "The user's account has expired."}
+		a[1794] := {"enum": "ERROR_REDIRECTOR_HAS_OPEN_HANDLES", "msg": "The redirector is in use and cannot be unloaded."}
+		a[1795] := {"enum": "ERROR_PRINTER_DRIVER_ALREADY_INSTALLED", "msg": "The specified printer driver is already installed."}
+		a[1796] := {"enum": "ERROR_UNKNOWN_PORT", "msg": "The specified port is unknown."}
+		a[1797] := {"enum": "ERROR_UNKNOWN_PRINTER_DRIVER", "msg": "The printer driver is unknown."}
+		a[1798] := {"enum": "ERROR_UNKNOWN_PRINTPROCESSOR", "msg": "The print processor is unknown."}
+		a[1799] := {"enum": "ERROR_INVALID_SEPARATOR_FILE", "msg": "The specified separator file is invalid."}
+		a[1800] := {"enum": "ERROR_INVALID_PRIORITY", "msg": "The specified priority is invalid."}
+		a[1801] := {"enum": "ERROR_INVALID_PRINTER_NAME", "msg": "The printer name is invalid."}
+		a[1802] := {"enum": "ERROR_PRINTER_ALREADY_EXISTS", "msg": "The printer already exists."}
+		a[1803] := {"enum": "ERROR_INVALID_PRINTER_COMMAND", "msg": "The printer command is invalid."}
+		a[1804] := {"enum": "ERROR_INVALID_DATATYPE", "msg": "The specified datatype is invalid."}
+		a[1805] := {"enum": "ERROR_INVALID_ENVIRONMENT", "msg": "The environment specified is invalid."}
+		a[1806] := {"enum": "RPC_S_NO_MORE_BINDINGS", "msg": "There are no more bindings."}
+		a[1807] := {"enum": "ERROR_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT", "msg": "The account used is an interdomain trust account. Use your global user account or local user account to access this server."}
+		a[1808] := {"enum": "ERROR_NOLOGON_WORKSTATION_TRUST_ACCOUNT", "msg": "The account used is a computer account. Use your global user account or local user account to access this server."}
+		a[1809] := {"enum": "ERROR_NOLOGON_SERVER_TRUST_ACCOUNT", "msg": "The account used is a server trust account. Use your global user account or local user account to access this server."}
+		a[1810] := {"enum": "ERROR_DOMAIN_TRUST_INCONSISTENT", "msg": "The name or security ID (SID) of the domain specified is inconsistent with the trust information for that domain."}
+		a[1811] := {"enum": "ERROR_SERVER_HAS_OPEN_HANDLES", "msg": "The server is in use and cannot be unloaded."}
+		a[1812] := {"enum": "ERROR_RESOURCE_DATA_NOT_FOUND", "msg": "The specified image file did not contain a resource section."}
+		a[1813] := {"enum": "ERROR_RESOURCE_TYPE_NOT_FOUND", "msg": "The specified resource type cannot be found in the image file."}
+		a[1814] := {"enum": "ERROR_RESOURCE_NAME_NOT_FOUND", "msg": "The specified resource name cannot be found in the image file."}
+		a[1815] := {"enum": "ERROR_RESOURCE_LANG_NOT_FOUND", "msg": "The specified resource language ID cannot be found in the image file."}
+		a[1816] := {"enum": "ERROR_NOT_ENOUGH_QUOTA", "msg": "Not enough quota is available to process this command."}
+		a[1817] := {"enum": "RPC_S_NO_INTERFACES", "msg": "No interfaces have been registered."}
+		a[1818] := {"enum": "RPC_S_CALL_CANCELLED", "msg": "The remote procedure call was cancelled."}
+		a[1819] := {"enum": "RPC_S_BINDING_INCOMPLETE", "msg": "The binding handle does not contain all required information."}
+		a[1820] := {"enum": "RPC_S_COMM_FAILURE", "msg": "A communications failure occurred during a remote procedure call."}
+		a[1821] := {"enum": "RPC_S_UNSUPPORTED_AUTHN_LEVEL", "msg": "The requested authentication level is not supported."}
+		a[1822] := {"enum": "RPC_S_NO_PRINC_NAME", "msg": "No principal name registered."}
+		a[1823] := {"enum": "RPC_S_NOT_RPC_ERROR", "msg": "The error specified is not a valid Windows RPC error code."}
+		a[1824] := {"enum": "RPC_S_UUID_LOCAL_ONLY", "msg": "A UUID that is valid only on this computer has been allocated."}
+		a[1825] := {"enum": "RPC_S_SEC_PKG_ERROR", "msg": "A security package specific error occurred."}
+		a[1826] := {"enum": "RPC_S_NOT_CANCELLED", "msg": "Thread is not canceled."}
+		a[1827] := {"enum": "RPC_X_INVALID_ES_ACTION", "msg": "Invalid operation on the encoding/decoding handle."}
+		a[1828] := {"enum": "RPC_X_WRONG_ES_VERSION", "msg": "Incompatible version of the serializing package."}
+		a[1829] := {"enum": "RPC_X_WRONG_STUB_VERSION", "msg": "Incompatible version of the RPC stub."}
+		a[1830] := {"enum": "RPC_X_INVALID_PIPE_OBJECT", "msg": "The RPC pipe object is invalid or corrupted."}
+		a[1831] := {"enum": "RPC_X_WRONG_PIPE_ORDER", "msg": "An invalid operation was attempted on an RPC pipe object."}
+		a[1832] := {"enum": "RPC_X_WRONG_PIPE_VERSION", "msg": "Unsupported RPC pipe version."}
+		a[1833] := {"enum": "RPC_S_COOKIE_AUTH_FAILED", "msg": "HTTP proxy server rejected the connection because the cookie authentication failed."}
+		a[1898] := {"enum": "RPC_S_GROUP_MEMBER_NOT_FOUND", "msg": "The group member was not found."}
+		a[1899] := {"enum": "EPT_S_CANT_CREATE", "msg": "The endpoint mapper database entry could not be created."}
+		a[1900] := {"enum": "RPC_S_INVALID_OBJECT", "msg": "The object universal unique identifier (UUID) is the nil UUID."}
+		a[1901] := {"enum": "ERROR_INVALID_TIME", "msg": "The specified time is invalid."}
+		a[1902] := {"enum": "ERROR_INVALID_FORM_NAME", "msg": "The specified form name is invalid."}
+		a[1903] := {"enum": "ERROR_INVALID_FORM_SIZE", "msg": "The specified form size is invalid."}
+		a[1904] := {"enum": "ERROR_ALREADY_WAITING", "msg": "The specified printer handle is already being waited on."}
+		a[1905] := {"enum": "ERROR_PRINTER_DELETED", "msg": "The specified printer has been deleted."}
+		a[1906] := {"enum": "ERROR_INVALID_PRINTER_STATE", "msg": "The state of the printer is invalid."}
+		a[1907] := {"enum": "ERROR_PASSWORD_MUST_CHANGE", "msg": "The user's password must be changed before signing in."}
+		a[1908] := {"enum": "ERROR_DOMAIN_CONTROLLER_NOT_FOUND", "msg": "Could not find the domain controller for this domain."}
+		a[1909] := {"enum": "ERROR_ACCOUNT_LOCKED_OUT", "msg": "The referenced account is currently locked out and may not be logged on to."}
+		a[1910] := {"enum": "OR_INVALID_OXID", "msg": "The object exporter specified was not found."}
+		a[1911] := {"enum": "OR_INVALID_OID", "msg": "The object specified was not found."}
+		a[1912] := {"enum": "OR_INVALID_SET", "msg": "The object resolver set specified was not found."}
+		a[1913] := {"enum": "RPC_S_SEND_INCOMPLETE", "msg": "Some data remains to be sent in the request buffer."}
+		a[1914] := {"enum": "RPC_S_INVALID_ASYNC_HANDLE", "msg": "Invalid asynchronous remote procedure call handle."}
+		a[1915] := {"enum": "RPC_S_INVALID_ASYNC_CALL", "msg": "Invalid asynchronous RPC call handle for this operation."}
+		a[1916] := {"enum": "RPC_X_PIPE_CLOSED", "msg": "The RPC pipe object has already been closed."}
+		a[1917] := {"enum": "RPC_X_PIPE_DISCIPLINE_ERROR", "msg": "The RPC call completed before all pipes were processed."}
+		a[1918] := {"enum": "RPC_X_PIPE_EMPTY", "msg": "No more data is available from the RPC pipe."}
+		a[1919] := {"enum": "ERROR_NO_SITENAME", "msg": "No site name is available for this machine."}
+		a[1920] := {"enum": "ERROR_CANT_ACCESS_FILE", "msg": "The file cannot be accessed by the system."}
+		a[1921] := {"enum": "ERROR_CANT_RESOLVE_FILENAME", "msg": "The name of the file cannot be resolved by the system."}
+		a[1922] := {"enum": "RPC_S_ENTRY_TYPE_MISMATCH", "msg": "The entry is not of the expected type."}
+		a[1923] := {"enum": "RPC_S_NOT_ALL_OBJS_EXPORTED", "msg": "Not all object UUIDs could be exported to the specified entry."}
+		a[1924] := {"enum": "RPC_S_INTERFACE_NOT_EXPORTED", "msg": "Interface could not be exported to the specified entry."}
+		a[1925] := {"enum": "RPC_S_PROFILE_NOT_ADDED", "msg": "The specified profile entry could not be added."}
+		a[1926] := {"enum": "RPC_S_PRF_ELT_NOT_ADDED", "msg": "The specified profile element could not be added."}
+		a[1927] := {"enum": "RPC_S_PRF_ELT_NOT_REMOVED", "msg": "The specified profile element could not be removed."}
+		a[1928] := {"enum": "RPC_S_GRP_ELT_NOT_ADDED", "msg": "The group element could not be added."}
+		a[1929] := {"enum": "RPC_S_GRP_ELT_NOT_REMOVED", "msg": "The group element could not be removed."}
+		a[1930] := {"enum": "ERROR_KM_DRIVER_BLOCKED", "msg": "The printer driver is not compatible with a policy enabled on your computer that blocks NT 4.0 drivers."}
+		a[1931] := {"enum": "ERROR_CONTEXT_EXPIRED", "msg": "The context has expired and can no longer be used."}
+		a[1932] := {"enum": "ERROR_PER_USER_TRUST_QUOTA_EXCEEDED", "msg": "The current user's delegated trust creation quota has been exceeded."}
+		a[1933] := {"enum": "ERROR_ALL_USER_TRUST_QUOTA_EXCEEDED", "msg": "The total delegated trust creation quota has been exceeded."}
+		a[1934] := {"enum": "ERROR_USER_DELETE_TRUST_QUOTA_EXCEEDED", "msg": "The current user's delegated trust deletion quota has been exceeded."}
+		a[1935] := {"enum": "ERROR_AUTHENTICATION_FIREWALL_FAILED", "msg": "The computer you are signing into is protected by an authentication firewall. The specified account is not allowed to authenticate to the computer."}
+		a[1936] := {"enum": "ERROR_REMOTE_PRINT_CONNECTIONS_BLOCKED", "msg": "Remote connections to the Print Spooler are blocked by a policy set on your machine."}
+		a[1937] := {"enum": "ERROR_NTLM_BLOCKED", "msg": "Authentication failed because NTLM authentication has been disabled."}
+		a[1938] := {"enum": "ERROR_PASSWORD_CHANGE_REQUIRED", "msg": "Logon Failure: EAS policy requires that the user change their password before this operation can be performed."}
+		a[2000] := {"enum": "ERROR_INVALID_PIXEL_FORMAT", "msg": "The pixel format is invalid."}
+		a[2001] := {"enum": "ERROR_BAD_DRIVER", "msg": "The specified driver is invalid."}
+		a[2002] := {"enum": "ERROR_INVALID_WINDOW_STYLE", "msg": "The window style or class attribute is invalid for this operation."}
+		a[2003] := {"enum": "ERROR_METAFILE_NOT_SUPPORTED", "msg": "The requested metafile operation is not supported."}
+		a[2004] := {"enum": "ERROR_TRANSFORM_NOT_SUPPORTED", "msg": "The requested transformation operation is not supported."}
+		a[2005] := {"enum": "ERROR_CLIPPING_NOT_SUPPORTED", "msg": "The requested clipping operation is not supported."}
+		a[2010] := {"enum": "ERROR_INVALID_CMM", "msg": "The specified color management module is invalid."}
+		a[2011] := {"enum": "ERROR_INVALID_PROFILE", "msg": "The specified color profile is invalid."}
+		a[2012] := {"enum": "ERROR_TAG_NOT_FOUND", "msg": "The specified tag was not found."}
+		a[2013] := {"enum": "ERROR_TAG_NOT_PRESENT", "msg": "A required tag is not present."}
+		a[2014] := {"enum": "ERROR_DUPLICATE_TAG", "msg": "The specified tag is already present."}
+		a[2015] := {"enum": "ERROR_PROFILE_NOT_ASSOCIATED_WITH_DEVICE", "msg": "The specified color profile is not associated with the specified device."}
+		a[2016] := {"enum": "ERROR_PROFILE_NOT_FOUND", "msg": "The specified color profile was not found."}
+		a[2017] := {"enum": "ERROR_INVALID_COLORSPACE", "msg": "The specified color space is invalid."}
+		a[2018] := {"enum": "ERROR_ICM_NOT_ENABLED", "msg": "Image Color Management is not enabled."}
+		a[2019] := {"enum": "ERROR_DELETING_ICM_XFORM", "msg": "There was an error while deleting the color transform."}
+		a[2020] := {"enum": "ERROR_INVALID_TRANSFORM", "msg": "The specified color transform is invalid."}
+		a[2021] := {"enum": "ERROR_COLORSPACE_MISMATCH", "msg": "The specified transform does not match the bitmap's color space."}
+		a[2022] := {"enum": "ERROR_INVALID_COLORINDEX", "msg": "The specified named color index is not present in the profile."}
+		a[2023] := {"enum": "ERROR_PROFILE_DOES_NOT_MATCH_DEVICE", "msg": "The specified profile is intended for a device of a different type than the specified device."}
+		a[2108] := {"enum": "ERROR_CONNECTED_OTHER_PASSWORD", "msg": "The network connection was made successfully, but the user had to be prompted for a password other than the one originally specified."}
+		a[2109] := {"enum": "ERROR_CONNECTED_OTHER_PASSWORD_DEFAULT", "msg": "The network connection was made successfully using default credentials."}
+		a[2202] := {"enum": "ERROR_BAD_USERNAME", "msg": "The specified username is invalid."}
+		a[2250] := {"enum": "ERROR_NOT_CONNECTED", "msg": "This network connection does not exist."}
+		a[2401] := {"enum": "ERROR_OPEN_FILES", "msg": "This network connection has files open or requests pending."}
+		a[2402] := {"enum": "ERROR_ACTIVE_CONNECTIONS", "msg": "Active connections still exist."}
+		a[2404] := {"enum": "ERROR_DEVICE_IN_USE", "msg": "The device is in use by an active process and cannot be disconnected."}
+		a[3000] := {"enum": "ERROR_UNKNOWN_PRINT_MONITOR", "msg": "The specified print monitor is unknown."}
+		a[3001] := {"enum": "ERROR_PRINTER_DRIVER_IN_USE", "msg": "The specified printer driver is currently in use."}
+		a[3002] := {"enum": "ERROR_SPOOL_FILE_NOT_FOUND", "msg": "The spool file was not found."}
+		a[3003] := {"enum": "ERROR_SPL_NO_STARTDOC", "msg": "A StartDocPrinter call was not issued."}
+		a[3004] := {"enum": "ERROR_SPL_NO_ADDJOB", "msg": "An AddJob call was not issued."}
+		a[3005] := {"enum": "ERROR_PRINT_PROCESSOR_ALREADY_INSTALLED", "msg": "The specified print processor has already been installed."}
+		a[3006] := {"enum": "ERROR_PRINT_MONITOR_ALREADY_INSTALLED", "msg": "The specified print monitor has already been installed."}
+		a[3007] := {"enum": "ERROR_INVALID_PRINT_MONITOR", "msg": "The specified print monitor does not have the required functions."}
+		a[3008] := {"enum": "ERROR_PRINT_MONITOR_IN_USE", "msg": "The specified print monitor is currently in use."}
+		a[3009] := {"enum": "ERROR_PRINTER_HAS_JOBS_QUEUED", "msg": "The requested operation is not allowed when there are jobs queued to the printer."}
+		a[3010] := {"enum": "ERROR_SUCCESS_REBOOT_REQUIRED", "msg": "The requested operation is successful. Changes will not be effective until the system is rebooted."}
+		a[3011] := {"enum": "ERROR_SUCCESS_RESTART_REQUIRED", "msg": "The requested operation is successful. Changes will not be effective until the service is restarted."}
+		a[3012] := {"enum": "ERROR_PRINTER_NOT_FOUND", "msg": "No printers were found."}
+		a[3013] := {"enum": "ERROR_PRINTER_DRIVER_WARNED", "msg": "The printer driver is known to be unreliable."}
+		a[3014] := {"enum": "ERROR_PRINTER_DRIVER_BLOCKED", "msg": "The printer driver is known to harm the system."}
+		a[3015] := {"enum": "ERROR_PRINTER_DRIVER_PACKAGE_IN_USE", "msg": "The specified printer driver package is currently in use."}
+		a[3016] := {"enum": "ERROR_CORE_DRIVER_PACKAGE_NOT_FOUND", "msg": "Unable to find a core driver package that is required by the printer driver package."}
+		a[3017] := {"enum": "ERROR_FAIL_REBOOT_REQUIRED", "msg": "The requested operation failed. A system reboot is required to roll back changes made."}
+		a[3018] := {"enum": "ERROR_FAIL_REBOOT_INITIATED", "msg": "The requested operation failed. A system reboot has been initiated to roll back changes made."}
+		a[3019] := {"enum": "ERROR_PRINTER_DRIVER_DOWNLOAD_NEEDED", "msg": "The specified printer driver was not found on the system and needs to be downloaded."}
+		a[3020] := {"enum": "ERROR_PRINT_JOB_RESTART_REQUIRED", "msg": "The requested print job has failed to print. A print system update requires the job to be resubmitted."}
+		a[3021] := {"enum": "ERROR_INVALID_PRINTER_DRIVER_MANIFEST", "msg": "The printer driver does not contain a valid manifest, or contains too many manifests."}
+		a[3022] := {"enum": "ERROR_PRINTER_NOT_SHAREABLE", "msg": "The specified printer cannot be shared."}
+		a[3050] := {"enum": "ERROR_REQUEST_PAUSED", "msg": "The operation was paused."}
+		a[3950] := {"enum": "ERROR_IO_REISSUE_AS_CACHED", "msg": "Reissue the given operation as a cached IO operation."}
+		a[4000] := {"enum": "ERROR_WINS_INTERNAL", "msg": "WINS encountered an error while processing the command."}
+		a[4001] := {"enum": "ERROR_CAN_NOT_DEL_LOCAL_WINS", "msg": "The local WINS cannot be deleted."}
+		a[4002] := {"enum": "ERROR_STATIC_INIT", "msg": "The importation from the file failed."}
+		a[4003] := {"enum": "ERROR_INC_BACKUP", "msg": "The backup failed. Was a full backup done before?"}
+		a[4004] := {"enum": "ERROR_FULL_BACKUP", "msg": "The backup failed. Check the directory to which you are backing the database."}
+		a[4005] := {"enum": "ERROR_REC_NON_EXISTENT", "msg": "The name does not exist in the WINS database."}
+		a[4006] := {"enum": "ERROR_RPL_NOT_ALLOWED", "msg": "Replication with a nonconfigured partner is not allowed."}
+		a[4050] := {"enum": "PEERDIST_ERROR_CONTENTINFO_VERSION_UNSUPPORTED", "msg": "The version of the supplied content information is not supported."}
+		a[4051] := {"enum": "PEERDIST_ERROR_CANNOT_PARSE_CONTENTINFO", "msg": "The supplied content information is malformed."}
+		a[4052] := {"enum": "PEERDIST_ERROR_MISSING_DATA", "msg": "The requested data cannot be found in local or peer caches."}
+		a[4053] := {"enum": "PEERDIST_ERROR_NO_MORE", "msg": "No more data is available or required."}
+		a[4054] := {"enum": "PEERDIST_ERROR_NOT_INITIALIZED", "msg": "The supplied object has not been initialized."}
+		a[4055] := {"enum": "PEERDIST_ERROR_ALREADY_INITIALIZED", "msg": "The supplied object has already been initialized."}
+		a[4056] := {"enum": "PEERDIST_ERROR_SHUTDOWN_IN_PROGRESS", "msg": "A shutdown operation is already in progress."}
+		a[4057] := {"enum": "PEERDIST_ERROR_INVALIDATED", "msg": "The supplied object has already been invalidated."}
+		a[4058] := {"enum": "PEERDIST_ERROR_ALREADY_EXISTS", "msg": "An element already exists and was not replaced."}
+		a[4059] := {"enum": "PEERDIST_ERROR_OPERATION_NOTFOUND", "msg": "Can not cancel the requested operation as it has already been completed."}
+		a[4060] := {"enum": "PEERDIST_ERROR_ALREADY_COMPLETED", "msg": "Can not perform the reqested operation because it has already been carried out."}
+		a[4061] := {"enum": "PEERDIST_ERROR_OUT_OF_BOUNDS", "msg": "An operation accessed data beyond the bounds of valid data."}
+		a[4062] := {"enum": "PEERDIST_ERROR_VERSION_UNSUPPORTED", "msg": "The requested version is not supported."}
+		a[4063] := {"enum": "PEERDIST_ERROR_INVALID_CONFIGURATION", "msg": "A configuration value is invalid."}
+		a[4064] := {"enum": "PEERDIST_ERROR_NOT_LICENSED", "msg": "The SKU is not licensed."}
+		a[4065] := {"enum": "PEERDIST_ERROR_SERVICE_UNAVAILABLE", "msg": "PeerDist Service is still initializing and will be available shortly."}
+		a[4066] := {"enum": "PEERDIST_ERROR_TRUST_FAILURE", "msg": "Communication with one or more computers will be temporarily blocked due to recent errors."}
+		a[4100] := {"enum": "ERROR_DHCP_ADDRESS_CONFLICT", "msg": "The DHCP client has obtained an IP address that is already in use on the network. The local interface will be disabled until the DHCP client can obtain a new address."}
+		a[4200] := {"enum": "ERROR_WMI_GUID_NOT_FOUND", "msg": "The GUID passed was not recognized as valid by a WMI data provider."}
+		a[4201] := {"enum": "ERROR_WMI_INSTANCE_NOT_FOUND", "msg": "The instance name passed was not recognized as valid by a WMI data provider."}
+		a[4202] := {"enum": "ERROR_WMI_ITEMID_NOT_FOUND", "msg": "The data item ID passed was not recognized as valid by a WMI data provider."}
+		a[4203] := {"enum": "ERROR_WMI_TRY_AGAIN", "msg": "The WMI request could not be completed and should be retried."}
+		a[4204] := {"enum": "ERROR_WMI_DP_NOT_FOUND", "msg": "The WMI data provider could not be located."}
+		a[4205] := {"enum": "ERROR_WMI_UNRESOLVED_INSTANCE_REF", "msg": "The WMI data provider references an instance set that has not been registered."}
+		a[4206] := {"enum": "ERROR_WMI_ALREADY_ENABLED", "msg": "The WMI data block or event notification has already been enabled."}
+		a[4207] := {"enum": "ERROR_WMI_GUID_DISCONNECTED", "msg": "The WMI data block is no longer available."}
+		a[4208] := {"enum": "ERROR_WMI_SERVER_UNAVAILABLE", "msg": "The WMI data service is not available."}
+		a[4209] := {"enum": "ERROR_WMI_DP_FAILED", "msg": "The WMI data provider failed to carry out the request."}
+		a[4210] := {"enum": "ERROR_WMI_INVALID_MOF", "msg": "The WMI MOF information is not valid."}
+		a[4211] := {"enum": "ERROR_WMI_INVALID_REGINFO", "msg": "The WMI registration information is not valid."}
+		a[4212] := {"enum": "ERROR_WMI_ALREADY_DISABLED", "msg": "The WMI data block or event notification has already been disabled."}
+		a[4213] := {"enum": "ERROR_WMI_READ_ONLY", "msg": "The WMI data item or data block is read only."}
+		a[4214] := {"enum": "ERROR_WMI_SET_FAILURE", "msg": "The WMI data item or data block could not be changed."}
+		a[4250] := {"enum": "ERROR_NOT_APPCONTAINER", "msg": "This operation is only valid in the context of an app container."}
+		a[4251] := {"enum": "ERROR_APPCONTAINER_REQUIRED", "msg": "This application can only run in the context of an app container."}
+		a[4252] := {"enum": "ERROR_NOT_SUPPORTED_IN_APPCONTAINER", "msg": "This functionality is not supported in the context of an app container."}
+		a[4253] := {"enum": "ERROR_INVALID_PACKAGE_SID_LENGTH", "msg": "The length of the SID supplied is not a valid length for app container SIDs."}
+		a[4300] := {"enum": "ERROR_INVALID_MEDIA", "msg": "The media identifier does not represent a valid medium."}
+		a[4301] := {"enum": "ERROR_INVALID_LIBRARY", "msg": "The library identifier does not represent a valid library."}
+		a[4302] := {"enum": "ERROR_INVALID_MEDIA_POOL", "msg": "The media pool identifier does not represent a valid media pool."}
+		a[4303] := {"enum": "ERROR_DRIVE_MEDIA_MISMATCH", "msg": "The drive and medium are not compatible or exist in different libraries."}
+		a[4304] := {"enum": "ERROR_MEDIA_OFFLINE", "msg": "The medium currently exists in an offline library and must be online to perform this operation."}
+		a[4305] := {"enum": "ERROR_LIBRARY_OFFLINE", "msg": "The operation cannot be performed on an offline library."}
+		a[4306] := {"enum": "ERROR_EMPTY", "msg": "The library, drive, or media pool is empty."}
+		a[4307] := {"enum": "ERROR_NOT_EMPTY", "msg": "The library, drive, or media pool must be empty to perform this operation."}
+		a[4308] := {"enum": "ERROR_MEDIA_UNAVAILABLE", "msg": "No media is currently available in this media pool or library."}
+		a[4309] := {"enum": "ERROR_RESOURCE_DISABLED", "msg": "A resource required for this operation is disabled."}
+		a[4310] := {"enum": "ERROR_INVALID_CLEANER", "msg": "The media identifier does not represent a valid cleaner."}
+		a[4311] := {"enum": "ERROR_UNABLE_TO_CLEAN", "msg": "The drive cannot be cleaned or does not support cleaning."}
+		a[4312] := {"enum": "ERROR_OBJECT_NOT_FOUND", "msg": "The object identifier does not represent a valid object."}
+		a[4313] := {"enum": "ERROR_DATABASE_FAILURE", "msg": "Unable to read from or write to the database."}
+		a[4314] := {"enum": "ERROR_DATABASE_FULL", "msg": "The database is full."}
+		a[4315] := {"enum": "ERROR_MEDIA_INCOMPATIBLE", "msg": "The medium is not compatible with the device or media pool."}
+		a[4316] := {"enum": "ERROR_RESOURCE_NOT_PRESENT", "msg": "The resource required for this operation does not exist."}
+		a[4317] := {"enum": "ERROR_INVALID_OPERATION", "msg": "The operation identifier is not valid."}
+		a[4318] := {"enum": "ERROR_MEDIA_NOT_AVAILABLE", "msg": "The media is not mounted or ready for use."}
+		a[4319] := {"enum": "ERROR_DEVICE_NOT_AVAILABLE", "msg": "The device is not ready for use."}
+		a[4320] := {"enum": "ERROR_REQUEST_REFUSED", "msg": "The operator or administrator has refused the request."}
+		a[4321] := {"enum": "ERROR_INVALID_DRIVE_OBJECT", "msg": "The drive identifier does not represent a valid drive."}
+		a[4322] := {"enum": "ERROR_LIBRARY_FULL", "msg": "Library is full. No slot is available for use."}
+		a[4323] := {"enum": "ERROR_MEDIUM_NOT_ACCESSIBLE", "msg": "The transport cannot access the medium."}
+		a[4324] := {"enum": "ERROR_UNABLE_TO_LOAD_MEDIUM", "msg": "Unable to load the medium into the drive."}
+		a[4325] := {"enum": "ERROR_UNABLE_TO_INVENTORY_DRIVE", "msg": "Unable to retrieve the drive status."}
+		a[4326] := {"enum": "ERROR_UNABLE_TO_INVENTORY_SLOT", "msg": "Unable to retrieve the slot status."}
+		a[4327] := {"enum": "ERROR_UNABLE_TO_INVENTORY_TRANSPORT", "msg": "Unable to retrieve status about the transport."}
+		a[4328] := {"enum": "ERROR_TRANSPORT_FULL", "msg": "Cannot use the transport because it is already in use."}
+		a[4329] := {"enum": "ERROR_CONTROLLING_IEPORT", "msg": "Unable to open or close the inject/eject port."}
+		a[4330] := {"enum": "ERROR_UNABLE_TO_EJECT_MOUNTED_MEDIA", "msg": "Unable to eject the medium because it is in a drive."}
+		a[4331] := {"enum": "ERROR_CLEANER_SLOT_SET", "msg": "A cleaner slot is already reserved."}
+		a[4332] := {"enum": "ERROR_CLEANER_SLOT_NOT_SET", "msg": "A cleaner slot is not reserved."}
+		a[4333] := {"enum": "ERROR_CLEANER_CARTRIDGE_SPENT", "msg": "The cleaner cartridge has performed the maximum number of drive cleanings."}
+		a[4334] := {"enum": "ERROR_UNEXPECTED_OMID", "msg": "Unexpected on-medium identifier."}
+		a[4335] := {"enum": "ERROR_CANT_DELETE_LAST_ITEM", "msg": "The last remaining item in this group or resource cannot be deleted."}
+		a[4336] := {"enum": "ERROR_MESSAGE_EXCEEDS_MAX_SIZE", "msg": "The message provided exceeds the maximum size allowed for this parameter."}
+		a[4337] := {"enum": "ERROR_VOLUME_CONTAINS_SYS_FILES", "msg": "The volume contains system or paging files."}
+		a[4338] := {"enum": "ERROR_INDIGENOUS_TYPE", "msg": "The media type cannot be removed from this library since at least one drive in the library reports it can support this media type."}
+		a[4339] := {"enum": "ERROR_NO_SUPPORTING_DRIVES", "msg": "This offline media cannot be mounted on this system since no enabled drives are present which can be used."}
+		a[4340] := {"enum": "ERROR_CLEANER_CARTRIDGE_INSTALLED", "msg": "A cleaner cartridge is present in the tape library."}
+		a[4341] := {"enum": "ERROR_IEPORT_FULL", "msg": "Cannot use the inject/eject port because it is not empty."}
+		a[4350] := {"enum": "ERROR_FILE_OFFLINE", "msg": "This file is currently not available for use on this computer."}
+		a[4351] := {"enum": "ERROR_REMOTE_STORAGE_NOT_ACTIVE", "msg": "The remote storage service is not operational at this time."}
+		a[4352] := {"enum": "ERROR_REMOTE_STORAGE_MEDIA_ERROR", "msg": "The remote storage service encountered a media error."}
+		a[4390] := {"enum": "ERROR_NOT_A_REPARSE_POINT", "msg": "The file or directory is not a reparse point."}
+		a[4391] := {"enum": "ERROR_REPARSE_ATTRIBUTE_CONFLICT", "msg": "The reparse point attribute cannot be set because it conflicts with an existing attribute."}
+		a[4392] := {"enum": "ERROR_INVALID_REPARSE_DATA", "msg": "The data present in the reparse point buffer is invalid."}
+		a[4393] := {"enum": "ERROR_REPARSE_TAG_INVALID", "msg": "The tag present in the reparse point buffer is invalid."}
+		a[4394] := {"enum": "ERROR_REPARSE_TAG_MISMATCH", "msg": "There is a mismatch between the tag specified in the request and the tag present in the reparse point."}
+		a[4400] := {"enum": "ERROR_APP_DATA_NOT_FOUND", "msg": "Fast Cache data not found."}
+		a[4401] := {"enum": "ERROR_APP_DATA_EXPIRED", "msg": "Fast Cache data expired."}
+		a[4402] := {"enum": "ERROR_APP_DATA_CORRUPT", "msg": "Fast Cache data corrupt."}
+		a[4403] := {"enum": "ERROR_APP_DATA_LIMIT_EXCEEDED", "msg": "Fast Cache data has exceeded its max size and cannot be updated."}
+		a[4404] := {"enum": "ERROR_APP_DATA_REBOOT_REQUIRED", "msg": "Fast Cache has been ReArmed and requires a reboot until it can be updated."}
+		a[4420] := {"enum": "ERROR_SECUREBOOT_ROLLBACK_DETECTED", "msg": "Secure Boot detected that rollback of protected data has been attempted."}
+		a[4421] := {"enum": "ERROR_SECUREBOOT_POLICY_VIOLATION", "msg": "The value is protected by Secure Boot policy and cannot be modified or deleted."}
+		a[4422] := {"enum": "ERROR_SECUREBOOT_INVALID_POLICY", "msg": "The Secure Boot policy is invalid."}
+		a[4423] := {"enum": "ERROR_SECUREBOOT_POLICY_PUBLISHER_NOT_FOUND", "msg": "A new Secure Boot policy did not contain the current publisher on its update list."}
+		a[4424] := {"enum": "ERROR_SECUREBOOT_POLICY_NOT_SIGNED", "msg": "The Secure Boot policy is either not signed or is signed by a non-trusted signer."}
+		a[4425] := {"enum": "ERROR_SECUREBOOT_NOT_ENABLED", "msg": "Secure Boot is not enabled on this machine."}
+		a[4426] := {"enum": "ERROR_SECUREBOOT_FILE_REPLACED", "msg": "Secure Boot requires that certain files and drivers are not replaced by other files or drivers."}
+		a[4440] := {"enum": "ERROR_OFFLOAD_READ_FLT_NOT_SUPPORTED", "msg": "The copy offload read operation is not supported by a filter."}
+		a[4441] := {"enum": "ERROR_OFFLOAD_WRITE_FLT_NOT_SUPPORTED", "msg": "The copy offload write operation is not supported by a filter."}
+		a[4442] := {"enum": "ERROR_OFFLOAD_READ_FILE_NOT_SUPPORTED", "msg": "The copy offload read operation is not supported for the file."}
+		a[4443] := {"enum": "ERROR_OFFLOAD_WRITE_FILE_NOT_SUPPORTED", "msg": "The copy offload write operation is not supported for the file."}
+		a[4500] := {"enum": "ERROR_VOLUME_NOT_SIS_ENABLED", "msg": "Single Instance Storage is not available on this volume."}
+		a[5001] := {"enum": "ERROR_DEPENDENT_RESOURCE_EXISTS", "msg": "The operation cannot be completed because other resources are dependent on this resource."}
+		a[5002] := {"enum": "ERROR_DEPENDENCY_NOT_FOUND", "msg": "The cluster resource dependency cannot be found."}
+		a[5003] := {"enum": "ERROR_DEPENDENCY_ALREADY_EXISTS", "msg": "The cluster resource cannot be made dependent on the specified resource because it is already dependent."}
+		a[5004] := {"enum": "ERROR_RESOURCE_NOT_ONLINE", "msg": "The cluster resource is not online."}
+		a[5005] := {"enum": "ERROR_HOST_NODE_NOT_AVAILABLE", "msg": "A cluster node is not available for this operation."}
+		a[5006] := {"enum": "ERROR_RESOURCE_NOT_AVAILABLE", "msg": "The cluster resource is not available."}
+		a[5007] := {"enum": "ERROR_RESOURCE_NOT_FOUND", "msg": "The cluster resource could not be found."}
+		a[5008] := {"enum": "ERROR_SHUTDOWN_CLUSTER", "msg": "The cluster is being shut down."}
+		a[5009] := {"enum": "ERROR_CANT_EVICT_ACTIVE_NODE", "msg": "A cluster node cannot be evicted from the cluster unless the node is down or it is the last node."}
+		a[5010] := {"enum": "ERROR_OBJECT_ALREADY_EXISTS", "msg": "The object already exists."}
+		a[5011] := {"enum": "ERROR_OBJECT_IN_LIST", "msg": "The object is already in the list."}
+		a[5012] := {"enum": "ERROR_GROUP_NOT_AVAILABLE", "msg": "The cluster group is not available for any new requests."}
+		a[5013] := {"enum": "ERROR_GROUP_NOT_FOUND", "msg": "The cluster group could not be found."}
+		a[5014] := {"enum": "ERROR_GROUP_NOT_ONLINE", "msg": "The operation could not be completed because the cluster group is not online."}
+		a[5015] := {"enum": "ERROR_HOST_NODE_NOT_RESOURCE_OWNER", "msg": "The operation failed because either the specified cluster node is not the owner of the resource, or the node is not a possible owner of the resource."}
+		a[5016] := {"enum": "ERROR_HOST_NODE_NOT_GROUP_OWNER", "msg": "The operation failed because either the specified cluster node is not the owner of the group, or the node is not a possible owner of the group."}
+		a[5017] := {"enum": "ERROR_RESMON_CREATE_FAILED", "msg": "The cluster resource could not be created in the specified resource monitor."}
+		a[5018] := {"enum": "ERROR_RESMON_ONLINE_FAILED", "msg": "The cluster resource could not be brought online by the resource monitor."}
+		a[5019] := {"enum": "ERROR_RESOURCE_ONLINE", "msg": "The operation could not be completed because the cluster resource is online."}
+		a[5020] := {"enum": "ERROR_QUORUM_RESOURCE", "msg": "The cluster resource could not be deleted or brought offline because it is the quorum resource."}
+		a[5021] := {"enum": "ERROR_NOT_QUORUM_CAPABLE", "msg": "The cluster could not make the specified resource a quorum resource because it is not capable of being a quorum resource."}
+		a[5022] := {"enum": "ERROR_CLUSTER_SHUTTING_DOWN", "msg": "The cluster software is shutting down."}
+		a[5023] := {"enum": "ERROR_INVALID_STATE", "msg": "The group or resource is not in the correct state to perform the requested operation."}
+		a[5024] := {"enum": "ERROR_RESOURCE_PROPERTIES_STORED", "msg": "The properties were stored but not all changes will take effect until the next time the resource is brought online."}
+		a[5025] := {"enum": "ERROR_NOT_QUORUM_CLASS", "msg": "The cluster could not make the specified resource a quorum resource because it does not belong to a shared storage class."}
+		a[5026] := {"enum": "ERROR_CORE_RESOURCE", "msg": "The cluster resource could not be deleted since it is a core resource."}
+		a[5027] := {"enum": "ERROR_QUORUM_RESOURCE_ONLINE_FAILED", "msg": "The quorum resource failed to come online."}
+		a[5028] := {"enum": "ERROR_QUORUMLOG_OPEN_FAILED", "msg": "The quorum log could not be created or mounted successfully."}
+		a[5029] := {"enum": "ERROR_CLUSTERLOG_CORRUPT", "msg": "The cluster log is corrupt."}
+		a[5030] := {"enum": "ERROR_CLUSTERLOG_RECORD_EXCEEDS_MAXSIZE", "msg": "The record could not be written to the cluster log since it exceeds the maximum size."}
+		a[5031] := {"enum": "ERROR_CLUSTERLOG_EXCEEDS_MAXSIZE", "msg": "The cluster log exceeds its maximum size."}
+		a[5032] := {"enum": "ERROR_CLUSTERLOG_CHKPOINT_NOT_FOUND", "msg": "No checkpoint record was found in the cluster log."}
+		a[5033] := {"enum": "ERROR_CLUSTERLOG_NOT_ENOUGH_SPACE", "msg": "The minimum required disk space needed for logging is not available."}
+		a[5034] := {"enum": "ERROR_QUORUM_OWNER_ALIVE", "msg": "The cluster node failed to take control of the quorum resource because the resource is owned by another active node."}
+		a[5035] := {"enum": "ERROR_NETWORK_NOT_AVAILABLE", "msg": "A cluster network is not available for this operation."}
+		a[5036] := {"enum": "ERROR_NODE_NOT_AVAILABLE", "msg": "A cluster node is not available for this operation."}
+		a[5037] := {"enum": "ERROR_ALL_NODES_NOT_AVAILABLE", "msg": "All cluster nodes must be running to perform this operation."}
+		a[5038] := {"enum": "ERROR_RESOURCE_FAILED", "msg": "A cluster resource failed."}
+		a[5039] := {"enum": "ERROR_CLUSTER_INVALID_NODE", "msg": "The cluster node is not valid."}
+		a[5040] := {"enum": "ERROR_CLUSTER_NODE_EXISTS", "msg": "The cluster node already exists."}
+		a[5041] := {"enum": "ERROR_CLUSTER_JOIN_IN_PROGRESS", "msg": "A node is in the process of joining the cluster."}
+		a[5042] := {"enum": "ERROR_CLUSTER_NODE_NOT_FOUND", "msg": "The cluster node was not found."}
+		a[5043] := {"enum": "ERROR_CLUSTER_LOCAL_NODE_NOT_FOUND", "msg": "The cluster local node information was not found."}
+		a[5044] := {"enum": "ERROR_CLUSTER_NETWORK_EXISTS", "msg": "The cluster network already exists."}
+		a[5045] := {"enum": "ERROR_CLUSTER_NETWORK_NOT_FOUND", "msg": "The cluster network was not found."}
+		a[5046] := {"enum": "ERROR_CLUSTER_NETINTERFACE_EXISTS", "msg": "The cluster network interface already exists."}
+		a[5047] := {"enum": "ERROR_CLUSTER_NETINTERFACE_NOT_FOUND", "msg": "The cluster network interface was not found."}
+		a[5048] := {"enum": "ERROR_CLUSTER_INVALID_REQUEST", "msg": "The cluster request is not valid for this object."}
+		a[5049] := {"enum": "ERROR_CLUSTER_INVALID_NETWORK_PROVIDER", "msg": "The cluster network provider is not valid."}
+		a[5050] := {"enum": "ERROR_CLUSTER_NODE_DOWN", "msg": "The cluster node is down."}
+		a[5051] := {"enum": "ERROR_CLUSTER_NODE_UNREACHABLE", "msg": "The cluster node is not reachable."}
+		a[5052] := {"enum": "ERROR_CLUSTER_NODE_NOT_MEMBER", "msg": "The cluster node is not a member of the cluster."}
+		a[5053] := {"enum": "ERROR_CLUSTER_JOIN_NOT_IN_PROGRESS", "msg": "A cluster join operation is not in progress."}
+		a[5054] := {"enum": "ERROR_CLUSTER_INVALID_NETWORK", "msg": "The cluster network is not valid."}
+		a[5056] := {"enum": "ERROR_CLUSTER_NODE_UP", "msg": "The cluster node is up."}
+		a[5057] := {"enum": "ERROR_CLUSTER_IPADDR_IN_USE", "msg": "The cluster IP address is already in use."}
+		a[5058] := {"enum": "ERROR_CLUSTER_NODE_NOT_PAUSED", "msg": "The cluster node is not paused."}
+		a[5059] := {"enum": "ERROR_CLUSTER_NO_SECURITY_CONTEXT", "msg": "No cluster security context is available."}
+		a[5060] := {"enum": "ERROR_CLUSTER_NETWORK_NOT_INTERNAL", "msg": "The cluster network is not configured for internal cluster communication."}
+		a[5061] := {"enum": "ERROR_CLUSTER_NODE_ALREADY_UP", "msg": "The cluster node is already up."}
+		a[5062] := {"enum": "ERROR_CLUSTER_NODE_ALREADY_DOWN", "msg": "The cluster node is already down."}
+		a[5063] := {"enum": "ERROR_CLUSTER_NETWORK_ALREADY_ONLINE", "msg": "The cluster network is already online."}
+		a[5064] := {"enum": "ERROR_CLUSTER_NETWORK_ALREADY_OFFLINE", "msg": "The cluster network is already offline."}
+		a[5065] := {"enum": "ERROR_CLUSTER_NODE_ALREADY_MEMBER", "msg": "The cluster node is already a member of the cluster."}
+		a[5066] := {"enum": "ERROR_CLUSTER_LAST_INTERNAL_NETWORK", "msg": "The cluster network is the only one configured for internal cluster communication between two or more active cluster nodes. The internal communication capability cannot be removed from the network."}
+		a[5067] := {"enum": "ERROR_CLUSTER_NETWORK_HAS_DEPENDENTS", "msg": "One or more cluster resources depend on the network to provide service to clients. The client access capability cannot be removed from the network."}
+		a[5068] := {"enum": "ERROR_INVALID_OPERATION_ON_QUORUM", "msg": "This operation cannot be performed on the cluster resource as it the quorum resource. You may not bring the quorum resource offline or modify its possible owners list."}
+		a[5069] := {"enum": "ERROR_DEPENDENCY_NOT_ALLOWED", "msg": "The cluster quorum resource is not allowed to have any dependencies."}
+		a[5070] := {"enum": "ERROR_CLUSTER_NODE_PAUSED", "msg": "The cluster node is paused."}
+		a[5071] := {"enum": "ERROR_NODE_CANT_HOST_RESOURCE", "msg": "The cluster resource cannot be brought online. The owner node cannot run this resource."}
+		a[5072] := {"enum": "ERROR_CLUSTER_NODE_NOT_READY", "msg": "The cluster node is not ready to perform the requested operation."}
+		a[5073] := {"enum": "ERROR_CLUSTER_NODE_SHUTTING_DOWN", "msg": "The cluster node is shutting down."}
+		a[5074] := {"enum": "ERROR_CLUSTER_JOIN_ABORTED", "msg": "The cluster join operation was aborted."}
+		a[5075] := {"enum": "ERROR_CLUSTER_INCOMPATIBLE_VERSIONS", "msg": "The cluster join operation failed due to incompatible software versions between the joining node and its sponsor."}
+		a[5076] := {"enum": "ERROR_CLUSTER_MAXNUM_OF_RESOURCES_EXCEEDED", "msg": "This resource cannot be created because the cluster has reached the limit on the number of resources it can monitor."}
+		a[5077] := {"enum": "ERROR_CLUSTER_SYSTEM_CONFIG_CHANGED", "msg": "The system configuration changed during the cluster join or form operation. The join or form operation was aborted."}
+		a[5078] := {"enum": "ERROR_CLUSTER_RESOURCE_TYPE_NOT_FOUND", "msg": "The specified resource type was not found."}
+		a[5079] := {"enum": "ERROR_CLUSTER_RESTYPE_NOT_SUPPORTED", "msg": "The specified node does not support a resource of this type. This may be due to version inconsistencies or due to the absence of the resource DLL on this node."}
+		a[5080] := {"enum": "ERROR_CLUSTER_RESNAME_NOT_FOUND", "msg": "The specified resource name is not supported by this resource DLL. This may be due to a bad (or changed) name supplied to the resource DLL."}
+		a[5081] := {"enum": "ERROR_CLUSTER_NO_RPC_PACKAGES_REGISTERED", "msg": "No authentication package could be registered with the RPC server."}
+		a[5082] := {"enum": "ERROR_CLUSTER_OWNER_NOT_IN_PREFLIST", "msg": "You cannot bring the group online because the owner of the group is not in the preferred list for the group. To change the owner node for the group, move the group."}
+		a[5083] := {"enum": "ERROR_CLUSTER_DATABASE_SEQMISMATCH", "msg": "The join operation failed because the cluster database sequence number has changed or is incompatible with the locker node. This may happen during a join operation if the cluster database was changing during the join."}
+		a[5084] := {"enum": "ERROR_RESMON_INVALID_STATE", "msg": "The resource monitor will not allow the fail operation to be performed while the resource is in its current state. This may happen if the resource is in a pending state."}
+		a[5085] := {"enum": "ERROR_CLUSTER_GUM_NOT_LOCKER", "msg": "A non locker code got a request to reserve the lock for making global updates."}
+		a[5086] := {"enum": "ERROR_QUORUM_DISK_NOT_FOUND", "msg": "The quorum disk could not be located by the cluster service."}
+		a[5087] := {"enum": "ERROR_DATABASE_BACKUP_CORRUPT", "msg": "The backed up cluster database is possibly corrupt."}
+		a[5088] := {"enum": "ERROR_CLUSTER_NODE_ALREADY_HAS_DFS_ROOT", "msg": "A DFS root already exists in this cluster node."}
+		a[5089] := {"enum": "ERROR_RESOURCE_PROPERTY_UNCHANGEABLE", "msg": "An attempt to modify a resource property failed because it conflicts with another existing property."}
+		a[5890] := {"enum": "ERROR_CLUSTER_MEMBERSHIP_INVALID_STATE", "msg": "An operation was attempted that is incompatible with the current membership state of the node."}
+		a[5891] := {"enum": "ERROR_CLUSTER_QUORUMLOG_NOT_FOUND", "msg": "The quorum resource does not contain the quorum log."}
+		a[5892] := {"enum": "ERROR_CLUSTER_MEMBERSHIP_HALT", "msg": "The membership engine requested shutdown of the cluster service on this node."}
+		a[5893] := {"enum": "ERROR_CLUSTER_INSTANCE_ID_MISMATCH", "msg": "The join operation failed because the cluster instance ID of the joining node does not match the cluster instance ID of the sponsor node."}
+		a[5894] := {"enum": "ERROR_CLUSTER_NETWORK_NOT_FOUND_FOR_IP", "msg": "A matching cluster network for the specified IP address could not be found."}
+		a[5895] := {"enum": "ERROR_CLUSTER_PROPERTY_DATA_TYPE_MISMATCH", "msg": "The actual data type of the property did not match the expected data type of the property."}
+		a[5896] := {"enum": "ERROR_CLUSTER_EVICT_WITHOUT_CLEANUP", "msg": "The cluster node was evicted from the cluster successfully, but the node was not cleaned up. To determine what cleanup steps failed and how to recover, see the Failover Clustering application event log using Event Viewer."}
+		a[5897] := {"enum": "ERROR_CLUSTER_PARAMETER_MISMATCH", "msg": "Two or more parameter values specified for a resource's properties are in conflict."}
+		a[5898] := {"enum": "ERROR_NODE_CANNOT_BE_CLUSTERED", "msg": "This computer cannot be made a member of a cluster."}
+		a[5899] := {"enum": "ERROR_CLUSTER_WRONG_OS_VERSION", "msg": "This computer cannot be made a member of a cluster because it does not have the correct version of Windows installed."}
+		a[5900] := {"enum": "ERROR_CLUSTER_CANT_CREATE_DUP_CLUSTER_NAME", "msg": "A cluster cannot be created with the specified cluster name because that cluster name is already in use. Specify a different name for the cluster."}
+		a[5901] := {"enum": "ERROR_CLUSCFG_ALREADY_COMMITTED", "msg": "The cluster configuration action has already been committed."}
+		a[5902] := {"enum": "ERROR_CLUSCFG_ROLLBACK_FAILED", "msg": "The cluster configuration action could not be rolled back."}
+		a[5903] := {"enum": "ERROR_CLUSCFG_SYSTEM_DISK_DRIVE_LETTER_CONFLICT", "msg": "The drive letter assigned to a system disk on one node conflicted with the drive letter assigned to a disk on another node."}
+		a[5904] := {"enum": "ERROR_CLUSTER_OLD_VERSION", "msg": "One or more nodes in the cluster are running a version of Windows that does not support this operation."}
+		a[5905] := {"enum": "ERROR_CLUSTER_MISMATCHED_COMPUTER_ACCT_NAME", "msg": "The name of the corresponding computer account doesn't match the Network Name for this resource."}
+		a[5906] := {"enum": "ERROR_CLUSTER_NO_NET_ADAPTERS", "msg": "No network adapters are available."}
+		a[5907] := {"enum": "ERROR_CLUSTER_POISONED", "msg": "The cluster node has been poisoned."}
+		a[5908] := {"enum": "ERROR_CLUSTER_GROUP_MOVING", "msg": "The group is unable to accept the request since it is moving to another node."}
+		a[5909] := {"enum": "ERROR_CLUSTER_RESOURCE_TYPE_BUSY", "msg": "The resource type cannot accept the request since is too busy performing another operation."}
+		a[5910] := {"enum": "ERROR_RESOURCE_CALL_TIMED_OUT", "msg": "The call to the cluster resource DLL timed out."}
+		a[5911] := {"enum": "ERROR_INVALID_CLUSTER_IPV6_ADDRESS", "msg": "The address is not valid for an IPv6 Address resource. A global IPv6 address is required, and it must match a cluster network. Compatibility addresses are not permitted."}
+		a[5912] := {"enum": "ERROR_CLUSTER_INTERNAL_INVALID_FUNCTION", "msg": "An internal cluster error occurred. A call to an invalid function was attempted."}
+		a[5913] := {"enum": "ERROR_CLUSTER_PARAMETER_OUT_OF_BOUNDS", "msg": "A parameter value is out of acceptable range."}
+		a[5914] := {"enum": "ERROR_CLUSTER_PARTIAL_SEND", "msg": "A network error occurred while sending data to another node in the cluster. The number of bytes transmitted was less than required."}
+		a[5915] := {"enum": "ERROR_CLUSTER_REGISTRY_INVALID_FUNCTION", "msg": "An invalid cluster registry operation was attempted."}
+		a[5916] := {"enum": "ERROR_CLUSTER_INVALID_STRING_TERMINATION", "msg": "An input string of characters is not properly terminated."}
+		a[5917] := {"enum": "ERROR_CLUSTER_INVALID_STRING_FORMAT", "msg": "An input string of characters is not in a valid format for the data it represents."}
+		a[5918] := {"enum": "ERROR_CLUSTER_DATABASE_TRANSACTION_IN_PROGRESS", "msg": "An internal cluster error occurred. A cluster database transaction was attempted while a transaction was already in progress."}
+		a[5919] := {"enum": "ERROR_CLUSTER_DATABASE_TRANSACTION_NOT_IN_PROGRESS", "msg": "An internal cluster error occurred. There was an attempt to commit a cluster database transaction while no transaction was in progress."}
+		a[5920] := {"enum": "ERROR_CLUSTER_NULL_DATA", "msg": "An internal cluster error occurred. Data was not properly initialized."}
+		a[5921] := {"enum": "ERROR_CLUSTER_PARTIAL_READ", "msg": "An error occurred while reading from a stream of data. An unexpected number of bytes was returned."}
+		a[5922] := {"enum": "ERROR_CLUSTER_PARTIAL_WRITE", "msg": "An error occurred while writing to a stream of data. The required number of bytes could not be written."}
+		a[5923] := {"enum": "ERROR_CLUSTER_CANT_DESERIALIZE_DATA", "msg": "An error occurred while deserializing a stream of cluster data."}
+		a[5924] := {"enum": "ERROR_DEPENDENT_RESOURCE_PROPERTY_CONFLICT", "msg": "One or more property values for this resource are in conflict with one or more property values associated with its dependent resource(s)."}
+		a[5925] := {"enum": "ERROR_CLUSTER_NO_QUORUM", "msg": "A quorum of cluster nodes was not present to form a cluster."}
+		a[5926] := {"enum": "ERROR_CLUSTER_INVALID_IPV6_NETWORK", "msg": "The cluster network is not valid for an IPv6 Address resource, or it does not match the configured address."}
+		a[5927] := {"enum": "ERROR_CLUSTER_INVALID_IPV6_TUNNEL_NETWORK", "msg": "The cluster network is not valid for an IPv6 Tunnel resource. Check the configuration of the IP Address resource on which the IPv6 Tunnel resource depends."}
+		a[5928] := {"enum": "ERROR_QUORUM_NOT_ALLOWED_IN_THIS_GROUP", "msg": "Quorum resource cannot reside in the Available Storage group."}
+		a[5929] := {"enum": "ERROR_DEPENDENCY_TREE_TOO_COMPLEX", "msg": "The dependencies for this resource are nested too deeply."}
+		a[5930] := {"enum": "ERROR_EXCEPTION_IN_RESOURCE_CALL", "msg": "The call into the resource DLL raised an unhandled exception."}
+		a[5931] := {"enum": "ERROR_CLUSTER_RHS_FAILED_INITIALIZATION", "msg": "The RHS process failed to initialize."}
+		a[5932] := {"enum": "ERROR_CLUSTER_NOT_INSTALLED", "msg": "The Failover Clustering feature is not installed on this node."}
+		a[5933] := {"enum": "ERROR_CLUSTER_RESOURCES_MUST_BE_ONLINE_ON_THE_SAME_NODE", "msg": "The resources must be online on the same node for this operation."}
+		a[5934] := {"enum": "ERROR_CLUSTER_MAX_NODES_IN_CLUSTER", "msg": "A new node can not be added since this cluster is already at its maximum number of nodes."}
+		a[5935] := {"enum": "ERROR_CLUSTER_TOO_MANY_NODES", "msg": "This cluster can not be created since the specified number of nodes exceeds the maximum allowed limit."}
+		a[5936] := {"enum": "ERROR_CLUSTER_OBJECT_ALREADY_USED", "msg": "An attempt to use the specified cluster name failed because an enabled computer object with the given name already exists in the domain."}
+		a[5937] := {"enum": "ERROR_NONCORE_GROUPS_FOUND", "msg": "This cluster cannot be destroyed. It has non-core application groups which must be deleted before the cluster can be destroyed."}
+		a[5938] := {"enum": "ERROR_FILE_SHARE_RESOURCE_CONFLICT", "msg": "File share associated with file share witness resource cannot be hosted by this cluster or any of its nodes."}
+		a[5939] := {"enum": "ERROR_CLUSTER_EVICT_INVALID_REQUEST", "msg": "Eviction of this node is invalid at this time. Due to quorum requirements node eviction will result in cluster shutdown. If it is the last node in the cluster, destroy cluster command should be used."}
+		a[5940] := {"enum": "ERROR_CLUSTER_SINGLETON_RESOURCE", "msg": "Only one instance of this resource type is allowed in the cluster."}
+		a[5941] := {"enum": "ERROR_CLUSTER_GROUP_SINGLETON_RESOURCE", "msg": "Only one instance of this resource type is allowed per resource group."}
+		a[5942] := {"enum": "ERROR_CLUSTER_RESOURCE_PROVIDER_FAILED", "msg": "The resource failed to come online due to the failure of one or more provider resources."}
+		a[5943] := {"enum": "ERROR_CLUSTER_RESOURCE_CONFIGURATION_ERROR", "msg": "The resource has indicated that it cannot come online on any node."}
+		a[5944] := {"enum": "ERROR_CLUSTER_GROUP_BUSY", "msg": "The current operation cannot be performed on this group at this time."}
+		a[5945] := {"enum": "ERROR_CLUSTER_NOT_SHARED_VOLUME", "msg": "The directory or file is not located on a cluster shared volume."}
+		a[5946] := {"enum": "ERROR_CLUSTER_INVALID_SECURITY_DESCRIPTOR", "msg": "The Security Descriptor does not meet the requirements for a cluster."}
+		a[5947] := {"enum": "ERROR_CLUSTER_SHARED_VOLUMES_IN_USE", "msg": "There is one or more shared volumes resources configured in the cluster. Those resources must be moved to available storage in order for operation to succeed."}
+		a[5948] := {"enum": "ERROR_CLUSTER_USE_SHARED_VOLUMES_API", "msg": "This group or resource cannot be directly manipulated. Use shared volume APIs to perform desired operation."}
+		a[5949] := {"enum": "ERROR_CLUSTER_BACKUP_IN_PROGRESS", "msg": "Back up is in progress. Please wait for backup completion before trying this operation again."}
+		a[5950] := {"enum": "ERROR_NON_CSV_PATH", "msg": "The path does not belong to a cluster shared volume."}
+		a[5951] := {"enum": "ERROR_CSV_VOLUME_NOT_LOCAL", "msg": "The cluster shared volume is not locally mounted on this node."}
+		a[5952] := {"enum": "ERROR_CLUSTER_WATCHDOG_TERMINATING", "msg": "The cluster watchdog is terminating."}
+		a[5953] := {"enum": "ERROR_CLUSTER_RESOURCE_VETOED_MOVE_INCOMPATIBLE_NODES", "msg": "A resource vetoed a move between two nodes because they are incompatible."}
+		a[5954] := {"enum": "ERROR_CLUSTER_INVALID_NODE_WEIGHT", "msg": "The request is invalid either because node weight cannot be changed while the cluster is in disk-only quorum mode, or because changing the node weight would violate the minimum cluster quorum requirements."}
+		a[5955] := {"enum": "ERROR_CLUSTER_RESOURCE_VETOED_CALL", "msg": "The resource vetoed the call."}
+		a[5956] := {"enum": "ERROR_RESMON_SYSTEM_RESOURCES_LACKING", "msg": "Resource could not start or run because it could not reserve sufficient system resources."}
+		a[5957] := {"enum": "ERROR_CLUSTER_RESOURCE_VETOED_MOVE_NOT_ENOUGH_RESOURCES_ON_DESTINATION", "msg": "A resource vetoed a move between two nodes because the destination currently does not have enough resources to complete the operation."}
+		a[5958] := {"enum": "ERROR_CLUSTER_RESOURCE_VETOED_MOVE_NOT_ENOUGH_RESOURCES_ON_SOURCE", "msg": "A resource vetoed a move between two nodes because the source currently does not have enough resources to complete the operation."}
+		a[5959] := {"enum": "ERROR_CLUSTER_GROUP_QUEUED", "msg": "The requested operation can not be completed because the group is queued for an operation."}
+		a[5960] := {"enum": "ERROR_CLUSTER_RESOURCE_LOCKED_STATUS", "msg": "The requested operation can not be completed because a resource has locked status."}
+		a[5961] := {"enum": "ERROR_CLUSTER_SHARED_VOLUME_FAILOVER_NOT_ALLOWED", "msg": "The resource cannot move to another node because a cluster shared volume vetoed the operation."}
+		a[5962] := {"enum": "ERROR_CLUSTER_NODE_DRAIN_IN_PROGRESS", "msg": "A node drain is already in progress.`nThis value was also named <strong>ERROR_CLUSTER_NODE_EVACUATION_IN_PROGRESS</strong>"}
+		a[5963] := {"enum": "ERROR_CLUSTER_DISK_NOT_CONNECTED", "msg": "Clustered storage is not connected to the node."}
+		a[5964] := {"enum": "ERROR_DISK_NOT_CSV_CAPABLE", "msg": "The disk is not configured in a way to be used with CSV. CSV disks must have at least one partition that is formatted with NTFS."}
+		a[5965] := {"enum": "ERROR_RESOURCE_NOT_IN_AVAILABLE_STORAGE", "msg": "The resource must be part of the Available Storage group to complete this action."}
+		a[5966] := {"enum": "ERROR_CLUSTER_SHARED_VOLUME_REDIRECTED", "msg": "CSVFS failed operation as volume is in redirected mode."}
+		a[5967] := {"enum": "ERROR_CLUSTER_SHARED_VOLUME_NOT_REDIRECTED", "msg": "CSVFS failed operation as volume is not in redirected mode."}
+		a[5968] := {"enum": "ERROR_CLUSTER_CANNOT_RETURN_PROPERTIES", "msg": "Cluster properties cannot be returned at this time."}
+		a[5969] := {"enum": "ERROR_CLUSTER_RESOURCE_CONTAINS_UNSUPPORTED_DIFF_AREA_FOR_SHARED_VOLUMES", "msg": "The clustered disk resource contains software snapshot diff area that are not supported for Cluster Shared Volumes."}
+		a[5970] := {"enum": "ERROR_CLUSTER_RESOURCE_IS_IN_MAINTENANCE_MODE", "msg": "The operation cannot be completed because the resource is in maintenance mode."}
+		a[5971] := {"enum": "ERROR_CLUSTER_AFFINITY_CONFLICT", "msg": "The operation cannot be completed because of cluster affinity conflicts."}
+		a[5972] := {"enum": "ERROR_CLUSTER_RESOURCE_IS_REPLICA_VIRTUAL_MACHINE", "msg": "The operation cannot be completed because the resource is a replica virtual machine."}
+		a[6000] := {"enum": "ERROR_ENCRYPTION_FAILED", "msg": "The specified file could not be encrypted."}
+		a[6001] := {"enum": "ERROR_DECRYPTION_FAILED", "msg": "The specified file could not be decrypted."}
+		a[6002] := {"enum": "ERROR_FILE_ENCRYPTED", "msg": "The specified file is encrypted and the user does not have the ability to decrypt it."}
+		a[6003] := {"enum": "ERROR_NO_RECOVERY_POLICY", "msg": "There is no valid encryption recovery policy configured for this system."}
+		a[6004] := {"enum": "ERROR_NO_EFS", "msg": "The required encryption driver is not loaded for this system."}
+		a[6005] := {"enum": "ERROR_WRONG_EFS", "msg": "The file was encrypted with a different encryption driver than is currently loaded."}
+		a[6006] := {"enum": "ERROR_NO_USER_KEYS", "msg": "There are no EFS keys defined for the user."}
+		a[6007] := {"enum": "ERROR_FILE_NOT_ENCRYPTED", "msg": "The specified file is not encrypted."}
+		a[6008] := {"enum": "ERROR_NOT_EXPORT_FORMAT", "msg": "The specified file is not in the defined EFS export format."}
+		a[6009] := {"enum": "ERROR_FILE_READ_ONLY", "msg": "The specified file is read only."}
+		a[6010] := {"enum": "ERROR_DIR_EFS_DISALLOWED", "msg": "The directory has been disabled for encryption."}
+		a[6011] := {"enum": "ERROR_EFS_SERVER_NOT_TRUSTED", "msg": "The server is not trusted for remote encryption operation."}
+		a[6012] := {"enum": "ERROR_BAD_RECOVERY_POLICY", "msg": "Recovery policy configured for this system contains invalid recovery certificate."}
+		a[6013] := {"enum": "ERROR_EFS_ALG_BLOB_TOO_BIG", "msg": "The encryption algorithm used on the source file needs a bigger key buffer than the one on the destination file."}
+		a[6014] := {"enum": "ERROR_VOLUME_NOT_SUPPORT_EFS", "msg": "The disk partition does not support file encryption."}
+		a[6015] := {"enum": "ERROR_EFS_DISABLED", "msg": "This machine is disabled for file encryption."}
+		a[6016] := {"enum": "ERROR_EFS_VERSION_NOT_SUPPORT", "msg": "A newer system is required to decrypt this encrypted file."}
+		a[6017] := {"enum": "ERROR_CS_ENCRYPTION_INVALID_SERVER_RESPONSE", "msg": "The remote server sent an invalid response for a file being opened with Client Side Encryption."}
+		a[6018] := {"enum": "ERROR_CS_ENCRYPTION_UNSUPPORTED_SERVER", "msg": "Client Side Encryption is not supported by the remote server even though it claims to support it."}
+		a[6019] := {"enum": "ERROR_CS_ENCRYPTION_EXISTING_ENCRYPTED_FILE", "msg": "File is encrypted and should be opened in Client Side Encryption mode."}
+		a[6020] := {"enum": "ERROR_CS_ENCRYPTION_NEW_ENCRYPTED_FILE", "msg": "A new encrypted file is being created and a $EFS needs to be provided."}
+		a[6021] := {"enum": "ERROR_CS_ENCRYPTION_FILE_NOT_CSE", "msg": "The SMB client requested a CSE FSCTL on a non-CSE file."}
+		a[6022] := {"enum": "ERROR_ENCRYPTION_POLICY_DENIES_OPERATION", "msg": "The requested operation was blocked by policy. For more information, contact your system administrator."}
+		a[6118] := {"enum": "ERROR_NO_BROWSER_SERVERS_FOUND", "msg": "The list of servers for this workgroup is not currently available."}
+		a[6200] := {"enum": "SCHED_E_SERVICE_NOT_LOCALSYSTEM", "msg": "The Task Scheduler service must be configured to run in the System account to function properly. Individual tasks may be configured to run in other accounts."}
+		a[6600] := {"enum": "ERROR_LOG_SECTOR_INVALID", "msg": "Log service encountered an invalid log sector."}
+		a[6601] := {"enum": "ERROR_LOG_SECTOR_PARITY_INVALID", "msg": "Log service encountered a log sector with invalid block parity."}
+		a[6602] := {"enum": "ERROR_LOG_SECTOR_REMAPPED", "msg": "Log service encountered a remapped log sector."}
+		a[6603] := {"enum": "ERROR_LOG_BLOCK_INCOMPLETE", "msg": "Log service encountered a partial or incomplete log block."}
+		a[6604] := {"enum": "ERROR_LOG_INVALID_RANGE", "msg": "Log service encountered an attempt access data outside the active log range."}
+		a[6605] := {"enum": "ERROR_LOG_BLOCKS_EXHAUSTED", "msg": "Log service user marshalling buffers are exhausted."}
+		a[6606] := {"enum": "ERROR_LOG_READ_CONTEXT_INVALID", "msg": "Log service encountered an attempt read from a marshalling area with an invalid read context."}
+		a[6607] := {"enum": "ERROR_LOG_RESTART_INVALID", "msg": "Log service encountered an invalid log restart area."}
+		a[6608] := {"enum": "ERROR_LOG_BLOCK_VERSION", "msg": "Log service encountered an invalid log block version."}
+		a[6609] := {"enum": "ERROR_LOG_BLOCK_INVALID", "msg": "Log service encountered an invalid log block."}
+		a[6610] := {"enum": "ERROR_LOG_READ_MODE_INVALID", "msg": "Log service encountered an attempt to read the log with an invalid read mode."}
+		a[6611] := {"enum": "ERROR_LOG_NO_RESTART", "msg": "Log service encountered a log stream with no restart area."}
+		a[6612] := {"enum": "ERROR_LOG_METADATA_CORRUPT", "msg": "Log service encountered a corrupted metadata file."}
+		a[6613] := {"enum": "ERROR_LOG_METADATA_INVALID", "msg": "Log service encountered a metadata file that could not be created by the log file system."}
+		a[6614] := {"enum": "ERROR_LOG_METADATA_INCONSISTENT", "msg": "Log service encountered a metadata file with inconsistent data."}
+		a[6615] := {"enum": "ERROR_LOG_RESERVATION_INVALID", "msg": "Log service encountered an attempt to erroneous allocate or dispose reservation space."}
+		a[6616] := {"enum": "ERROR_LOG_CANT_DELETE", "msg": "Log service cannot delete log file or file system container."}
+		a[6617] := {"enum": "ERROR_LOG_CONTAINER_LIMIT_EXCEEDED", "msg": "Log service has reached the maximum allowable containers allocated to a log file."}
+		a[6618] := {"enum": "ERROR_LOG_START_OF_LOG", "msg": "Log service has attempted to read or write backward past the start of the log."}
+		a[6619] := {"enum": "ERROR_LOG_POLICY_ALREADY_INSTALLED", "msg": "Log policy could not be installed because a policy of the same type is already present."}
+		a[6620] := {"enum": "ERROR_LOG_POLICY_NOT_INSTALLED", "msg": "Log policy in question was not installed at the time of the request."}
+		a[6621] := {"enum": "ERROR_LOG_POLICY_INVALID", "msg": "The installed set of policies on the log is invalid."}
+		a[6622] := {"enum": "ERROR_LOG_POLICY_CONFLICT", "msg": "A policy on the log in question prevented the operation from completing."}
+		a[6623] := {"enum": "ERROR_LOG_PINNED_ARCHIVE_TAIL", "msg": "Log space cannot be reclaimed because the log is pinned by the archive tail."}
+		a[6624] := {"enum": "ERROR_LOG_RECORD_NONEXISTENT", "msg": "Log record is not a record in the log file."}
+		a[6625] := {"enum": "ERROR_LOG_RECORDS_RESERVED_INVALID", "msg": "Number of reserved log records or the adjustment of the number of reserved log records is invalid."}
+		a[6626] := {"enum": "ERROR_LOG_SPACE_RESERVED_INVALID", "msg": "Reserved log space or the adjustment of the log space is invalid."}
+		a[6627] := {"enum": "ERROR_LOG_TAIL_INVALID", "msg": "An new or existing archive tail or base of the active log is invalid."}
+		a[6628] := {"enum": "ERROR_LOG_FULL", "msg": "Log space is exhausted."}
+		a[6629] := {"enum": "ERROR_COULD_NOT_RESIZE_LOG", "msg": "The log could not be set to the requested size."}
+		a[6630] := {"enum": "ERROR_LOG_MULTIPLEXED", "msg": "Log is multiplexed, no direct writes to the physical log is allowed."}
+		a[6631] := {"enum": "ERROR_LOG_DEDICATED", "msg": "The operation failed because the log is a dedicated log."}
+		a[6632] := {"enum": "ERROR_LOG_ARCHIVE_NOT_IN_PROGRESS", "msg": "The operation requires an archive context."}
+		a[6633] := {"enum": "ERROR_LOG_ARCHIVE_IN_PROGRESS", "msg": "Log archival is in progress."}
+		a[6634] := {"enum": "ERROR_LOG_EPHEMERAL", "msg": "The operation requires a non-ephemeral log, but the log is ephemeral."}
+		a[6635] := {"enum": "ERROR_LOG_NOT_ENOUGH_CONTAINERS", "msg": "The log must have at least two containers before it can be read from or written to."}
+		a[6636] := {"enum": "ERROR_LOG_CLIENT_ALREADY_REGISTERED", "msg": "A log client has already registered on the stream."}
+		a[6637] := {"enum": "ERROR_LOG_CLIENT_NOT_REGISTERED", "msg": "A log client has not been registered on the stream."}
+		a[6638] := {"enum": "ERROR_LOG_FULL_HANDLER_IN_PROGRESS", "msg": "A request has already been made to handle the log full condition."}
+		a[6639] := {"enum": "ERROR_LOG_CONTAINER_READ_FAILED", "msg": "Log service encountered an error when attempting to read from a log container."}
+		a[6640] := {"enum": "ERROR_LOG_CONTAINER_WRITE_FAILED", "msg": "Log service encountered an error when attempting to write to a log container."}
+		a[6641] := {"enum": "ERROR_LOG_CONTAINER_OPEN_FAILED", "msg": "Log service encountered an error when attempting open a log container."}
+		a[6642] := {"enum": "ERROR_LOG_CONTAINER_STATE_INVALID", "msg": "Log service encountered an invalid container state when attempting a requested action."}
+		a[6643] := {"enum": "ERROR_LOG_STATE_INVALID", "msg": "Log service is not in the correct state to perform a requested action."}
+		a[6644] := {"enum": "ERROR_LOG_PINNED", "msg": "Log space cannot be reclaimed because the log is pinned."}
+		a[6645] := {"enum": "ERROR_LOG_METADATA_FLUSH_FAILED", "msg": "Log metadata flush failed."}
+		a[6646] := {"enum": "ERROR_LOG_INCONSISTENT_SECURITY", "msg": "Security on the log and its containers is inconsistent."}
+		a[6647] := {"enum": "ERROR_LOG_APPENDED_FLUSH_FAILED", "msg": "Records were appended to the log or reservation changes were made, but the log could not be flushed."}
+		a[6648] := {"enum": "ERROR_LOG_PINNED_RESERVATION", "msg": "The log is pinned due to reservation consuming most of the log space. Free some reserved records to make space available."}
+		a[6700] := {"enum": "ERROR_INVALID_TRANSACTION", "msg": "The transaction handle associated with this operation is not valid."}
+		a[6701] := {"enum": "ERROR_TRANSACTION_NOT_ACTIVE", "msg": "The requested operation was made in the context of a transaction that is no longer active."}
+		a[6702] := {"enum": "ERROR_TRANSACTION_REQUEST_NOT_VALID", "msg": "The requested operation is not valid on the Transaction object in its current state."}
+		a[6703] := {"enum": "ERROR_TRANSACTION_NOT_REQUESTED", "msg": "The caller has called a response API, but the response is not expected because the TM did not issue the corresponding request to the caller."}
+		a[6704] := {"enum": "ERROR_TRANSACTION_ALREADY_ABORTED", "msg": "It is too late to perform the requested operation, since the Transaction has already been aborted."}
+		a[6705] := {"enum": "ERROR_TRANSACTION_ALREADY_COMMITTED", "msg": "It is too late to perform the requested operation, since the Transaction has already been committed."}
+		a[6706] := {"enum": "ERROR_TM_INITIALIZATION_FAILED", "msg": "The Transaction Manager was unable to be successfully initialized. Transacted operations are not supported."}
+		a[6707] := {"enum": "ERROR_RESOURCEMANAGER_READ_ONLY", "msg": "The specified ResourceManager made no changes or updates to the resource under this transaction."}
+		a[6708] := {"enum": "ERROR_TRANSACTION_NOT_JOINED", "msg": "The resource manager has attempted to prepare a transaction that it has not successfully joined."}
+		a[6709] := {"enum": "ERROR_TRANSACTION_SUPERIOR_EXISTS", "msg": "The Transaction object already has a superior enlistment, and the caller attempted an operation that would have created a new superior. Only a single superior enlistment is allow."}
+		a[6710] := {"enum": "ERROR_CRM_PROTOCOL_ALREADY_EXISTS", "msg": "The RM tried to register a protocol that already exists."}
+		a[6711] := {"enum": "ERROR_TRANSACTION_PROPAGATION_FAILED", "msg": "The attempt to propagate the Transaction failed."}
+		a[6712] := {"enum": "ERROR_CRM_PROTOCOL_NOT_FOUND", "msg": "The requested propagation protocol was not registered as a CRM."}
+		a[6713] := {"enum": "ERROR_TRANSACTION_INVALID_MARSHALL_BUFFER", "msg": "The buffer passed in to PushTransaction or PullTransaction is not in a valid format."}
+		a[6714] := {"enum": "ERROR_CURRENT_TRANSACTION_NOT_VALID", "msg": "The current transaction context associated with the thread is not a valid handle to a transaction object."}
+		a[6715] := {"enum": "ERROR_TRANSACTION_NOT_FOUND", "msg": "The specified Transaction object could not be opened, because it was not found."}
+		a[6716] := {"enum": "ERROR_RESOURCEMANAGER_NOT_FOUND", "msg": "The specified ResourceManager object could not be opened, because it was not found."}
+		a[6717] := {"enum": "ERROR_ENLISTMENT_NOT_FOUND", "msg": "The specified Enlistment object could not be opened, because it was not found."}
+		a[6718] := {"enum": "ERROR_TRANSACTIONMANAGER_NOT_FOUND", "msg": "The specified TransactionManager object could not be opened, because it was not found."}
+		a[6719] := {"enum": "ERROR_TRANSACTIONMANAGER_NOT_ONLINE", "msg": "The object specified could not be created or opened, because its associated TransactionManager is not online. The TransactionManager must be brought fully Online by calling RecoverTransactionManager to recover to the end of its LogFile before objects in its Transaction or ResourceManager namespaces can be opened. In addition, errors in writing records to its LogFile can cause a TransactionManager to go offline."}
+		a[6720] := {"enum": "ERROR_TRANSACTIONMANAGER_RECOVERY_NAME_COLLISION", "msg": "The specified TransactionManager was unable to create the objects contained in its logfile in the Ob namespace. Therefore, the TransactionManager was unable to recover."}
+		a[6721] := {"enum": "ERROR_TRANSACTION_NOT_ROOT", "msg": "The call to create a superior Enlistment on this Transaction object could not be completed, because the Transaction object specified for the enlistment is a subordinate branch of the Transaction. Only the root of the Transaction can be enlisted on as a superior."}
+		a[6722] := {"enum": "ERROR_TRANSACTION_OBJECT_EXPIRED", "msg": "Because the associated transaction manager or resource manager has been closed, the handle is no longer valid."}
+		a[6723] := {"enum": "ERROR_TRANSACTION_RESPONSE_NOT_ENLISTED", "msg": "The specified operation could not be performed on this Superior enlistment, because the enlistment was not created with the corresponding completion response in the NotificationMask."}
+		a[6724] := {"enum": "ERROR_TRANSACTION_RECORD_TOO_LONG", "msg": "The specified operation could not be performed, because the record that would be logged was too long. This can occur because of two conditions: either there are too many Enlistments on this Transaction, or the combined RecoveryInformation being logged on behalf of those Enlistments is too long."}
+		a[6725] := {"enum": "ERROR_IMPLICIT_TRANSACTION_NOT_SUPPORTED", "msg": "Implicit transaction are not supported."}
+		a[6726] := {"enum": "ERROR_TRANSACTION_INTEGRITY_VIOLATED", "msg": "The kernel transaction manager had to abort or forget the transaction because it blocked forward progress."}
+		a[6727] := {"enum": "ERROR_TRANSACTIONMANAGER_IDENTITY_MISMATCH", "msg": "The TransactionManager identity that was supplied did not match the one recorded in the TransactionManager's log file."}
+		a[6728] := {"enum": "ERROR_RM_CANNOT_BE_FROZEN_FOR_SNAPSHOT", "msg": "This snapshot operation cannot continue because a transactional resource manager cannot be frozen in its current state. Please try again."}
+		a[6729] := {"enum": "ERROR_TRANSACTION_MUST_WRITETHROUGH", "msg": "The transaction cannot be enlisted on with the specified EnlistmentMask, because the transaction has already completed the PrePrepare phase. In order to ensure correctness, the ResourceManager must switch to a write- through mode and cease caching data within this transaction. Enlisting for only subsequent transaction phases may still succeed."}
+		a[6730] := {"enum": "ERROR_TRANSACTION_NO_SUPERIOR", "msg": "The transaction does not have a superior enlistment."}
+		a[6731] := {"enum": "ERROR_HEURISTIC_DAMAGE_POSSIBLE", "msg": "The attempt to commit the Transaction completed, but it is possible that some portion of the transaction tree did not commit successfully due to heuristics. Therefore it is possible that some data modified in the transaction may not have committed, resulting in transactional inconsistency. If possible, check the consistency of the associated data."}
+		a[6800] := {"enum": "ERROR_TRANSACTIONAL_CONFLICT", "msg": "The function attempted to use a name that is reserved for use by another transaction."}
+		a[6801] := {"enum": "ERROR_RM_NOT_ACTIVE", "msg": "Transaction support within the specified resource manager is not started or was shut down due to an error."}
+		a[6802] := {"enum": "ERROR_RM_METADATA_CORRUPT", "msg": "The metadata of the RM has been corrupted. The RM will not function."}
+		a[6803] := {"enum": "ERROR_DIRECTORY_NOT_RM", "msg": "The specified directory does not contain a resource manager."}
+		a[6805] := {"enum": "ERROR_TRANSACTIONS_UNSUPPORTED_REMOTE", "msg": "The remote server or share does not support transacted file operations."}
+		a[6806] := {"enum": "ERROR_LOG_RESIZE_INVALID_SIZE", "msg": "The requested log size is invalid."}
+		a[6807] := {"enum": "ERROR_OBJECT_NO_LONGER_EXISTS", "msg": "The object (file, stream, link) corresponding to the handle has been deleted by a Transaction Savepoint Rollback."}
+		a[6808] := {"enum": "ERROR_STREAM_MINIVERSION_NOT_FOUND", "msg": "The specified file miniversion was not found for this transacted file open."}
+		a[6809] := {"enum": "ERROR_STREAM_MINIVERSION_NOT_VALID", "msg": "The specified file miniversion was found but has been invalidated. Most likely cause is a transaction savepoint rollback."}
+		a[6810] := {"enum": "ERROR_MINIVERSION_INACCESSIBLE_FROM_SPECIFIED_TRANSACTION", "msg": "A miniversion may only be opened in the context of the transaction that created it."}
+		a[6811] := {"enum": "ERROR_CANT_OPEN_MINIVERSION_WITH_MODIFY_INTENT", "msg": "It is not possible to open a miniversion with modify access."}
+		a[6812] := {"enum": "ERROR_CANT_CREATE_MORE_STREAM_MINIVERSIONS", "msg": "It is not possible to create any more miniversions for this stream."}
+		a[6814] := {"enum": "ERROR_REMOTE_FILE_VERSION_MISMATCH", "msg": "The remote server sent mismatching version number or Fid for a file opened with transactions."}
+		a[6815] := {"enum": "ERROR_HANDLE_NO_LONGER_VALID", "msg": "The handle has been invalidated by a transaction. The most likely cause is the presence of memory mapping on a file or an open handle when the transaction ended or rolled back to savepoint."}
+		a[6816] := {"enum": "ERROR_NO_TXF_METADATA", "msg": "There is no transaction metadata on the file."}
+		a[6817] := {"enum": "ERROR_LOG_CORRUPTION_DETECTED", "msg": "The log data is corrupt."}
+		a[6818] := {"enum": "ERROR_CANT_RECOVER_WITH_HANDLE_OPEN", "msg": "The file can't be recovered because there is a handle still open on it."}
+		a[6819] := {"enum": "ERROR_RM_DISCONNECTED", "msg": "The transaction outcome is unavailable because the resource manager responsible for it has disconnected."}
+		a[6820] := {"enum": "ERROR_ENLISTMENT_NOT_SUPERIOR", "msg": "The request was rejected because the enlistment in question is not a superior enlistment."}
+		a[6821] := {"enum": "ERROR_RECOVERY_NOT_NEEDED", "msg": "The transactional resource manager is already consistent. Recovery is not needed."}
+		a[6822] := {"enum": "ERROR_RM_ALREADY_STARTED", "msg": "The transactional resource manager has already been started."}
+		a[6823] := {"enum": "ERROR_FILE_IDENTITY_NOT_PERSISTENT", "msg": "The file cannot be opened transactionally, because its identity depends on the outcome of an unresolved transaction."}
+		a[6824] := {"enum": "ERROR_CANT_BREAK_TRANSACTIONAL_DEPENDENCY", "msg": "The operation cannot be performed because another transaction is depending on the fact that this property will not change."}
+		a[6825] := {"enum": "ERROR_CANT_CROSS_RM_BOUNDARY", "msg": "The operation would involve a single file with two transactional resource managers and is therefore not allowed."}
+		a[6826] := {"enum": "ERROR_TXF_DIR_NOT_EMPTY", "msg": "The $Txf directory must be empty for this operation to succeed."}
+		a[6827] := {"enum": "ERROR_INDOUBT_TRANSACTIONS_EXIST", "msg": "The operation would leave a transactional resource manager in an inconsistent state and is therefore not allowed."}
+		a[6828] := {"enum": "ERROR_TM_VOLATILE", "msg": "The operation could not be completed because the transaction manager does not have a log."}
+		a[6829] := {"enum": "ERROR_ROLLBACK_TIMER_EXPIRED", "msg": "A rollback could not be scheduled because a previously scheduled rollback has already executed or been queued for execution."}
+		a[6830] := {"enum": "ERROR_TXF_ATTRIBUTE_CORRUPT", "msg": "The transactional metadata attribute on the file or directory is corrupt and unreadable."}
+		a[6831] := {"enum": "ERROR_EFS_NOT_ALLOWED_IN_TRANSACTION", "msg": "The encryption operation could not be completed because a transaction is active."}
+		a[6832] := {"enum": "ERROR_TRANSACTIONAL_OPEN_NOT_ALLOWED", "msg": "This object is not allowed to be opened in a transaction."}
+		a[6833] := {"enum": "ERROR_LOG_GROWTH_FAILED", "msg": "An attempt to create space in the transactional resource manager's log failed. The failure status has been recorded in the event log."}
+		a[6834] := {"enum": "ERROR_TRANSACTED_MAPPING_UNSUPPORTED_REMOTE", "msg": "Memory mapping (creating a mapped section) a remote file under a transaction is not supported."}
+		a[6835] := {"enum": "ERROR_TXF_METADATA_ALREADY_PRESENT", "msg": "Transaction metadata is already present on this file and cannot be superseded."}
+		a[6836] := {"enum": "ERROR_TRANSACTION_SCOPE_CALLBACKS_NOT_SET", "msg": "A transaction scope could not be entered because the scope handler has not been initialized."}
+		a[6837] := {"enum": "ERROR_TRANSACTION_REQUIRED_PROMOTION", "msg": "Promotion was required in order to allow the resource manager to enlist, but the transaction was set to disallow it."}
+		a[6838] := {"enum": "ERROR_CANNOT_EXECUTE_FILE_IN_TRANSACTION", "msg": "This file is open for modification in an unresolved transaction and may be opened for execute only by a transacted reader."}
+		a[6839] := {"enum": "ERROR_TRANSACTIONS_NOT_FROZEN", "msg": "The request to thaw frozen transactions was ignored because transactions had not previously been frozen."}
+		a[6840] := {"enum": "ERROR_TRANSACTION_FREEZE_IN_PROGRESS", "msg": "Transactions cannot be frozen because a freeze is already in progress."}
+		a[6841] := {"enum": "ERROR_NOT_SNAPSHOT_VOLUME", "msg": "The target volume is not a snapshot volume. This operation is only valid on a volume mounted as a snapshot."}
+		a[6842] := {"enum": "ERROR_NO_SAVEPOINT_WITH_OPEN_FILES", "msg": "The savepoint operation failed because files are open on the transaction. This is not permitted."}
+		a[6843] := {"enum": "ERROR_DATA_LOST_REPAIR", "msg": "Windows has discovered corruption in a file, and that file has since been repaired. Data loss may have occurred."}
+		a[6844] := {"enum": "ERROR_SPARSE_NOT_ALLOWED_IN_TRANSACTION", "msg": "The sparse operation could not be completed because a transaction is active on the file."}
+		a[6845] := {"enum": "ERROR_TM_IDENTITY_MISMATCH", "msg": "The call to create a TransactionManager object failed because the Tm Identity stored in the logfile does not match the Tm Identity that was passed in as an argument."}
+		a[6846] := {"enum": "ERROR_FLOATED_SECTION", "msg": "I/O was attempted on a section object that has been floated as a result of a transaction ending. There is no valid data."}
+		a[6847] := {"enum": "ERROR_CANNOT_ACCEPT_TRANSACTED_WORK", "msg": "The transactional resource manager cannot currently accept transacted work due to a transient condition such as low resources."}
+		a[6848] := {"enum": "ERROR_CANNOT_ABORT_TRANSACTIONS", "msg": "The transactional resource manager had too many tranactions outstanding that could not be aborted. The transactional resource manger has been shut down."}
+		a[6849] := {"enum": "ERROR_BAD_CLUSTERS", "msg": "The operation could not be completed due to bad clusters on disk."}
+		a[6850] := {"enum": "ERROR_COMPRESSION_NOT_ALLOWED_IN_TRANSACTION", "msg": "The compression operation could not be completed because a transaction is active on the file."}
+		a[6851] := {"enum": "ERROR_VOLUME_DIRTY", "msg": "The operation could not be completed because the volume is dirty. Please run chkdsk and try again."}
+		a[6852] := {"enum": "ERROR_NO_LINK_TRACKING_IN_TRANSACTION", "msg": "The link tracking operation could not be completed because a transaction is active."}
+		a[6853] := {"enum": "ERROR_OPERATION_NOT_SUPPORTED_IN_TRANSACTION", "msg": "This operation cannot be performed in a transaction."}
+		a[6854] := {"enum": "ERROR_EXPIRED_HANDLE", "msg": "The handle is no longer properly associated with its transaction. It may have been opened in a transactional resource manager that was subsequently forced to restart. Please close the handle and open a new one."}
+		a[6855] := {"enum": "ERROR_TRANSACTION_NOT_ENLISTED", "msg": "The specified operation could not be performed because the resource manager is not enlisted in the transaction."}
+		a[7001] := {"enum": "ERROR_CTX_WINSTATION_NAME_INVALID", "msg": "The specified session name is invalid."}
+		a[7002] := {"enum": "ERROR_CTX_INVALID_PD", "msg": "The specified protocol driver is invalid."}
+		a[7003] := {"enum": "ERROR_CTX_PD_NOT_FOUND", "msg": "The specified protocol driver was not found in the system path."}
+		a[7004] := {"enum": "ERROR_CTX_WD_NOT_FOUND", "msg": "The specified terminal connection driver was not found in the system path."}
+		a[7005] := {"enum": "ERROR_CTX_CANNOT_MAKE_EVENTLOG_ENTRY", "msg": "A registry key for event logging could not be created for this session."}
+		a[7006] := {"enum": "ERROR_CTX_SERVICE_NAME_COLLISION", "msg": "A service with the same name already exists on the system."}
+		a[7007] := {"enum": "ERROR_CTX_CLOSE_PENDING", "msg": "A close operation is pending on the session."}
+		a[7008] := {"enum": "ERROR_CTX_NO_OUTBUF", "msg": "There are no free output buffers available."}
+		a[7009] := {"enum": "ERROR_CTX_MODEM_INF_NOT_FOUND", "msg": "The MODEM.INF file was not found."}
+		a[7010] := {"enum": "ERROR_CTX_INVALID_MODEMNAME", "msg": "The modem name was not found in MODEM.INF."}
+		a[7011] := {"enum": "ERROR_CTX_MODEM_RESPONSE_ERROR", "msg": "The modem did not accept the command sent to it. Verify that the configured modem name matches the attached modem."}
+		a[7012] := {"enum": "ERROR_CTX_MODEM_RESPONSE_TIMEOUT", "msg": "The modem did not respond to the command sent to it. Verify that the modem is properly cabled and powered on."}
+		a[7013] := {"enum": "ERROR_CTX_MODEM_RESPONSE_NO_CARRIER", "msg": "Carrier detect has failed or carrier has been dropped due to disconnect."}
+		a[7014] := {"enum": "ERROR_CTX_MODEM_RESPONSE_NO_DIALTONE", "msg": "Dial tone not detected within the required time. Verify that the phone cable is properly attached and functional."}
+		a[7015] := {"enum": "ERROR_CTX_MODEM_RESPONSE_BUSY", "msg": "Busy signal detected at remote site on callback."}
+		a[7016] := {"enum": "ERROR_CTX_MODEM_RESPONSE_VOICE", "msg": "Voice detected at remote site on callback."}
+		a[7017] := {"enum": "ERROR_CTX_TD_ERROR", "msg": "Transport driver error."}
+		a[7022] := {"enum": "ERROR_CTX_WINSTATION_NOT_FOUND", "msg": "The specified session cannot be found."}
+		a[7023] := {"enum": "ERROR_CTX_WINSTATION_ALREADY_EXISTS", "msg": "The specified session name is already in use."}
+		a[7024] := {"enum": "ERROR_CTX_WINSTATION_BUSY", "msg": "The task you are trying to do can't be completed because Remote Desktop Services is currently busy. Please try again in a few minutes. Other users should still be able to log on."}
+		a[7025] := {"enum": "ERROR_CTX_BAD_VIDEO_MODE", "msg": "An attempt has been made to connect to a session whose video mode is not supported by the current client."}
+		a[7035] := {"enum": "ERROR_CTX_GRAPHICS_INVALID", "msg": "The application attempted to enable DOS graphics mode. DOS graphics mode is not supported."}
+		a[7037] := {"enum": "ERROR_CTX_LOGON_DISABLED", "msg": "Your interactive logon privilege has been disabled. Please contact your administrator."}
+		a[7038] := {"enum": "ERROR_CTX_NOT_CONSOLE", "msg": "The requested operation can be performed only on the system console. This is most often the result of a driver or system DLL requiring direct console access."}
+		a[7040] := {"enum": "ERROR_CTX_CLIENT_QUERY_TIMEOUT", "msg": "The client failed to respond to the server connect message."}
+		a[7041] := {"enum": "ERROR_CTX_CONSOLE_DISCONNECT", "msg": "Disconnecting the console session is not supported."}
+		a[7042] := {"enum": "ERROR_CTX_CONSOLE_CONNECT", "msg": "Reconnecting a disconnected session to the console is not supported."}
+		a[7044] := {"enum": "ERROR_CTX_SHADOW_DENIED", "msg": "The request to control another session remotely was denied."}
+		a[7045] := {"enum": "ERROR_CTX_WINSTATION_ACCESS_DENIED", "msg": "The requested session access is denied."}
+		a[7049] := {"enum": "ERROR_CTX_INVALID_WD", "msg": "The specified terminal connection driver is invalid."}
+		a[7050] := {"enum": "ERROR_CTX_SHADOW_INVALID", "msg": "The requested session cannot be controlled remotely. This may be because the session is disconnected or does not currently have a user logged on."}
+		a[7051] := {"enum": "ERROR_CTX_SHADOW_DISABLED", "msg": "The requested session is not configured to allow remote control."}
+		a[7052] := {"enum": "ERROR_CTX_CLIENT_LICENSE_IN_USE", "msg": "Your request to connect to this Terminal Server has been rejected. Your Terminal Server client license number is currently being used by another user. Please call your system administrator to obtain a unique license number."}
+		a[7053] := {"enum": "ERROR_CTX_CLIENT_LICENSE_NOT_SET", "msg": "Your request to connect to this Terminal Server has been rejected. Your Terminal Server client license number has not been entered for this copy of the Terminal Server client. Please contact your system administrator."}
+		a[7054] := {"enum": "ERROR_CTX_LICENSE_NOT_AVAILABLE", "msg": "The number of connections to this computer is limited and all connections are in use right now. Try connecting later or contact your system administrator."}
+		a[7055] := {"enum": "ERROR_CTX_LICENSE_CLIENT_INVALID", "msg": "The client you are using is not licensed to use this system. Your logon request is denied."}
+		a[7056] := {"enum": "ERROR_CTX_LICENSE_EXPIRED", "msg": "The system license has expired. Your logon request is denied."}
+		a[7057] := {"enum": "ERROR_CTX_SHADOW_NOT_RUNNING", "msg": "Remote control could not be terminated because the specified session is not currently being remotely controlled."}
+		a[7058] := {"enum": "ERROR_CTX_SHADOW_ENDED_BY_MODE_CHANGE", "msg": "The remote control of the console was terminated because the display mode was changed. Changing the display mode in a remote control session is not supported."}
+		a[7059] := {"enum": "ERROR_ACTIVATION_COUNT_EXCEEDED", "msg": "Activation has already been reset the maximum number of times for this installation. Your activation timer will not be cleared."}
+		a[7060] := {"enum": "ERROR_CTX_WINSTATIONS_DISABLED", "msg": "Remote logins are currently disabled."}
+		a[7061] := {"enum": "ERROR_CTX_ENCRYPTION_LEVEL_REQUIRED", "msg": "You do not have the proper encryption level to access this Session."}
+		a[7062] := {"enum": "ERROR_CTX_SESSION_IN_USE", "msg": "The user `%s\\`%s is currently logged on to this computer. Only the current user or an administrator can log on to this computer."}
+		a[7063] := {"enum": "ERROR_CTX_NO_FORCE_LOGOFF", "msg": "The user `%s\\`%s is already logged on to the console of this computer. You do not have permission to log in at this time. To resolve this issue, contact `%s\\`%s and have them log off."}
+		a[7064] := {"enum": "ERROR_CTX_ACCOUNT_RESTRICTION", "msg": "Unable to log you on because of an account restriction."}
+		a[7065] := {"enum": "ERROR_RDP_PROTOCOL_ERROR", "msg": "The RDP protocol component `%2 detected an error in the protocol stream and has disconnected the client."}
+		a[7066] := {"enum": "ERROR_CTX_CDM_CONNECT", "msg": "The Client Drive Mapping Service Has Connected on Terminal Connection."}
+		a[7067] := {"enum": "ERROR_CTX_CDM_DISCONNECT", "msg": "The Client Drive Mapping Service Has Disconnected on Terminal Connection."}
+		a[7068] := {"enum": "ERROR_CTX_SECURITY_LAYER_ERROR", "msg": "The Terminal Server security layer detected an error in the protocol stream and has disconnected the client."}
+		a[7069] := {"enum": "ERROR_TS_INCOMPATIBLE_SESSIONS", "msg": "The target session is incompatible with the current session."}
+		a[7070] := {"enum": "ERROR_TS_VIDEO_SUBSYSTEM_ERROR", "msg": "Windows can't connect to your session because a problem occurred in the Windows video subsystem. Try connecting again later, or contact the server administrator for assistance."}
+		a[8001] := {"enum": "FRS_ERR_INVALID_API_SEQUENCE", "msg": "The file replication service API was called incorrectly."}
+		a[8002] := {"enum": "FRS_ERR_STARTING_SERVICE", "msg": "The file replication service cannot be started."}
+		a[8003] := {"enum": "FRS_ERR_STOPPING_SERVICE", "msg": "The file replication service cannot be stopped."}
+		a[8004] := {"enum": "FRS_ERR_INTERNAL_API", "msg": "The file replication service API terminated the request. The event log may have more information."}
+		a[8005] := {"enum": "FRS_ERR_INTERNAL", "msg": "The file replication service terminated the request. The event log may have more information."}
+		a[8006] := {"enum": "FRS_ERR_SERVICE_COMM", "msg": "The file replication service cannot be contacted. The event log may have more information."}
+		a[8007] := {"enum": "FRS_ERR_INSUFFICIENT_PRIV", "msg": "The file replication service cannot satisfy the request because the user has insufficient privileges. The event log may have more information."}
+		a[8008] := {"enum": "FRS_ERR_AUTHENTICATION", "msg": "The file replication service cannot satisfy the request because authenticated RPC is not available. The event log may have more information."}
+		a[8009] := {"enum": "FRS_ERR_PARENT_INSUFFICIENT_PRIV", "msg": "The file replication service cannot satisfy the request because the user has insufficient privileges on the domain controller. The event log may have more information."}
+		a[8010] := {"enum": "FRS_ERR_PARENT_AUTHENTICATION", "msg": "The file replication service cannot satisfy the request because authenticated RPC is not available on the domain controller. The event log may have more information."}
+		a[8011] := {"enum": "FRS_ERR_CHILD_TO_PARENT_COMM", "msg": "The file replication service cannot communicate with the file replication service on the domain controller. The event log may have more information."}
+		a[8012] := {"enum": "FRS_ERR_PARENT_TO_CHILD_COMM", "msg": "The file replication service on the domain controller cannot communicate with the file replication service on this computer. The event log may have more information."}
+		a[8013] := {"enum": "FRS_ERR_SYSVOL_POPULATE", "msg": "The file replication service cannot populate the system volume because of an internal error. The event log may have more information."}
+		a[8014] := {"enum": "FRS_ERR_SYSVOL_POPULATE_TIMEOUT", "msg": "The file replication service cannot populate the system volume because of an internal timeout. The event log may have more information."}
+		a[8015] := {"enum": "FRS_ERR_SYSVOL_IS_BUSY", "msg": "The file replication service cannot process the request. The system volume is busy with a previous request."}
+		a[8016] := {"enum": "FRS_ERR_SYSVOL_DEMOTE", "msg": "The file replication service cannot stop replicating the system volume because of an internal error. The event log may have more information."}
+		a[8017] := {"enum": "FRS_ERR_INVALID_SERVICE_PARAMETER", "msg": "The file replication service detected an invalid parameter."}
+		a[8200] := {"enum": "ERROR_DS_NOT_INSTALLED", "msg": "An error occurred while installing the directory service. For more information, see the event log."}
+		a[8201] := {"enum": "ERROR_DS_MEMBERSHIP_EVALUATED_LOCALLY", "msg": "The directory service evaluated group memberships locally."}
+		a[8202] := {"enum": "ERROR_DS_NO_ATTRIBUTE_OR_VALUE", "msg": "The specified directory service attribute or value does not exist."}
+		a[8203] := {"enum": "ERROR_DS_INVALID_ATTRIBUTE_SYNTAX", "msg": "The attribute syntax specified to the directory service is invalid."}
+		a[8204] := {"enum": "ERROR_DS_ATTRIBUTE_TYPE_UNDEFINED", "msg": "The attribute type specified to the directory service is not defined."}
+		a[8205] := {"enum": "ERROR_DS_ATTRIBUTE_OR_VALUE_EXISTS", "msg": "The specified directory service attribute or value already exists."}
+		a[8206] := {"enum": "ERROR_DS_BUSY", "msg": "The directory service is busy."}
+		a[8207] := {"enum": "ERROR_DS_UNAVAILABLE", "msg": "The directory service is unavailable."}
+		a[8208] := {"enum": "ERROR_DS_NO_RIDS_ALLOCATED", "msg": "The directory service was unable to allocate a relative identifier."}
+		a[8209] := {"enum": "ERROR_DS_NO_MORE_RIDS", "msg": "The directory service has exhausted the pool of relative identifiers."}
+		a[8210] := {"enum": "ERROR_DS_INCORRECT_ROLE_OWNER", "msg": "The requested operation could not be performed because the directory service is not the master for that type of operation."}
+		a[8211] := {"enum": "ERROR_DS_RIDMGR_INIT_ERROR", "msg": "The directory service was unable to initialize the subsystem that allocates relative identifiers."}
+		a[8212] := {"enum": "ERROR_DS_OBJ_CLASS_VIOLATION", "msg": "The requested operation did not satisfy one or more constraints associated with the class of the object."}
+		a[8213] := {"enum": "ERROR_DS_CANT_ON_NON_LEAF", "msg": "The directory service can perform the requested operation only on a leaf object."}
+		a[8214] := {"enum": "ERROR_DS_CANT_ON_RDN", "msg": "The directory service cannot perform the requested operation on the RDN attribute of an object."}
+		a[8215] := {"enum": "ERROR_DS_CANT_MOD_OBJ_CLASS", "msg": "The directory service detected an attempt to modify the object class of an object."}
+		a[8216] := {"enum": "ERROR_DS_CROSS_DOM_MOVE_ERROR", "msg": "The requested cross-domain move operation could not be performed."}
+		a[8217] := {"enum": "ERROR_DS_GC_NOT_AVAILABLE", "msg": "Unable to contact the global catalog server."}
+		a[8218] := {"enum": "ERROR_SHARED_POLICY", "msg": "The policy object is shared and can only be modified at the root."}
+		a[8219] := {"enum": "ERROR_POLICY_OBJECT_NOT_FOUND", "msg": "The policy object does not exist."}
+		a[8220] := {"enum": "ERROR_POLICY_ONLY_IN_DS", "msg": "The requested policy information is only in the directory service."}
+		a[8221] := {"enum": "ERROR_PROMOTION_ACTIVE", "msg": "A domain controller promotion is currently active."}
+		a[8222] := {"enum": "ERROR_NO_PROMOTION_ACTIVE", "msg": "A domain controller promotion is not currently active."}
+		a[8224] := {"enum": "ERROR_DS_OPERATIONS_ERROR", "msg": "An operations error occurred."}
+		a[8225] := {"enum": "ERROR_DS_PROTOCOL_ERROR", "msg": "A protocol error occurred."}
+		a[8226] := {"enum": "ERROR_DS_TIMELIMIT_EXCEEDED", "msg": "The time limit for this request was exceeded."}
+		a[8227] := {"enum": "ERROR_DS_SIZELIMIT_EXCEEDED", "msg": "The size limit for this request was exceeded."}
+		a[8228] := {"enum": "ERROR_DS_ADMIN_LIMIT_EXCEEDED", "msg": "The administrative limit for this request was exceeded."}
+		a[8229] := {"enum": "ERROR_DS_COMPARE_FALSE", "msg": "The compare response was false."}
+		a[8230] := {"enum": "ERROR_DS_COMPARE_TRUE", "msg": "The compare response was true."}
+		a[8231] := {"enum": "ERROR_DS_AUTH_METHOD_NOT_SUPPORTED", "msg": "The requested authentication method is not supported by the server."}
+		a[8232] := {"enum": "ERROR_DS_STRONG_AUTH_REQUIRED", "msg": "A more secure authentication method is required for this server."}
+		a[8233] := {"enum": "ERROR_DS_INAPPROPRIATE_AUTH", "msg": "Inappropriate authentication."}
+		a[8234] := {"enum": "ERROR_DS_AUTH_UNKNOWN", "msg": "The authentication mechanism is unknown."}
+		a[8235] := {"enum": "ERROR_DS_REFERRAL", "msg": "A referral was returned from the server."}
+		a[8236] := {"enum": "ERROR_DS_UNAVAILABLE_CRIT_EXTENSION", "msg": "The server does not support the requested critical extension."}
+		a[8237] := {"enum": "ERROR_DS_CONFIDENTIALITY_REQUIRED", "msg": "This request requires a secure connection."}
+		a[8238] := {"enum": "ERROR_DS_INAPPROPRIATE_MATCHING", "msg": "Inappropriate matching."}
+		a[8239] := {"enum": "ERROR_DS_CONSTRAINT_VIOLATION", "msg": "A constraint violation occurred."}
+		a[8240] := {"enum": "ERROR_DS_NO_SUCH_OBJECT", "msg": "There is no such object on the server."}
+		a[8241] := {"enum": "ERROR_DS_ALIAS_PROBLEM", "msg": "There is an alias problem."}
+		a[8242] := {"enum": "ERROR_DS_INVALID_DN_SYNTAX", "msg": "An invalid dn syntax has been specified."}
+		a[8243] := {"enum": "ERROR_DS_IS_LEAF", "msg": "The object is a leaf object."}
+		a[8244] := {"enum": "ERROR_DS_ALIAS_DEREF_PROBLEM", "msg": "There is an alias dereferencing problem."}
+		a[8245] := {"enum": "ERROR_DS_UNWILLING_TO_PERFORM", "msg": "The server is unwilling to process the request."}
+		a[8246] := {"enum": "ERROR_DS_LOOP_DETECT", "msg": "A loop has been detected."}
+		a[8247] := {"enum": "ERROR_DS_NAMING_VIOLATION", "msg": "There is a naming violation."}
+		a[8248] := {"enum": "ERROR_DS_OBJECT_RESULTS_TOO_LARGE", "msg": "The result set is too large."}
+		a[8249] := {"enum": "ERROR_DS_AFFECTS_MULTIPLE_DSAS", "msg": "The operation affects multiple DSAs."}
+		a[8250] := {"enum": "ERROR_DS_SERVER_DOWN", "msg": "The server is not operational."}
+		a[8251] := {"enum": "ERROR_DS_LOCAL_ERROR", "msg": "A local error has occurred."}
+		a[8252] := {"enum": "ERROR_DS_ENCODING_ERROR", "msg": "An encoding error has occurred."}
+		a[8253] := {"enum": "ERROR_DS_DECODING_ERROR", "msg": "A decoding error has occurred."}
+		a[8254] := {"enum": "ERROR_DS_FILTER_UNKNOWN", "msg": "The search filter cannot be recognized."}
+		a[8255] := {"enum": "ERROR_DS_PARAM_ERROR", "msg": "One or more parameters are illegal."}
+		a[8256] := {"enum": "ERROR_DS_NOT_SUPPORTED", "msg": "The specified method is not supported."}
+		a[8257] := {"enum": "ERROR_DS_NO_RESULTS_RETURNED", "msg": "No results were returned."}
+		a[8258] := {"enum": "ERROR_DS_CONTROL_NOT_FOUND", "msg": "The specified control is not supported by the server."}
+		a[8259] := {"enum": "ERROR_DS_CLIENT_LOOP", "msg": "A referral loop was detected by the client."}
+		a[8260] := {"enum": "ERROR_DS_REFERRAL_LIMIT_EXCEEDED", "msg": "The preset referral limit was exceeded."}
+		a[8261] := {"enum": "ERROR_DS_SORT_CONTROL_MISSING", "msg": "The search requires a SORT control."}
+		a[8262] := {"enum": "ERROR_DS_OFFSET_RANGE_ERROR", "msg": "The search results exceed the offset range specified."}
+		a[8263] := {"enum": "ERROR_DS_RIDMGR_DISABLED", "msg": "The directory service detected the subsystem that allocates relative identifiers is disabled. This can occur as a protective mechanism when the system determines a significant portion of relative identifiers (RIDs) have been exhausted. Please see http://go.microsoft.com/fwlink/p/?linkid=228610 for recommended diagnostic steps and the procedure to re-enable account creation."}
+		a[8301] := {"enum": "ERROR_DS_ROOT_MUST_BE_NC", "msg": "The root object must be the head of a naming context. The root object cannot have an instantiated parent."}
+		a[8302] := {"enum": "ERROR_DS_ADD_REPLICA_INHIBITED", "msg": "The add replica operation cannot be performed. The naming context must be writeable in order to create the replica."}
+		a[8303] := {"enum": "ERROR_DS_ATT_NOT_DEF_IN_SCHEMA", "msg": "A reference to an attribute that is not defined in the schema occurred."}
+		a[8304] := {"enum": "ERROR_DS_MAX_OBJ_SIZE_EXCEEDED", "msg": "The maximum size of an object has been exceeded."}
+		a[8305] := {"enum": "ERROR_DS_OBJ_STRING_NAME_EXISTS", "msg": "An attempt was made to add an object to the directory with a name that is already in use."}
+		a[8306] := {"enum": "ERROR_DS_NO_RDN_DEFINED_IN_SCHEMA", "msg": "An attempt was made to add an object of a class that does not have an RDN defined in the schema."}
+		a[8307] := {"enum": "ERROR_DS_RDN_DOESNT_MATCH_SCHEMA", "msg": "An attempt was made to add an object using an RDN that is not the RDN defined in the schema."}
+		a[8308] := {"enum": "ERROR_DS_NO_REQUESTED_ATTS_FOUND", "msg": "None of the requested attributes were found on the objects."}
+		a[8309] := {"enum": "ERROR_DS_USER_BUFFER_TO_SMALL", "msg": "The user buffer is too small."}
+		a[8310] := {"enum": "ERROR_DS_ATT_IS_NOT_ON_OBJ", "msg": "The attribute specified in the operation is not present on the object."}
+		a[8311] := {"enum": "ERROR_DS_ILLEGAL_MOD_OPERATION", "msg": "Illegal modify operation. Some aspect of the modification is not permitted."}
+		a[8312] := {"enum": "ERROR_DS_OBJ_TOO_LARGE", "msg": "The specified object is too large."}
+		a[8313] := {"enum": "ERROR_DS_BAD_INSTANCE_TYPE", "msg": "The specified instance type is not valid."}
+		a[8314] := {"enum": "ERROR_DS_MASTERDSA_REQUIRED", "msg": "The operation must be performed at a master DSA."}
+		a[8315] := {"enum": "ERROR_DS_OBJECT_CLASS_REQUIRED", "msg": "The object class attribute must be specified."}
+		a[8316] := {"enum": "ERROR_DS_MISSING_REQUIRED_ATT", "msg": "A required attribute is missing."}
+		a[8317] := {"enum": "ERROR_DS_ATT_NOT_DEF_FOR_CLASS", "msg": "An attempt was made to modify an object to include an attribute that is not legal for its class."}
+		a[8318] := {"enum": "ERROR_DS_ATT_ALREADY_EXISTS", "msg": "The specified attribute is already present on the object."}
+		a[8320] := {"enum": "ERROR_DS_CANT_ADD_ATT_VALUES", "msg": "The specified attribute is not present, or has no values."}
+		a[8321] := {"enum": "ERROR_DS_SINGLE_VALUE_CONSTRAINT", "msg": "Multiple values were specified for an attribute that can have only one value."}
+		a[8322] := {"enum": "ERROR_DS_RANGE_CONSTRAINT", "msg": "A value for the attribute was not in the acceptable range of values."}
+		a[8323] := {"enum": "ERROR_DS_ATT_VAL_ALREADY_EXISTS", "msg": "The specified value already exists."}
+		a[8324] := {"enum": "ERROR_DS_CANT_REM_MISSING_ATT", "msg": "The attribute cannot be removed because it is not present on the object."}
+		a[8325] := {"enum": "ERROR_DS_CANT_REM_MISSING_ATT_VAL", "msg": "The attribute value cannot be removed because it is not present on the object."}
+		a[8326] := {"enum": "ERROR_DS_ROOT_CANT_BE_SUBREF", "msg": "The specified root object cannot be a subref."}
+		a[8327] := {"enum": "ERROR_DS_NO_CHAINING", "msg": "Chaining is not permitted."}
+		a[8328] := {"enum": "ERROR_DS_NO_CHAINED_EVAL", "msg": "Chained evaluation is not permitted."}
+		a[8329] := {"enum": "ERROR_DS_NO_PARENT_OBJECT", "msg": "The operation could not be performed because the object's parent is either uninstantiated or deleted."}
+		a[8330] := {"enum": "ERROR_DS_PARENT_IS_AN_ALIAS", "msg": "Having a parent that is an alias is not permitted. Aliases are leaf objects."}
+		a[8331] := {"enum": "ERROR_DS_CANT_MIX_MASTER_AND_REPS", "msg": "The object and parent must be of the same type, either both masters or both replicas."}
+		a[8332] := {"enum": "ERROR_DS_CHILDREN_EXIST", "msg": "The operation cannot be performed because child objects exist. This operation can only be performed on a leaf object."}
+		a[8333] := {"enum": "ERROR_DS_OBJ_NOT_FOUND", "msg": "Directory object not found."}
+		a[8334] := {"enum": "ERROR_DS_ALIASED_OBJ_MISSING", "msg": "The aliased object is missing."}
+		a[8335] := {"enum": "ERROR_DS_BAD_NAME_SYNTAX", "msg": "The object name has bad syntax."}
+		a[8336] := {"enum": "ERROR_DS_ALIAS_POINTS_TO_ALIAS", "msg": "It is not permitted for an alias to refer to another alias."}
+		a[8337] := {"enum": "ERROR_DS_CANT_DEREF_ALIAS", "msg": "The alias cannot be dereferenced."}
+		a[8338] := {"enum": "ERROR_DS_OUT_OF_SCOPE", "msg": "The operation is out of scope."}
+		a[8339] := {"enum": "ERROR_DS_OBJECT_BEING_REMOVED", "msg": "The operation cannot continue because the object is in the process of being removed."}
+		a[8340] := {"enum": "ERROR_DS_CANT_DELETE_DSA_OBJ", "msg": "The DSA object cannot be deleted."}
+		a[8341] := {"enum": "ERROR_DS_GENERIC_ERROR", "msg": "A directory service error has occurred."}
+		a[8342] := {"enum": "ERROR_DS_DSA_MUST_BE_INT_MASTER", "msg": "The operation can only be performed on an internal master DSA object."}
+		a[8343] := {"enum": "ERROR_DS_CLASS_NOT_DSA", "msg": "The object must be of class DSA."}
+		a[8344] := {"enum": "ERROR_DS_INSUFF_ACCESS_RIGHTS", "msg": "Insufficient access rights to perform the operation."}
+		a[8345] := {"enum": "ERROR_DS_ILLEGAL_SUPERIOR", "msg": "The object cannot be added because the parent is not on the list of possible superiors."}
+		a[8346] := {"enum": "ERROR_DS_ATTRIBUTE_OWNED_BY_SAM", "msg": "Access to the attribute is not permitted because the attribute is owned by the Security Accounts Manager (SAM)."}
+		a[8347] := {"enum": "ERROR_DS_NAME_TOO_MANY_PARTS", "msg": "The name has too many parts."}
+		a[8348] := {"enum": "ERROR_DS_NAME_TOO_LONG", "msg": "The name is too long."}
+		a[8349] := {"enum": "ERROR_DS_NAME_VALUE_TOO_LONG", "msg": "The name value is too long."}
+		a[8350] := {"enum": "ERROR_DS_NAME_UNPARSEABLE", "msg": "The directory service encountered an error parsing a name."}
+		a[8351] := {"enum": "ERROR_DS_NAME_TYPE_UNKNOWN", "msg": "The directory service cannot get the attribute type for a name."}
+		a[8352] := {"enum": "ERROR_DS_NOT_AN_OBJECT", "msg": "The name does not identify an object; the name identifies a phantom."}
+		a[8353] := {"enum": "ERROR_DS_SEC_DESC_TOO_SHORT", "msg": "The security descriptor is too short."}
+		a[8354] := {"enum": "ERROR_DS_SEC_DESC_INVALID", "msg": "The security descriptor is invalid."}
+		a[8355] := {"enum": "ERROR_DS_NO_DELETED_NAME", "msg": "Failed to create name for deleted object."}
+		a[8356] := {"enum": "ERROR_DS_SUBREF_MUST_HAVE_PARENT", "msg": "The parent of a new subref must exist."}
+		a[8357] := {"enum": "ERROR_DS_NCNAME_MUST_BE_NC", "msg": "The object must be a naming context."}
+		a[8358] := {"enum": "ERROR_DS_CANT_ADD_SYSTEM_ONLY", "msg": "It is not permitted to add an attribute which is owned by the system."}
+		a[8359] := {"enum": "ERROR_DS_CLASS_MUST_BE_CONCRETE", "msg": "The class of the object must be structural; you cannot instantiate an abstract class."}
+		a[8360] := {"enum": "ERROR_DS_INVALID_DMD", "msg": "The schema object could not be found."}
+		a[8361] := {"enum": "ERROR_DS_OBJ_GUID_EXISTS", "msg": "A local object with this GUID (dead or alive) already exists."}
+		a[8362] := {"enum": "ERROR_DS_NOT_ON_BACKLINK", "msg": "The operation cannot be performed on a back link."}
+		a[8363] := {"enum": "ERROR_DS_NO_CROSSREF_FOR_NC", "msg": "The cross reference for the specified naming context could not be found."}
+		a[8364] := {"enum": "ERROR_DS_SHUTTING_DOWN", "msg": "The operation could not be performed because the directory service is shutting down."}
+		a[8365] := {"enum": "ERROR_DS_UNKNOWN_OPERATION", "msg": "The directory service request is invalid."}
+		a[8366] := {"enum": "ERROR_DS_INVALID_ROLE_OWNER", "msg": "The role owner attribute could not be read."}
+		a[8367] := {"enum": "ERROR_DS_COULDNT_CONTACT_FSMO", "msg": "The requested FSMO operation failed. The current FSMO holder could not be contacted."}
+		a[8368] := {"enum": "ERROR_DS_CROSS_NC_DN_RENAME", "msg": "Modification of a DN across a naming context is not permitted."}
+		a[8369] := {"enum": "ERROR_DS_CANT_MOD_SYSTEM_ONLY", "msg": "The attribute cannot be modified because it is owned by the system."}
+		a[8370] := {"enum": "ERROR_DS_REPLICATOR_ONLY", "msg": "Only the replicator can perform this function."}
+		a[8371] := {"enum": "ERROR_DS_OBJ_CLASS_NOT_DEFINED", "msg": "The specified class is not defined."}
+		a[8372] := {"enum": "ERROR_DS_OBJ_CLASS_NOT_SUBCLASS", "msg": "The specified class is not a subclass."}
+		a[8373] := {"enum": "ERROR_DS_NAME_REFERENCE_INVALID", "msg": "The name reference is invalid."}
+		a[8374] := {"enum": "ERROR_DS_CROSS_REF_EXISTS", "msg": "A cross reference already exists."}
+		a[8375] := {"enum": "ERROR_DS_CANT_DEL_MASTER_CROSSREF", "msg": "It is not permitted to delete a master cross reference."}
+		a[8376] := {"enum": "ERROR_DS_SUBTREE_NOTIFY_NOT_NC_HEAD", "msg": "Subtree notifications are only supported on NC heads."}
+		a[8377] := {"enum": "ERROR_DS_NOTIFY_FILTER_TOO_COMPLEX", "msg": "Notification filter is too complex."}
+		a[8378] := {"enum": "ERROR_DS_DUP_RDN", "msg": "Schema update failed: duplicate RDN."}
+		a[8379] := {"enum": "ERROR_DS_DUP_OID", "msg": "Schema update failed: duplicate OID."}
+		a[8380] := {"enum": "ERROR_DS_DUP_MAPI_ID", "msg": "Schema update failed: duplicate MAPI identifier."}
+		a[8381] := {"enum": "ERROR_DS_DUP_SCHEMA_ID_GUID", "msg": "Schema update failed: duplicate schema-id GUID."}
+		a[8382] := {"enum": "ERROR_DS_DUP_LDAP_DISPLAY_NAME", "msg": "Schema update failed: duplicate LDAP display name."}
+		a[8383] := {"enum": "ERROR_DS_SEMANTIC_ATT_TEST", "msg": "Schema update failed: range-lower less than range upper."}
+		a[8384] := {"enum": "ERROR_DS_SYNTAX_MISMATCH", "msg": "Schema update failed: syntax mismatch."}
+		a[8385] := {"enum": "ERROR_DS_EXISTS_IN_MUST_HAVE", "msg": "Schema deletion failed: attribute is used in must-contain."}
+		a[8386] := {"enum": "ERROR_DS_EXISTS_IN_MAY_HAVE", "msg": "Schema deletion failed: attribute is used in may-contain."}
+		a[8387] := {"enum": "ERROR_DS_NONEXISTENT_MAY_HAVE", "msg": "Schema update failed: attribute in may-contain does not exist."}
+		a[8388] := {"enum": "ERROR_DS_NONEXISTENT_MUST_HAVE", "msg": "Schema update failed: attribute in must-contain does not exist."}
+		a[8389] := {"enum": "ERROR_DS_AUX_CLS_TEST_FAIL", "msg": "Schema update failed: class in aux-class list does not exist or is not an auxiliary class."}
+		a[8390] := {"enum": "ERROR_DS_NONEXISTENT_POSS_SUP", "msg": "Schema update failed: class in poss-superiors does not exist."}
+		a[8391] := {"enum": "ERROR_DS_SUB_CLS_TEST_FAIL", "msg": "Schema update failed: class in subclassof list does not exist or does not satisfy hierarchy rules."}
+		a[8392] := {"enum": "ERROR_DS_BAD_RDN_ATT_ID_SYNTAX", "msg": "Schema update failed: Rdn-Att-Id has wrong syntax."}
+		a[8393] := {"enum": "ERROR_DS_EXISTS_IN_AUX_CLS", "msg": "Schema deletion failed: class is used as auxiliary class."}
+		a[8394] := {"enum": "ERROR_DS_EXISTS_IN_SUB_CLS", "msg": "Schema deletion failed: class is used as sub class."}
+		a[8395] := {"enum": "ERROR_DS_EXISTS_IN_POSS_SUP", "msg": "Schema deletion failed: class is used as poss superior."}
+		a[8396] := {"enum": "ERROR_DS_RECALCSCHEMA_FAILED", "msg": "Schema update failed in recalculating validation cache."}
+		a[8397] := {"enum": "ERROR_DS_TREE_DELETE_NOT_FINISHED", "msg": "The tree deletion is not finished. The request must be made again to continue deleting the tree."}
+		a[8398] := {"enum": "ERROR_DS_CANT_DELETE", "msg": "The requested delete operation could not be performed."}
+		a[8399] := {"enum": "ERROR_DS_ATT_SCHEMA_REQ_ID", "msg": "Cannot read the governs class identifier for the schema record."}
+		a[8400] := {"enum": "ERROR_DS_BAD_ATT_SCHEMA_SYNTAX", "msg": "The attribute schema has bad syntax."}
+		a[8401] := {"enum": "ERROR_DS_CANT_CACHE_ATT", "msg": "The attribute could not be cached."}
+		a[8402] := {"enum": "ERROR_DS_CANT_CACHE_CLASS", "msg": "The class could not be cached."}
+		a[8403] := {"enum": "ERROR_DS_CANT_REMOVE_ATT_CACHE", "msg": "The attribute could not be removed from the cache."}
+		a[8404] := {"enum": "ERROR_DS_CANT_REMOVE_CLASS_CACHE", "msg": "The class could not be removed from the cache."}
+		a[8405] := {"enum": "ERROR_DS_CANT_RETRIEVE_DN", "msg": "The distinguished name attribute could not be read."}
+		a[8406] := {"enum": "ERROR_DS_MISSING_SUPREF", "msg": "No superior reference has been configured for the directory service. The directory service is therefore unable to issue referrals to objects outside this forest."}
+		a[8407] := {"enum": "ERROR_DS_CANT_RETRIEVE_INSTANCE", "msg": "The instance type attribute could not be retrieved."}
+		a[8408] := {"enum": "ERROR_DS_CODE_INCONSISTENCY", "msg": "An internal error has occurred."}
+		a[8409] := {"enum": "ERROR_DS_DATABASE_ERROR", "msg": "A database error has occurred."}
+		a[8410] := {"enum": "ERROR_DS_GOVERNSID_MISSING", "msg": "The attribute GOVERNSID is missing."}
+		a[8411] := {"enum": "ERROR_DS_MISSING_EXPECTED_ATT", "msg": "An expected attribute is missing."}
+		a[8412] := {"enum": "ERROR_DS_NCNAME_MISSING_CR_REF", "msg": "The specified naming context is missing a cross reference."}
+		a[8413] := {"enum": "ERROR_DS_SECURITY_CHECKING_ERROR", "msg": "A security checking error has occurred."}
+		a[8414] := {"enum": "ERROR_DS_SCHEMA_NOT_LOADED", "msg": "The schema is not loaded."}
+		a[8415] := {"enum": "ERROR_DS_SCHEMA_ALLOC_FAILED", "msg": "Schema allocation failed. Please check if the machine is running low on memory."}
+		a[8416] := {"enum": "ERROR_DS_ATT_SCHEMA_REQ_SYNTAX", "msg": "Failed to obtain the required syntax for the attribute schema."}
+		a[8417] := {"enum": "ERROR_DS_GCVERIFY_ERROR", "msg": "The global catalog verification failed. The global catalog is not available or does not support the operation. Some part of the directory is currently not available."}
+		a[8418] := {"enum": "ERROR_DS_DRA_SCHEMA_MISMATCH", "msg": "The replication operation failed because of a schema mismatch between the servers involved."}
+		a[8419] := {"enum": "ERROR_DS_CANT_FIND_DSA_OBJ", "msg": "The DSA object could not be found."}
+		a[8420] := {"enum": "ERROR_DS_CANT_FIND_EXPECTED_NC", "msg": "The naming context could not be found."}
+		a[8421] := {"enum": "ERROR_DS_CANT_FIND_NC_IN_CACHE", "msg": "The naming context could not be found in the cache."}
+		a[8422] := {"enum": "ERROR_DS_CANT_RETRIEVE_CHILD", "msg": "The child object could not be retrieved."}
+		a[8423] := {"enum": "ERROR_DS_SECURITY_ILLEGAL_MODIFY", "msg": "The modification was not permitted for security reasons."}
+		a[8424] := {"enum": "ERROR_DS_CANT_REPLACE_HIDDEN_REC", "msg": "The operation cannot replace the hidden record."}
+		a[8425] := {"enum": "ERROR_DS_BAD_HIERARCHY_FILE", "msg": "The hierarchy file is invalid."}
+		a[8426] := {"enum": "ERROR_DS_BUILD_HIERARCHY_TABLE_FAILED", "msg": "The attempt to build the hierarchy table failed."}
+		a[8427] := {"enum": "ERROR_DS_CONFIG_PARAM_MISSING", "msg": "The directory configuration parameter is missing from the registry."}
+		a[8428] := {"enum": "ERROR_DS_COUNTING_AB_INDICES_FAILED", "msg": "The attempt to count the address book indices failed."}
+		a[8429] := {"enum": "ERROR_DS_HIERARCHY_TABLE_MALLOC_FAILED", "msg": "The allocation of the hierarchy table failed."}
+		a[8430] := {"enum": "ERROR_DS_INTERNAL_FAILURE", "msg": "The directory service encountered an internal failure."}
+		a[8431] := {"enum": "ERROR_DS_UNKNOWN_ERROR", "msg": "The directory service encountered an unknown failure."}
+		a[8432] := {"enum": "ERROR_DS_ROOT_REQUIRES_CLASS_TOP", "msg": "A root object requires a class of 'top'."}
+		a[8433] := {"enum": "ERROR_DS_REFUSING_FSMO_ROLES", "msg": "This directory server is shutting down, and cannot take ownership of new floating single-master operation roles."}
+		a[8434] := {"enum": "ERROR_DS_MISSING_FSMO_SETTINGS", "msg": "The directory service is missing mandatory configuration information, and is unable to determine the ownership of floating single-master operation roles."}
+		a[8435] := {"enum": "ERROR_DS_UNABLE_TO_SURRENDER_ROLES", "msg": "The directory service was unable to transfer ownership of one or more floating single-master operation roles to other servers."}
+		a[8436] := {"enum": "ERROR_DS_DRA_GENERIC", "msg": "The replication operation failed."}
+		a[8437] := {"enum": "ERROR_DS_DRA_INVALID_PARAMETER", "msg": "An invalid parameter was specified for this replication operation."}
+		a[8438] := {"enum": "ERROR_DS_DRA_BUSY", "msg": "The directory service is too busy to complete the replication operation at this time."}
+		a[8439] := {"enum": "ERROR_DS_DRA_BAD_DN", "msg": "The distinguished name specified for this replication operation is invalid."}
+		a[8440] := {"enum": "ERROR_DS_DRA_BAD_NC", "msg": "The naming context specified for this replication operation is invalid."}
+		a[8441] := {"enum": "ERROR_DS_DRA_DN_EXISTS", "msg": "The distinguished name specified for this replication operation already exists."}
+		a[8442] := {"enum": "ERROR_DS_DRA_INTERNAL_ERROR", "msg": "The replication system encountered an internal error."}
+		a[8443] := {"enum": "ERROR_DS_DRA_INCONSISTENT_DIT", "msg": "The replication operation encountered a database inconsistency."}
+		a[8444] := {"enum": "ERROR_DS_DRA_CONNECTION_FAILED", "msg": "The server specified for this replication operation could not be contacted."}
+		a[8445] := {"enum": "ERROR_DS_DRA_BAD_INSTANCE_TYPE", "msg": "The replication operation encountered an object with an invalid instance type."}
+		a[8446] := {"enum": "ERROR_DS_DRA_OUT_OF_MEM", "msg": "The replication operation failed to allocate memory."}
+		a[8447] := {"enum": "ERROR_DS_DRA_MAIL_PROBLEM", "msg": "The replication operation encountered an error with the mail system."}
+		a[8448] := {"enum": "ERROR_DS_DRA_REF_ALREADY_EXISTS", "msg": "The replication reference information for the target server already exists."}
+		a[8449] := {"enum": "ERROR_DS_DRA_REF_NOT_FOUND", "msg": "The replication reference information for the target server does not exist."}
+		a[8450] := {"enum": "ERROR_DS_DRA_OBJ_IS_REP_SOURCE", "msg": "The naming context cannot be removed because it is replicated to another server."}
+		a[8451] := {"enum": "ERROR_DS_DRA_DB_ERROR", "msg": "The replication operation encountered a database error."}
+		a[8452] := {"enum": "ERROR_DS_DRA_NO_REPLICA", "msg": "The naming context is in the process of being removed or is not replicated from the specified server."}
+		a[8453] := {"enum": "ERROR_DS_DRA_ACCESS_DENIED", "msg": "Replication access was denied."}
+		a[8454] := {"enum": "ERROR_DS_DRA_NOT_SUPPORTED", "msg": "The requested operation is not supported by this version of the directory service."}
+		a[8455] := {"enum": "ERROR_DS_DRA_RPC_CANCELLED", "msg": "The replication remote procedure call was cancelled."}
+		a[8456] := {"enum": "ERROR_DS_DRA_SOURCE_DISABLED", "msg": "The source server is currently rejecting replication requests."}
+		a[8457] := {"enum": "ERROR_DS_DRA_SINK_DISABLED", "msg": "The destination server is currently rejecting replication requests."}
+		a[8458] := {"enum": "ERROR_DS_DRA_NAME_COLLISION", "msg": "The replication operation failed due to a collision of object names."}
+		a[8459] := {"enum": "ERROR_DS_DRA_SOURCE_REINSTALLED", "msg": "The replication source has been reinstalled."}
+		a[8460] := {"enum": "ERROR_DS_DRA_MISSING_PARENT", "msg": "The replication operation failed because a required parent object is missing."}
+		a[8461] := {"enum": "ERROR_DS_DRA_PREEMPTED", "msg": "The replication operation was preempted."}
+		a[8462] := {"enum": "ERROR_DS_DRA_ABANDON_SYNC", "msg": "The replication synchronization attempt was abandoned because of a lack of updates."}
+		a[8463] := {"enum": "ERROR_DS_DRA_SHUTDOWN", "msg": "The replication operation was terminated because the system is shutting down."}
+		a[8464] := {"enum": "ERROR_DS_DRA_INCOMPATIBLE_PARTIAL_SET", "msg": "Synchronization attempt failed because the destination DC is currently waiting to synchronize new partial attributes from source. This condition is normal if a recent schema change modified the partial attribute set. The destination partial attribute set is not a subset of source partial attribute set."}
+		a[8465] := {"enum": "ERROR_DS_DRA_SOURCE_IS_PARTIAL_REPLICA", "msg": "The replication synchronization attempt failed because a master replica attempted to sync from a partial replica."}
+		a[8466] := {"enum": "ERROR_DS_DRA_EXTN_CONNECTION_FAILED", "msg": "The server specified for this replication operation was contacted, but that server was unable to contact an additional server needed to complete the operation."}
+		a[8467] := {"enum": "ERROR_DS_INSTALL_SCHEMA_MISMATCH", "msg": "The version of the directory service schema of the source forest is not compatible with the version of directory service on this computer."}
+		a[8468] := {"enum": "ERROR_DS_DUP_LINK_ID", "msg": "Schema update failed: An attribute with the same link identifier already exists."}
+		a[8469] := {"enum": "ERROR_DS_NAME_ERROR_RESOLVING", "msg": "Name translation: Generic processing error."}
+		a[8470] := {"enum": "ERROR_DS_NAME_ERROR_NOT_FOUND", "msg": "Name translation: Could not find the name or insufficient right to see name."}
+		a[8471] := {"enum": "ERROR_DS_NAME_ERROR_NOT_UNIQUE", "msg": "Name translation: Input name mapped to more than one output name."}
+		a[8472] := {"enum": "ERROR_DS_NAME_ERROR_NO_MAPPING", "msg": "Name translation: Input name found, but not the associated output format."}
+		a[8473] := {"enum": "ERROR_DS_NAME_ERROR_DOMAIN_ONLY", "msg": "Name translation: Unable to resolve completely, only the domain was found."}
+		a[8474] := {"enum": "ERROR_DS_NAME_ERROR_NO_SYNTACTICAL_MAPPING", "msg": "Name translation: Unable to perform purely syntactical mapping at the client without going out to the wire."}
+		a[8475] := {"enum": "ERROR_DS_CONSTRUCTED_ATT_MOD", "msg": "Modification of a constructed attribute is not allowed."}
+		a[8476] := {"enum": "ERROR_DS_WRONG_OM_OBJ_CLASS", "msg": "The OM-Object-Class specified is incorrect for an attribute with the specified syntax."}
+		a[8477] := {"enum": "ERROR_DS_DRA_REPL_PENDING", "msg": "The replication request has been posted; waiting for reply."}
+		a[8478] := {"enum": "ERROR_DS_DS_REQUIRED", "msg": "The requested operation requires a directory service, and none was available."}
+		a[8479] := {"enum": "ERROR_DS_INVALID_LDAP_DISPLAY_NAME", "msg": "The LDAP display name of the class or attribute contains non-ASCII characters."}
+		a[8480] := {"enum": "ERROR_DS_NON_BASE_SEARCH", "msg": "The requested search operation is only supported for base searches."}
+		a[8481] := {"enum": "ERROR_DS_CANT_RETRIEVE_ATTS", "msg": "The search failed to retrieve attributes from the database."}
+		a[8482] := {"enum": "ERROR_DS_BACKLINK_WITHOUT_LINK", "msg": "The schema update operation tried to add a backward link attribute that has no corresponding forward link."}
+		a[8483] := {"enum": "ERROR_DS_EPOCH_MISMATCH", "msg": "Source and destination of a cross-domain move do not agree on the object's epoch number. Either source or destination does not have the latest version of the object."}
+		a[8484] := {"enum": "ERROR_DS_SRC_NAME_MISMATCH", "msg": "Source and destination of a cross-domain move do not agree on the object's current name. Either source or destination does not have the latest version of the object."}
+		a[8485] := {"enum": "ERROR_DS_SRC_AND_DST_NC_IDENTICAL", "msg": "Source and destination for the cross-domain move operation are identical. Caller should use local move operation instead of cross-domain move operation."}
+		a[8486] := {"enum": "ERROR_DS_DST_NC_MISMATCH", "msg": "Source and destination for a cross-domain move are not in agreement on the naming contexts in the forest. Either source or destination does not have the latest version of the Partitions container."}
+		a[8487] := {"enum": "ERROR_DS_NOT_AUTHORITIVE_FOR_DST_NC", "msg": "Destination of a cross-domain move is not authoritative for the destination naming context."}
+		a[8488] := {"enum": "ERROR_DS_SRC_GUID_MISMATCH", "msg": "Source and destination of a cross-domain move do not agree on the identity of the source object. Either source or destination does not have the latest version of the source object."}
+		a[8489] := {"enum": "ERROR_DS_CANT_MOVE_DELETED_OBJECT", "msg": "Object being moved across-domains is already known to be deleted by the destination server. The source server does not have the latest version of the source object."}
+		a[8490] := {"enum": "ERROR_DS_PDC_OPERATION_IN_PROGRESS", "msg": "Another operation which requires exclusive access to the PDC FSMO is already in progress."}
+		a[8491] := {"enum": "ERROR_DS_CROSS_DOMAIN_CLEANUP_REQD", "msg": "A cross-domain move operation failed such that two versions of the moved object exist - one each in the source and destination domains. The destination object needs to be removed to restore the system to a consistent state."}
+		a[8492] := {"enum": "ERROR_DS_ILLEGAL_XDOM_MOVE_OPERATION", "msg": "This object may not be moved across domain boundaries either because cross-domain moves for this class are disallowed, or the object has some special characteristics, e.g.: trust account or restricted RID, which prevent its move."}
+		a[8493] := {"enum": "ERROR_DS_CANT_WITH_ACCT_GROUP_MEMBERSHPS", "msg": "Can't move objects with memberships across domain boundaries as once moved, this would violate the membership conditions of the account group. Remove the object from any account group memberships and retry."}
+		a[8494] := {"enum": "ERROR_DS_NC_MUST_HAVE_NC_PARENT", "msg": "A naming context head must be the immediate child of another naming context head, not of an interior node."}
+		a[8495] := {"enum": "ERROR_DS_CR_IMPOSSIBLE_TO_VALIDATE", "msg": "The directory cannot validate the proposed naming context name because it does not hold a replica of the naming context above the proposed naming context. Please ensure that the domain naming master role is held by a server that is configured as a global catalog server, and that the server is up to date with its replication partners. (Applies only to Windows 2000 Domain Naming masters.)"}
+		a[8496] := {"enum": "ERROR_DS_DST_DOMAIN_NOT_NATIVE", "msg": "Destination domain must be in native mode."}
+		a[8497] := {"enum": "ERROR_DS_MISSING_INFRASTRUCTURE_CONTAINER", "msg": "The operation cannot be performed because the server does not have an infrastructure container in the domain of interest."}
+		a[8498] := {"enum": "ERROR_DS_CANT_MOVE_ACCOUNT_GROUP", "msg": "Cross-domain move of non-empty account groups is not allowed."}
+		a[8499] := {"enum": "ERROR_DS_CANT_MOVE_RESOURCE_GROUP", "msg": "Cross-domain move of non-empty resource groups is not allowed."}
+		a[8500] := {"enum": "ERROR_DS_INVALID_SEARCH_FLAG", "msg": "The search flags for the attribute are invalid. The ANR bit is valid only on attributes of Unicode or Teletex strings."}
+		a[8501] := {"enum": "ERROR_DS_NO_TREE_DELETE_ABOVE_NC", "msg": "Tree deletions starting at an object which has an NC head as a descendant are not allowed."}
+		a[8502] := {"enum": "ERROR_DS_COULDNT_LOCK_TREE_FOR_DELETE", "msg": "The directory service failed to lock a tree in preparation for a tree deletion because the tree was in use."}
+		a[8503] := {"enum": "ERROR_DS_COULDNT_IDENTIFY_OBJECTS_FOR_TREE_DELETE", "msg": "The directory service failed to identify the list of objects to delete while attempting a tree deletion."}
+		a[8504] := {"enum": "ERROR_DS_SAM_INIT_FAILURE", "msg": "Security Accounts Manager initialization failed because of the following error: `%1. Error Status: 0x`%2. Please shutdown this system and reboot into Directory Services Restore Mode, check the event log for more detailed information."}
+		a[8505] := {"enum": "ERROR_DS_SENSITIVE_GROUP_VIOLATION", "msg": "Only an administrator can modify the membership list of an administrative group."}
+		a[8506] := {"enum": "ERROR_DS_CANT_MOD_PRIMARYGROUPID", "msg": "Cannot change the primary group ID of a domain controller account."}
+		a[8507] := {"enum": "ERROR_DS_ILLEGAL_BASE_SCHEMA_MOD", "msg": "An attempt is made to modify the base schema."}
+		a[8508] := {"enum": "ERROR_DS_NONSAFE_SCHEMA_CHANGE", "msg": "Adding a new mandatory attribute to an existing class, deleting a mandatory attribute from an existing class, or adding an optional attribute to the special class Top that is not a backlink attribute (directly or through inheritance, for example, by adding or deleting an auxiliary class) is not allowed."}
+		a[8509] := {"enum": "ERROR_DS_SCHEMA_UPDATE_DISALLOWED", "msg": "Schema update is not allowed on this DC because the DC is not the schema FSMO Role Owner."}
+		a[8510] := {"enum": "ERROR_DS_CANT_CREATE_UNDER_SCHEMA", "msg": "An object of this class cannot be created under the schema container. You can only create attribute-schema and class-schema objects under the schema container."}
+		a[8511] := {"enum": "ERROR_DS_INSTALL_NO_SRC_SCH_VERSION", "msg": "The replica/child install failed to get the objectVersion attribute on the schema container on the source DC. Either the attribute is missing on the schema container or the credentials supplied do not have permission to read it."}
+		a[8512] := {"enum": "ERROR_DS_INSTALL_NO_SCH_VERSION_IN_INIFILE", "msg": "The replica/child install failed to read the objectVersion attribute in the SCHEMA section of the file schema.ini in the system32 directory."}
+		a[8513] := {"enum": "ERROR_DS_INVALID_GROUP_TYPE", "msg": "The specified group type is invalid."}
+		a[8514] := {"enum": "ERROR_DS_NO_NEST_GLOBALGROUP_IN_MIXEDDOMAIN", "msg": "You cannot nest global groups in a mixed domain if the group is security-enabled."}
+		a[8515] := {"enum": "ERROR_DS_NO_NEST_LOCALGROUP_IN_MIXEDDOMAIN", "msg": "You cannot nest local groups in a mixed domain if the group is security-enabled."}
+		a[8516] := {"enum": "ERROR_DS_GLOBAL_CANT_HAVE_LOCAL_MEMBER", "msg": "A global group cannot have a local group as a member."}
+		a[8517] := {"enum": "ERROR_DS_GLOBAL_CANT_HAVE_UNIVERSAL_MEMBER", "msg": "A global group cannot have a universal group as a member."}
+		a[8518] := {"enum": "ERROR_DS_UNIVERSAL_CANT_HAVE_LOCAL_MEMBER", "msg": "A universal group cannot have a local group as a member."}
+		a[8519] := {"enum": "ERROR_DS_GLOBAL_CANT_HAVE_CROSSDOMAIN_MEMBER", "msg": "A global group cannot have a cross-domain member."}
+		a[8520] := {"enum": "ERROR_DS_LOCAL_CANT_HAVE_CROSSDOMAIN_LOCAL_MEMBER", "msg": "A local group cannot have another cross domain local group as a member."}
+		a[8521] := {"enum": "ERROR_DS_HAVE_PRIMARY_MEMBERS", "msg": "A group with primary members cannot change to a security-disabled group."}
+		a[8522] := {"enum": "ERROR_DS_STRING_SD_CONVERSION_FAILED", "msg": "The schema cache load failed to convert the string default SD on a class-schema object."}
+		a[8523] := {"enum": "ERROR_DS_NAMING_MASTER_GC", "msg": "Only DSAs configured to be Global Catalog servers should be allowed to hold the Domain Naming Master FSMO role. (Applies only to Windows 2000 servers.)"}
+		a[8524] := {"enum": "ERROR_DS_DNS_LOOKUP_FAILURE", "msg": "The DSA operation is unable to proceed because of a DNS lookup failure."}
+		a[8525] := {"enum": "ERROR_DS_COULDNT_UPDATE_SPNS", "msg": "While processing a change to the DNS Host Name for an object, the Service Principal Name values could not be kept in sync."}
+		a[8526] := {"enum": "ERROR_DS_CANT_RETRIEVE_SD", "msg": "The Security Descriptor attribute could not be read."}
+		a[8527] := {"enum": "ERROR_DS_KEY_NOT_UNIQUE", "msg": "The object requested was not found, but an object with that key was found."}
+		a[8528] := {"enum": "ERROR_DS_WRONG_LINKED_ATT_SYNTAX", "msg": "The syntax of the linked attribute being added is incorrect. Forward links can only have syntax 2.5.5.1, 2.5.5.7, and 2.5.5.14, and backlinks can only have syntax 2.5.5.1."}
+		a[8529] := {"enum": "ERROR_DS_SAM_NEED_BOOTKEY_PASSWORD", "msg": "Security Account Manager needs to get the boot password."}
+		a[8530] := {"enum": "ERROR_DS_SAM_NEED_BOOTKEY_FLOPPY", "msg": "Security Account Manager needs to get the boot key from floppy disk."}
+		a[8531] := {"enum": "ERROR_DS_CANT_START", "msg": "Directory Service cannot start."}
+		a[8532] := {"enum": "ERROR_DS_INIT_FAILURE", "msg": "Directory Services could not start."}
+		a[8533] := {"enum": "ERROR_DS_NO_PKT_PRIVACY_ON_CONNECTION", "msg": "The connection between client and server requires packet privacy or better."}
+		a[8534] := {"enum": "ERROR_DS_SOURCE_DOMAIN_IN_FOREST", "msg": "The source domain may not be in the same forest as destination."}
+		a[8535] := {"enum": "ERROR_DS_DESTINATION_DOMAIN_NOT_IN_FOREST", "msg": "The destination domain must be in the forest."}
+		a[8536] := {"enum": "ERROR_DS_DESTINATION_AUDITING_NOT_ENABLED", "msg": "The operation requires that destination domain auditing be enabled."}
+		a[8537] := {"enum": "ERROR_DS_CANT_FIND_DC_FOR_SRC_DOMAIN", "msg": "The operation couldn't locate a DC for the source domain."}
+		a[8538] := {"enum": "ERROR_DS_SRC_OBJ_NOT_GROUP_OR_USER", "msg": "The source object must be a group or user."}
+		a[8539] := {"enum": "ERROR_DS_SRC_SID_EXISTS_IN_FOREST", "msg": "The source object's SID already exists in destination forest."}
+		a[8540] := {"enum": "ERROR_DS_SRC_AND_DST_OBJECT_CLASS_MISMATCH", "msg": "The source and destination object must be of the same type."}
+		a[8541] := {"enum": "ERROR_SAM_INIT_FAILURE", "msg": "Security Accounts Manager initialization failed because of the following error: `%1. Error Status: 0x`%2. Click OK to shut down the system and reboot into Safe Mode. Check the event log for detailed information."}
+		a[8542] := {"enum": "ERROR_DS_DRA_SCHEMA_INFO_SHIP", "msg": "Schema information could not be included in the replication request."}
+		a[8543] := {"enum": "ERROR_DS_DRA_SCHEMA_CONFLICT", "msg": "The replication operation could not be completed due to a schema incompatibility."}
+		a[8544] := {"enum": "ERROR_DS_DRA_EARLIER_SCHEMA_CONFLICT", "msg": "The replication operation could not be completed due to a previous schema incompatibility."}
+		a[8545] := {"enum": "ERROR_DS_DRA_OBJ_NC_MISMATCH", "msg": "The replication update could not be applied because either the source or the destination has not yet received information regarding a recent cross-domain move operation."}
+		a[8546] := {"enum": "ERROR_DS_NC_STILL_HAS_DSAS", "msg": "The requested domain could not be deleted because there exist domain controllers that still host this domain."}
+		a[8547] := {"enum": "ERROR_DS_GC_REQUIRED", "msg": "The requested operation can be performed only on a global catalog server."}
+		a[8548] := {"enum": "ERROR_DS_LOCAL_MEMBER_OF_LOCAL_ONLY", "msg": "A local group can only be a member of other local groups in the same domain."}
+		a[8549] := {"enum": "ERROR_DS_NO_FPO_IN_UNIVERSAL_GROUPS", "msg": "Foreign security principals cannot be members of universal groups."}
+		a[8550] := {"enum": "ERROR_DS_CANT_ADD_TO_GC", "msg": "The attribute is not allowed to be replicated to the GC because of security reasons."}
+		a[8551] := {"enum": "ERROR_DS_NO_CHECKPOINT_WITH_PDC", "msg": "The checkpoint with the PDC could not be taken because there too many modifications being processed currently."}
+		a[8552] := {"enum": "ERROR_DS_SOURCE_AUDITING_NOT_ENABLED", "msg": "The operation requires that source domain auditing be enabled."}
+		a[8553] := {"enum": "ERROR_DS_CANT_CREATE_IN_NONDOMAIN_NC", "msg": "Security principal objects can only be created inside domain naming contexts."}
+		a[8554] := {"enum": "ERROR_DS_INVALID_NAME_FOR_SPN", "msg": "A Service Principal Name (SPN) could not be constructed because the provided hostname is not in the necessary format."}
+		a[8555] := {"enum": "ERROR_DS_FILTER_USES_CONTRUCTED_ATTRS", "msg": "A Filter was passed that uses constructed attributes."}
+		a[8556] := {"enum": "ERROR_DS_UNICODEPWD_NOT_IN_QUOTES", "msg": "The unicodePwd attribute value must be enclosed in double quotes."}
+		a[8557] := {"enum": "ERROR_DS_MACHINE_ACCOUNT_QUOTA_EXCEEDED", "msg": "Your computer could not be joined to the domain. You have exceeded the maximum number of computer accounts you are allowed to create in this domain. Contact your system administrator to have this limit reset or increased."}
+		a[8558] := {"enum": "ERROR_DS_MUST_BE_RUN_ON_DST_DC", "msg": "For security reasons, the operation must be run on the destination DC."}
+		a[8559] := {"enum": "ERROR_DS_SRC_DC_MUST_BE_SP4_OR_GREATER", "msg": "For security reasons, the source DC must be NT4SP4 or greater."}
+		a[8560] := {"enum": "ERROR_DS_CANT_TREE_DELETE_CRITICAL_OBJ", "msg": "Critical Directory Service System objects cannot be deleted during tree delete operations. The tree delete may have been partially performed."}
+		a[8561] := {"enum": "ERROR_DS_INIT_FAILURE_CONSOLE", "msg": "Directory Services could not start because of the following error: `%1. Error Status: 0x`%2. Please click OK to shutdown the system. You can use the recovery console to diagnose the system further."}
+		a[8562] := {"enum": "ERROR_DS_SAM_INIT_FAILURE_CONSOLE", "msg": "Security Accounts Manager initialization failed because of the following error: `%1. Error Status: 0x`%2. Please click OK to shutdown the system. You can use the recovery console to diagnose the system further."}
+		a[8563] := {"enum": "ERROR_DS_FOREST_VERSION_TOO_HIGH", "msg": "The version of the operating system is incompatible with the current AD DS forest functional level or AD LDS Configuration Set functional level. You must upgrade to a new version of the operating system before this server can become an AD DS Domain Controller or add an AD LDS Instance in this AD DS Forest or AD LDS Configuration Set."}
+		a[8564] := {"enum": "ERROR_DS_DOMAIN_VERSION_TOO_HIGH", "msg": "The version of the operating system installed is incompatible with the current domain functional level. You must upgrade to a new version of the operating system before this server can become a domain controller in this domain."}
+		a[8565] := {"enum": "ERROR_DS_FOREST_VERSION_TOO_LOW", "msg": "The version of the operating system installed on this server no longer supports the current AD DS Forest functional level or AD LDS Configuration Set functional level. You must raise the AD DS Forest functional level or AD LDS Configuration Set functional level before this server can become an AD DS Domain Controller or an AD LDS Instance in this Forest or Configuration Set."}
+		a[8566] := {"enum": "ERROR_DS_DOMAIN_VERSION_TOO_LOW", "msg": "The version of the operating system installed on this server no longer supports the current domain functional level. You must raise the domain functional level before this server can become a domain controller in this domain."}
+		a[8567] := {"enum": "ERROR_DS_INCOMPATIBLE_VERSION", "msg": "The version of the operating system installed on this server is incompatible with the functional level of the domain or forest."}
+		a[8568] := {"enum": "ERROR_DS_LOW_DSA_VERSION", "msg": "The functional level of the domain (or forest) cannot be raised to the requested value, because there exist one or more domain controllers in the domain (or forest) that are at a lower incompatible functional level."}
+		a[8569] := {"enum": "ERROR_DS_NO_BEHAVIOR_VERSION_IN_MIXEDDOMAIN", "msg": "The forest functional level cannot be raised to the requested value since one or more domains are still in mixed domain mode. All domains in the forest must be in native mode, for you to raise the forest functional level."}
+		a[8570] := {"enum": "ERROR_DS_NOT_SUPPORTED_SORT_ORDER", "msg": "The sort order requested is not supported."}
+		a[8571] := {"enum": "ERROR_DS_NAME_NOT_UNIQUE", "msg": "The requested name already exists as a unique identifier."}
+		a[8572] := {"enum": "ERROR_DS_MACHINE_ACCOUNT_CREATED_PRENT4", "msg": "The machine account was created pre-NT4. The account needs to be recreated."}
+		a[8573] := {"enum": "ERROR_DS_OUT_OF_VERSION_STORE", "msg": "The database is out of version store."}
+		a[8574] := {"enum": "ERROR_DS_INCOMPATIBLE_CONTROLS_USED", "msg": "Unable to continue operation because multiple conflicting controls were used."}
+		a[8575] := {"enum": "ERROR_DS_NO_REF_DOMAIN", "msg": "Unable to find a valid security descriptor reference domain for this partition."}
+		a[8576] := {"enum": "ERROR_DS_RESERVED_LINK_ID", "msg": "Schema update failed: The link identifier is reserved."}
+		a[8577] := {"enum": "ERROR_DS_LINK_ID_NOT_AVAILABLE", "msg": "Schema update failed: There are no link identifiers available."}
+		a[8578] := {"enum": "ERROR_DS_AG_CANT_HAVE_UNIVERSAL_MEMBER", "msg": "An account group cannot have a universal group as a member."}
+		a[8579] := {"enum": "ERROR_DS_MODIFYDN_DISALLOWED_BY_INSTANCE_TYPE", "msg": "Rename or move operations on naming context heads or read-only objects are not allowed."}
+		a[8580] := {"enum": "ERROR_DS_NO_OBJECT_MOVE_IN_SCHEMA_NC", "msg": "Move operations on objects in the schema naming context are not allowed."}
+		a[8581] := {"enum": "ERROR_DS_MODIFYDN_DISALLOWED_BY_FLAG", "msg": "A system flag has been set on the object and does not allow the object to be moved or renamed."}
+		a[8582] := {"enum": "ERROR_DS_MODIFYDN_WRONG_GRANDPARENT", "msg": "This object is not allowed to change its grandparent container. Moves are not forbidden on this object, but are restricted to sibling containers."}
+		a[8583] := {"enum": "ERROR_DS_NAME_ERROR_TRUST_REFERRAL", "msg": "Unable to resolve completely, a referral to another forest is generated."}
+		a[8584] := {"enum": "ERROR_NOT_SUPPORTED_ON_STANDARD_SERVER", "msg": "The requested action is not supported on standard server."}
+		a[8585] := {"enum": "ERROR_DS_CANT_ACCESS_REMOTE_PART_OF_AD", "msg": "Could not access a partition of the directory service located on a remote server. Make sure at least one server is running for the partition in question."}
+		a[8586] := {"enum": "ERROR_DS_CR_IMPOSSIBLE_TO_VALIDATE_V2", "msg": "The directory cannot validate the proposed naming context (or partition) name because it does not hold a replica nor can it contact a replica of the naming context above the proposed naming context. Please ensure that the parent naming context is properly registered in DNS, and at least one replica of this naming context is reachable by the Domain Naming master."}
+		a[8587] := {"enum": "ERROR_DS_THREAD_LIMIT_EXCEEDED", "msg": "The thread limit for this request was exceeded."}
+		a[8588] := {"enum": "ERROR_DS_NOT_CLOSEST", "msg": "The Global catalog server is not in the closest site."}
+		a[8589] := {"enum": "ERROR_DS_CANT_DERIVE_SPN_WITHOUT_SERVER_REF", "msg": "The DS cannot derive a service principal name (SPN) with which to mutually authenticate the target server because the corresponding server object in the local DS database has no serverReference attribute."}
+		a[8590] := {"enum": "ERROR_DS_SINGLE_USER_MODE_FAILED", "msg": "The Directory Service failed to enter single user mode."}
+		a[8591] := {"enum": "ERROR_DS_NTDSCRIPT_SYNTAX_ERROR", "msg": "The Directory Service cannot parse the script because of a syntax error."}
+		a[8592] := {"enum": "ERROR_DS_NTDSCRIPT_PROCESS_ERROR", "msg": "The Directory Service cannot process the script because of an error."}
+		a[8593] := {"enum": "ERROR_DS_DIFFERENT_REPL_EPOCHS", "msg": "The directory service cannot perform the requested operation because the servers involved are of different replication epochs (which is usually related to a domain rename that is in progress)."}
+		a[8594] := {"enum": "ERROR_DS_DRS_EXTENSIONS_CHANGED", "msg": "The directory service binding must be renegotiated due to a change in the server extensions information."}
+		a[8595] := {"enum": "ERROR_DS_REPLICA_SET_CHANGE_NOT_ALLOWED_ON_DISABLED_CR", "msg": "Operation not allowed on a disabled cross ref."}
+		a[8596] := {"enum": "ERROR_DS_NO_MSDS_INTID", "msg": "Schema update failed: No values for msDS-IntId are available."}
+		a[8597] := {"enum": "ERROR_DS_DUP_MSDS_INTID", "msg": "Schema update failed: Duplicate msDS-INtId. Retry the operation."}
+		a[8598] := {"enum": "ERROR_DS_EXISTS_IN_RDNATTID", "msg": "Schema deletion failed: attribute is used in rDNAttID."}
+		a[8599] := {"enum": "ERROR_DS_AUTHORIZATION_FAILED", "msg": "The directory service failed to authorize the request."}
+		a[8600] := {"enum": "ERROR_DS_INVALID_SCRIPT", "msg": "The Directory Service cannot process the script because it is invalid."}
+		a[8601] := {"enum": "ERROR_DS_REMOTE_CROSSREF_OP_FAILED", "msg": "The remote create cross reference operation failed on the Domain Naming Master FSMO. The operation's error is in the extended data."}
+		a[8602] := {"enum": "ERROR_DS_CROSS_REF_BUSY", "msg": "A cross reference is in use locally with the same name."}
+		a[8603] := {"enum": "ERROR_DS_CANT_DERIVE_SPN_FOR_DELETED_DOMAIN", "msg": "The DS cannot derive a service principal name (SPN) with which to mutually authenticate the target server because the server's domain has been deleted from the forest."}
+		a[8604] := {"enum": "ERROR_DS_CANT_DEMOTE_WITH_WRITEABLE_NC", "msg": "Writeable NCs prevent this DC from demoting."}
+		a[8605] := {"enum": "ERROR_DS_DUPLICATE_ID_FOUND", "msg": "The requested object has a non-unique identifier and cannot be retrieved."}
+		a[8606] := {"enum": "ERROR_DS_INSUFFICIENT_ATTR_TO_CREATE_OBJECT", "msg": "Insufficient attributes were given to create an object. This object may not exist because it may have been deleted and already garbage collected."}
+		a[8607] := {"enum": "ERROR_DS_GROUP_CONVERSION_ERROR", "msg": "The group cannot be converted due to attribute restrictions on the requested group type."}
+		a[8608] := {"enum": "ERROR_DS_CANT_MOVE_APP_BASIC_GROUP", "msg": "Cross-domain move of non-empty basic application groups is not allowed."}
+		a[8609] := {"enum": "ERROR_DS_CANT_MOVE_APP_QUERY_GROUP", "msg": "Cross-domain move of non-empty query based application groups is not allowed."}
+		a[8610] := {"enum": "ERROR_DS_ROLE_NOT_VERIFIED", "msg": "The FSMO role ownership could not be verified because its directory partition has not replicated successfully with at least one replication partner."}
+		a[8611] := {"enum": "ERROR_DS_WKO_CONTAINER_CANNOT_BE_SPECIAL", "msg": "The target container for a redirection of a well known object container cannot already be a special container."}
+		a[8612] := {"enum": "ERROR_DS_DOMAIN_RENAME_IN_PROGRESS", "msg": "The Directory Service cannot perform the requested operation because a domain rename operation is in progress."}
+		a[8613] := {"enum": "ERROR_DS_EXISTING_AD_CHILD_NC", "msg": "The directory service detected a child partition below the requested partition name. The partition hierarchy must be created in a top down method."}
+		a[8614] := {"enum": "ERROR_DS_REPL_LIFETIME_EXCEEDED", "msg": "The directory service cannot replicate with this server because the time since the last replication with this server has exceeded the tombstone lifetime."}
+		a[8615] := {"enum": "ERROR_DS_DISALLOWED_IN_SYSTEM_CONTAINER", "msg": "The requested operation is not allowed on an object under the system container."}
+		a[8616] := {"enum": "ERROR_DS_LDAP_SEND_QUEUE_FULL", "msg": "The LDAP servers network send queue has filled up because the client is not processing the results of its requests fast enough. No more requests will be processed until the client catches up. If the client does not catch up then it will be disconnected."}
+		a[8617] := {"enum": "ERROR_DS_DRA_OUT_SCHEDULE_WINDOW", "msg": "The scheduled replication did not take place because the system was too busy to execute the request within the schedule window. The replication queue is overloaded. Consider reducing the number of partners or decreasing the scheduled replication frequency."}
+		a[8618] := {"enum": "ERROR_DS_POLICY_NOT_KNOWN", "msg": "At this time, it cannot be determined if the branch replication policy is available on the hub domain controller. Please retry at a later time to account for replication latencies."}
+		a[8619] := {"enum": "ERROR_NO_SITE_SETTINGS_OBJECT", "msg": "The site settings object for the specified site does not exist."}
+		a[8620] := {"enum": "ERROR_NO_SECRETS", "msg": "The local account store does not contain secret material for the specified account."}
+		a[8621] := {"enum": "ERROR_NO_WRITABLE_DC_FOUND", "msg": "Could not find a writable domain controller in the domain."}
+		a[8622] := {"enum": "ERROR_DS_NO_SERVER_OBJECT", "msg": "The server object for the domain controller does not exist."}
+		a[8623] := {"enum": "ERROR_DS_NO_NTDSA_OBJECT", "msg": "The NTDS Settings object for the domain controller does not exist."}
+		a[8624] := {"enum": "ERROR_DS_NON_ASQ_SEARCH", "msg": "The requested search operation is not supported for ASQ searches."}
+		a[8625] := {"enum": "ERROR_DS_AUDIT_FAILURE", "msg": "A required audit event could not be generated for the operation."}
+		a[8626] := {"enum": "ERROR_DS_INVALID_SEARCH_FLAG_SUBTREE", "msg": "The search flags for the attribute are invalid. The subtree index bit is valid only on single valued attributes."}
+		a[8627] := {"enum": "ERROR_DS_INVALID_SEARCH_FLAG_TUPLE", "msg": "The search flags for the attribute are invalid. The tuple index bit is valid only on attributes of Unicode strings."}
+		a[8628] := {"enum": "ERROR_DS_HIERARCHY_TABLE_TOO_DEEP", "msg": "The address books are nested too deeply. Failed to build the hierarchy table."}
+		a[8629] := {"enum": "ERROR_DS_DRA_CORRUPT_UTD_VECTOR", "msg": "The specified up-to-date-ness vector is corrupt."}
+		a[8630] := {"enum": "ERROR_DS_DRA_SECRETS_DENIED", "msg": "The request to replicate secrets is denied."}
+		a[8631] := {"enum": "ERROR_DS_RESERVED_MAPI_ID", "msg": "Schema update failed: The MAPI identifier is reserved."}
+		a[8632] := {"enum": "ERROR_DS_MAPI_ID_NOT_AVAILABLE", "msg": "Schema update failed: There are no MAPI identifiers available."}
+		a[8633] := {"enum": "ERROR_DS_DRA_MISSING_KRBTGT_SECRET", "msg": "The replication operation failed because the required attributes of the local krbtgt object are missing."}
+		a[8634] := {"enum": "ERROR_DS_DOMAIN_NAME_EXISTS_IN_FOREST", "msg": "The domain name of the trusted domain already exists in the forest."}
+		a[8635] := {"enum": "ERROR_DS_FLAT_NAME_EXISTS_IN_FOREST", "msg": "The flat name of the trusted domain already exists in the forest."}
+		a[8636] := {"enum": "ERROR_INVALID_USER_PRINCIPAL_NAME", "msg": "The User Principal Name (UPN) is invalid."}
+		a[8637] := {"enum": "ERROR_DS_OID_MAPPED_GROUP_CANT_HAVE_MEMBERS", "msg": "OID mapped groups cannot have members."}
+		a[8638] := {"enum": "ERROR_DS_OID_NOT_FOUND", "msg": "The specified OID cannot be found."}
+		a[8639] := {"enum": "ERROR_DS_DRA_RECYCLED_TARGET", "msg": "The replication operation failed because the target object referred by a link value is recycled."}
+		a[8640] := {"enum": "ERROR_DS_DISALLOWED_NC_REDIRECT", "msg": "The redirect operation failed because the target object is in a NC different from the domain NC of the current domain controller."}
+		a[8641] := {"enum": "ERROR_DS_HIGH_ADLDS_FFL", "msg": "The functional level of the AD LDS configuration set cannot be lowered to the requested value."}
+		a[8642] := {"enum": "ERROR_DS_HIGH_DSA_VERSION", "msg": "The functional level of the domain (or forest) cannot be lowered to the requested value."}
+		a[8643] := {"enum": "ERROR_DS_LOW_ADLDS_FFL", "msg": "The functional level of the AD LDS configuration set cannot be raised to the requested value, because there exist one or more ADLDS instances that are at a lower incompatible functional level."}
+		a[8644] := {"enum": "ERROR_DOMAIN_SID_SAME_AS_LOCAL_WORKSTATION", "msg": "The domain join cannot be completed because the SID of the domain you attempted to join was identical to the SID of this machine. This is a symptom of an improperly cloned operating system install. You should run sysprep on this machine in order to generate a new machine SID. Please see http://go.microsoft.com/fwlink/p/?linkid=168895 for more information."}
+		a[8645] := {"enum": "ERROR_DS_UNDELETE_SAM_VALIDATION_FAILED", "msg": "The undelete operation failed because the Sam Account Name or Additional Sam Account Name of the object being undeleted conflicts with an existing live object."}
+		a[8646] := {"enum": "ERROR_INCORRECT_ACCOUNT_TYPE", "msg": "The system is not authoritative for the specified account and therefore cannot complete the operation. Please retry the operation using the provider associated with this account. If this is an online provider please use the provider's online site."}
+		a[9001] := {"enum": "DNS_ERROR_RCODE_FORMAT_ERROR", "msg": "DNS server unable to interpret format."}
+		a[9002] := {"enum": "DNS_ERROR_RCODE_SERVER_FAILURE", "msg": "DNS server failure."}
+		a[9003] := {"enum": "DNS_ERROR_RCODE_NAME_ERROR", "msg": "DNS name does not exist."}
+		a[9004] := {"enum": "DNS_ERROR_RCODE_NOT_IMPLEMENTED", "msg": "DNS request not supported by name server."}
+		a[9005] := {"enum": "DNS_ERROR_RCODE_REFUSED", "msg": "DNS operation refused."}
+		a[9006] := {"enum": "DNS_ERROR_RCODE_YXDOMAIN", "msg": "DNS name that ought not exist, does exist."}
+		a[9007] := {"enum": "DNS_ERROR_RCODE_YXRRSET", "msg": "DNS RR set that ought not exist, does exist."}
+		a[9008] := {"enum": "DNS_ERROR_RCODE_NXRRSET", "msg": "DNS RR set that ought to exist, does not exist."}
+		a[9009] := {"enum": "DNS_ERROR_RCODE_NOTAUTH", "msg": "DNS server not authoritative for zone."}
+		a[9010] := {"enum": "DNS_ERROR_RCODE_NOTZONE", "msg": "DNS name in update or prereq is not in zone."}
+		a[9016] := {"enum": "DNS_ERROR_RCODE_BADSIG", "msg": "DNS signature failed to verify."}
+		a[9017] := {"enum": "DNS_ERROR_RCODE_BADKEY", "msg": "DNS bad key."}
+		a[9018] := {"enum": "DNS_ERROR_RCODE_BADTIME", "msg": "DNS signature validity expired."}
+		a[9101] := {"enum": "DNS_ERROR_KEYMASTER_REQUIRED", "msg": "Only the DNS server acting as the key master for the zone may perform this operation."}
+		a[9102] := {"enum": "DNS_ERROR_NOT_ALLOWED_ON_SIGNED_ZONE", "msg": "This operation is not allowed on a zone that is signed or has signing keys."}
+		a[9103] := {"enum": "DNS_ERROR_NSEC3_INCOMPATIBLE_WITH_RSA_SHA1", "msg": "NSEC3 is not compatible with the RSA-SHA-1 algorithm. Choose a different algorithm or use NSEC.`nThis value was also named <strong>DNS_ERROR_INVALID_NSEC3_PARAMETERS</strong>"}
+		a[9104] := {"enum": "DNS_ERROR_NOT_ENOUGH_SIGNING_KEY_DESCRIPTORS", "msg": "The zone does not have enough signing keys. There must be at least one key signing key (KSK) and at least one zone signing key (ZSK)."}
+		a[9105] := {"enum": "DNS_ERROR_UNSUPPORTED_ALGORITHM", "msg": "The specified algorithm is not supported."}
+		a[9106] := {"enum": "DNS_ERROR_INVALID_KEY_SIZE", "msg": "The specified key size is not supported."}
+		a[9107] := {"enum": "DNS_ERROR_SIGNING_KEY_NOT_ACCESSIBLE", "msg": "One or more of the signing keys for a zone are not accessible to the DNS server. Zone signing will not be operational until this error is resolved."}
+		a[9108] := {"enum": "DNS_ERROR_KSP_DOES_NOT_SUPPORT_PROTECTION", "msg": "The specified key storage provider does not support DPAPI++ data protection. Zone signing will not be operational until this error is resolved."}
+		a[9109] := {"enum": "DNS_ERROR_UNEXPECTED_DATA_PROTECTION_ERROR", "msg": "An unexpected DPAPI++ error was encountered. Zone signing will not be operational until this error is resolved."}
+		a[9110] := {"enum": "DNS_ERROR_UNEXPECTED_CNG_ERROR", "msg": "An unexpected crypto error was encountered. Zone signing may not be operational until this error is resolved."}
+		a[9111] := {"enum": "DNS_ERROR_UNKNOWN_SIGNING_PARAMETER_VERSION", "msg": "The DNS server encountered a signing key with an unknown version. Zone signing will not be operational until this error is resolved."}
+		a[9112] := {"enum": "DNS_ERROR_KSP_NOT_ACCESSIBLE", "msg": "The specified key service provider cannot be opened by the DNS server."}
+		a[9113] := {"enum": "DNS_ERROR_TOO_MANY_SKDS", "msg": "The DNS server cannot accept any more signing keys with the specified algorithm and KSK flag value for this zone."}
+		a[9114] := {"enum": "DNS_ERROR_INVALID_ROLLOVER_PERIOD", "msg": "The specified rollover period is invalid."}
+		a[9115] := {"enum": "DNS_ERROR_INVALID_INITIAL_ROLLOVER_OFFSET", "msg": "The specified initial rollover offset is invalid."}
+		a[9116] := {"enum": "DNS_ERROR_ROLLOVER_IN_PROGRESS", "msg": "The specified signing key is already in process of rolling over keys."}
+		a[9117] := {"enum": "DNS_ERROR_STANDBY_KEY_NOT_PRESENT", "msg": "The specified signing key does not have a standby key to revoke."}
+		a[9118] := {"enum": "DNS_ERROR_NOT_ALLOWED_ON_ZSK", "msg": "This operation is not allowed on a zone signing key (ZSK)."}
+		a[9119] := {"enum": "DNS_ERROR_NOT_ALLOWED_ON_ACTIVE_SKD", "msg": "This operation is not allowed on an active signing key."}
+		a[9120] := {"enum": "DNS_ERROR_ROLLOVER_ALREADY_QUEUED", "msg": "The specified signing key is already queued for rollover."}
+		a[9121] := {"enum": "DNS_ERROR_NOT_ALLOWED_ON_UNSIGNED_ZONE", "msg": "This operation is not allowed on an unsigned zone."}
+		a[9122] := {"enum": "DNS_ERROR_BAD_KEYMASTER", "msg": "This operation could not be completed because the DNS server listed as the current key master for this zone is down or misconfigured. Resolve the problem on the current key master for this zone or use another DNS server to seize the key master role."}
+		a[9123] := {"enum": "DNS_ERROR_INVALID_SIGNATURE_VALIDITY_PERIOD", "msg": "The specified signature validity period is invalid."}
+		a[9124] := {"enum": "DNS_ERROR_INVALID_NSEC3_ITERATION_COUNT", "msg": "The specified NSEC3 iteration count is higher than allowed by the minimum key length used in the zone."}
+		a[9125] := {"enum": "DNS_ERROR_DNSSEC_IS_DISABLED", "msg": "This operation could not be completed because the DNS server has been configured with DNSSEC features disabled. Enable DNSSEC on the DNS server."}
+		a[9126] := {"enum": "DNS_ERROR_INVALID_XML", "msg": "This operation could not be completed because the XML stream received is empty or syntactically invalid."}
+		a[9127] := {"enum": "DNS_ERROR_NO_VALID_TRUST_ANCHORS", "msg": "This operation completed, but no trust anchors were added because all of the trust anchors received were either invalid, unsupported, expired, or would not become valid in less than 30 days."}
+		a[9128] := {"enum": "DNS_ERROR_ROLLOVER_NOT_POKEABLE", "msg": "The specified signing key is not waiting for parental DS update."}
+		a[9129] := {"enum": "DNS_ERROR_NSEC3_NAME_COLLISION", "msg": "Hash collision detected during NSEC3 signing. Specify a different user-provided salt, or use a randomly generated salt, and attempt to sign the zone again."}
+		a[9130] := {"enum": "DNS_ERROR_NSEC_INCOMPATIBLE_WITH_NSEC3_RSA_SHA1", "msg": "NSEC is not compatible with the NSEC3-RSA-SHA-1 algorithm. Choose a different algorithm or use NSEC3."}
+		a[9501] := {"enum": "DNS_INFO_NO_RECORDS", "msg": "No records found for given DNS query."}
+		a[9502] := {"enum": "DNS_ERROR_BAD_PACKET", "msg": "Bad DNS packet."}
+		a[9503] := {"enum": "DNS_ERROR_NO_PACKET", "msg": "No DNS packet."}
+		a[9504] := {"enum": "DNS_ERROR_RCODE", "msg": "DNS error, check rcode."}
+		a[9505] := {"enum": "DNS_ERROR_UNSECURE_PACKET", "msg": "Unsecured DNS packet."}
+		a[9506] := {"enum": "DNS_REQUEST_PENDING", "msg": "DNS query request is pending."}
+		a[9551] := {"enum": "DNS_ERROR_INVALID_TYPE", "msg": "Invalid DNS type."}
+		a[9552] := {"enum": "DNS_ERROR_INVALID_IP_ADDRESS", "msg": "Invalid IP address."}
+		a[9553] := {"enum": "DNS_ERROR_INVALID_PROPERTY", "msg": "Invalid property."}
+		a[9554] := {"enum": "DNS_ERROR_TRY_AGAIN_LATER", "msg": "Try DNS operation again later."}
+		a[9555] := {"enum": "DNS_ERROR_NOT_UNIQUE", "msg": "Record for given name and type is not unique."}
+		a[9556] := {"enum": "DNS_ERROR_NON_RFC_NAME", "msg": "DNS name does not comply with RFC specifications."}
+		a[9557] := {"enum": "DNS_STATUS_FQDN", "msg": "DNS name is a fully-qualified DNS name."}
+		a[9558] := {"enum": "DNS_STATUS_DOTTED_NAME", "msg": "DNS name is dotted (multi-label)."}
+		a[9559] := {"enum": "DNS_STATUS_SINGLE_PART_NAME", "msg": "DNS name is a single-part name."}
+		a[9560] := {"enum": "DNS_ERROR_INVALID_NAME_CHAR", "msg": "DNS name contains an invalid character."}
+		a[9561] := {"enum": "DNS_ERROR_NUMERIC_NAME", "msg": "DNS name is entirely numeric."}
+		a[9562] := {"enum": "DNS_ERROR_NOT_ALLOWED_ON_ROOT_SERVER", "msg": "The operation requested is not permitted on a DNS root server."}
+		a[9563] := {"enum": "DNS_ERROR_NOT_ALLOWED_UNDER_DELEGATION", "msg": "The record could not be created because this part of the DNS namespace has been delegated to another server."}
+		a[9564] := {"enum": "DNS_ERROR_CANNOT_FIND_ROOT_HINTS", "msg": "The DNS server could not find a set of root hints."}
+		a[9565] := {"enum": "DNS_ERROR_INCONSISTENT_ROOT_HINTS", "msg": "The DNS server found root hints but they were not consistent across all adapters."}
+		a[9566] := {"enum": "DNS_ERROR_DWORD_VALUE_TOO_SMALL", "msg": "The specified value is too small for this parameter."}
+		a[9567] := {"enum": "DNS_ERROR_DWORD_VALUE_TOO_LARGE", "msg": "The specified value is too large for this parameter."}
+		a[9568] := {"enum": "DNS_ERROR_BACKGROUND_LOADING", "msg": "This operation is not allowed while the DNS server is loading zones in the background. Please try again later."}
+		a[9569] := {"enum": "DNS_ERROR_NOT_ALLOWED_ON_RODC", "msg": "The operation requested is not permitted on against a DNS server running on a read-only DC."}
+		a[9570] := {"enum": "DNS_ERROR_NOT_ALLOWED_UNDER_DNAME", "msg": "No data is allowed to exist underneath a DNAME record."}
+		a[9571] := {"enum": "DNS_ERROR_DELEGATION_REQUIRED", "msg": "This operation requires credentials delegation."}
+		a[9572] := {"enum": "DNS_ERROR_INVALID_POLICY_TABLE", "msg": "Name resolution policy table has been corrupted. DNS resolution will fail until it is fixed. Contact your network administrator."}
+		a[9601] := {"enum": "DNS_ERROR_ZONE_DOES_NOT_EXIST", "msg": "DNS zone does not exist."}
+		a[9602] := {"enum": "DNS_ERROR_NO_ZONE_INFO", "msg": "DNS zone information not available."}
+		a[9603] := {"enum": "DNS_ERROR_INVALID_ZONE_OPERATION", "msg": "Invalid operation for DNS zone."}
+		a[9604] := {"enum": "DNS_ERROR_ZONE_CONFIGURATION_ERROR", "msg": "Invalid DNS zone configuration."}
+		a[9605] := {"enum": "DNS_ERROR_ZONE_HAS_NO_SOA_RECORD", "msg": "DNS zone has no start of authority (SOA) record."}
+		a[9606] := {"enum": "DNS_ERROR_ZONE_HAS_NO_NS_RECORDS", "msg": "DNS zone has no Name Server (NS) record."}
+		a[9607] := {"enum": "DNS_ERROR_ZONE_LOCKED", "msg": "DNS zone is locked."}
+		a[9608] := {"enum": "DNS_ERROR_ZONE_CREATION_FAILED", "msg": "DNS zone creation failed."}
+		a[9609] := {"enum": "DNS_ERROR_ZONE_ALREADY_EXISTS", "msg": "DNS zone already exists."}
+		a[9610] := {"enum": "DNS_ERROR_AUTOZONE_ALREADY_EXISTS", "msg": "DNS automatic zone already exists."}
+		a[9611] := {"enum": "DNS_ERROR_INVALID_ZONE_TYPE", "msg": "Invalid DNS zone type."}
+		a[9612] := {"enum": "DNS_ERROR_SECONDARY_REQUIRES_MASTER_IP", "msg": "Secondary DNS zone requires master IP address."}
+		a[9613] := {"enum": "DNS_ERROR_ZONE_NOT_SECONDARY", "msg": "DNS zone not secondary."}
+		a[9614] := {"enum": "DNS_ERROR_NEED_SECONDARY_ADDRESSES", "msg": "Need secondary IP address."}
+		a[9615] := {"enum": "DNS_ERROR_WINS_INIT_FAILED", "msg": "WINS initialization failed."}
+		a[9616] := {"enum": "DNS_ERROR_NEED_WINS_SERVERS", "msg": "Need WINS servers."}
+		a[9617] := {"enum": "DNS_ERROR_NBSTAT_INIT_FAILED", "msg": "NBTSTAT initialization call failed."}
+		a[9618] := {"enum": "DNS_ERROR_SOA_DELETE_INVALID", "msg": "Invalid delete of start of authority (SOA)."}
+		a[9619] := {"enum": "DNS_ERROR_FORWARDER_ALREADY_EXISTS", "msg": "A conditional forwarding zone already exists for that name."}
+		a[9620] := {"enum": "DNS_ERROR_ZONE_REQUIRES_MASTER_IP", "msg": "This zone must be configured with one or more master DNS server IP addresses."}
+		a[9621] := {"enum": "DNS_ERROR_ZONE_IS_SHUTDOWN", "msg": "The operation cannot be performed because this zone is shut down."}
+		a[9622] := {"enum": "DNS_ERROR_ZONE_LOCKED_FOR_SIGNING", "msg": "This operation cannot be performed because the zone is currently being signed. Please try again later."}
+		a[9651] := {"enum": "DNS_ERROR_PRIMARY_REQUIRES_DATAFILE", "msg": "Primary DNS zone requires datafile."}
+		a[9652] := {"enum": "DNS_ERROR_INVALID_DATAFILE_NAME", "msg": "Invalid datafile name for DNS zone."}
+		a[9653] := {"enum": "DNS_ERROR_DATAFILE_OPEN_FAILURE", "msg": "Failed to open datafile for DNS zone."}
+		a[9654] := {"enum": "DNS_ERROR_FILE_WRITEBACK_FAILED", "msg": "Failed to write datafile for DNS zone."}
+		a[9655] := {"enum": "DNS_ERROR_DATAFILE_PARSING", "msg": "Failure while reading datafile for DNS zone."}
+		a[9701] := {"enum": "DNS_ERROR_RECORD_DOES_NOT_EXIST", "msg": "DNS record does not exist."}
+		a[9702] := {"enum": "DNS_ERROR_RECORD_FORMAT", "msg": "DNS record format error."}
+		a[9703] := {"enum": "DNS_ERROR_NODE_CREATION_FAILED", "msg": "Node creation failure in DNS."}
+		a[9704] := {"enum": "DNS_ERROR_UNKNOWN_RECORD_TYPE", "msg": "Unknown DNS record type."}
+		a[9705] := {"enum": "DNS_ERROR_RECORD_TIMED_OUT", "msg": "DNS record timed out."}
+		a[9706] := {"enum": "DNS_ERROR_NAME_NOT_IN_ZONE", "msg": "Name not in DNS zone."}
+		a[9707] := {"enum": "DNS_ERROR_CNAME_LOOP", "msg": "CNAME loop detected."}
+		a[9708] := {"enum": "DNS_ERROR_NODE_IS_CNAME", "msg": "Node is a CNAME DNS record."}
+		a[9709] := {"enum": "DNS_ERROR_CNAME_COLLISION", "msg": "A CNAME record already exists for given name."}
+		a[9710] := {"enum": "DNS_ERROR_RECORD_ONLY_AT_ZONE_ROOT", "msg": "Record only at DNS zone root."}
+		a[9711] := {"enum": "DNS_ERROR_RECORD_ALREADY_EXISTS", "msg": "DNS record already exists."}
+		a[9712] := {"enum": "DNS_ERROR_SECONDARY_DATA", "msg": "Secondary DNS zone data error."}
+		a[9713] := {"enum": "DNS_ERROR_NO_CREATE_CACHE_DATA", "msg": "Could not create DNS cache data."}
+		a[9714] := {"enum": "DNS_ERROR_NAME_DOES_NOT_EXIST", "msg": "DNS name does not exist."}
+		a[9715] := {"enum": "DNS_WARNING_PTR_CREATE_FAILED", "msg": "Could not create pointer (PTR) record."}
+		a[9716] := {"enum": "DNS_WARNING_DOMAIN_UNDELETED", "msg": "DNS domain was undeleted."}
+		a[9717] := {"enum": "DNS_ERROR_DS_UNAVAILABLE", "msg": "The directory service is unavailable."}
+		a[9718] := {"enum": "DNS_ERROR_DS_ZONE_ALREADY_EXISTS", "msg": "DNS zone already exists in the directory service."}
+		a[9719] := {"enum": "DNS_ERROR_NO_BOOTFILE_IF_DS_ZONE", "msg": "DNS server not creating or reading the boot file for the directory service integrated DNS zone."}
+		a[9720] := {"enum": "DNS_ERROR_NODE_IS_DNAME", "msg": "Node is a DNAME DNS record."}
+		a[9721] := {"enum": "DNS_ERROR_DNAME_COLLISION", "msg": "A DNAME record already exists for given name."}
+		a[9722] := {"enum": "DNS_ERROR_ALIAS_LOOP", "msg": "An alias loop has been detected with either CNAME or DNAME records."}
+		a[9751] := {"enum": "DNS_INFO_AXFR_COMPLETE", "msg": "DNS AXFR (zone transfer) complete."}
+		a[9752] := {"enum": "DNS_ERROR_AXFR", "msg": "DNS zone transfer failed."}
+		a[9753] := {"enum": "DNS_INFO_ADDED_LOCAL_WINS", "msg": "Added local WINS server."}
+		a[9801] := {"enum": "DNS_STATUS_CONTINUE_NEEDED", "msg": "Secure update call needs to continue update request."}
+		a[9851] := {"enum": "DNS_ERROR_NO_TCPIP", "msg": "TCP/IP network protocol not installed."}
+		a[9852] := {"enum": "DNS_ERROR_NO_DNS_SERVERS", "msg": "No DNS servers configured for local system."}
+		a[9901] := {"enum": "DNS_ERROR_DP_DOES_NOT_EXIST", "msg": "The specified directory partition does not exist."}
+		a[9902] := {"enum": "DNS_ERROR_DP_ALREADY_EXISTS", "msg": "The specified directory partition already exists."}
+		a[9903] := {"enum": "DNS_ERROR_DP_NOT_ENLISTED", "msg": "This DNS server is not enlisted in the specified directory partition."}
+		a[9904] := {"enum": "DNS_ERROR_DP_ALREADY_ENLISTED", "msg": "This DNS server is already enlisted in the specified directory partition."}
+		a[9905] := {"enum": "DNS_ERROR_DP_NOT_AVAILABLE", "msg": "The directory partition is not available at this time. Please wait a few minutes and try again."}
+		a[9906] := {"enum": "DNS_ERROR_DP_FSMO_ERROR", "msg": "The operation failed because the domain naming master FSMO role could not be reached. The domain controller holding the domain naming master FSMO role is down or unable to service the request or is not running Windows Server 2003 or later."}
+		a[10004] := {"enum": "WSAEINTR", "msg": "A blocking operation was interrupted by a call to WSACancelBlockingCall."}
+		a[10009] := {"enum": "WSAEBADF", "msg": "The file handle supplied is not valid."}
+		a[10013] := {"enum": "WSAEACCES", "msg": "An attempt was made to access a socket in a way forbidden by its access permissions."}
+		a[10014] := {"enum": "WSAEFAULT", "msg": "The system detected an invalid pointer address in attempting to use a pointer argument in a call."}
+		a[10022] := {"enum": "WSAEINVAL", "msg": "An invalid argument was supplied."}
+		a[10024] := {"enum": "WSAEMFILE", "msg": "Too many open sockets."}
+		a[10035] := {"enum": "WSAEWOULDBLOCK", "msg": "A non-blocking socket operation could not be completed immediately."}
+		a[10036] := {"enum": "WSAEINPROGRESS", "msg": "A blocking operation is currently executing."}
+		a[10037] := {"enum": "WSAEALREADY", "msg": "An operation was attempted on a non-blocking socket that already had an operation in progress."}
+		a[10038] := {"enum": "WSAENOTSOCK", "msg": "An operation was attempted on something that is not a socket."}
+		a[10039] := {"enum": "WSAEDESTADDRREQ", "msg": "A required address was omitted from an operation on a socket."}
+		a[10040] := {"enum": "WSAEMSGSIZE", "msg": "A message sent on a datagram socket was larger than the internal message buffer or some other network limit, or the buffer used to receive a datagram into was smaller than the datagram itself."}
+		a[10041] := {"enum": "WSAEPROTOTYPE", "msg": "A protocol was specified in the socket function call that does not support the semantics of the socket type requested."}
+		a[10042] := {"enum": "WSAENOPROTOOPT", "msg": "An unknown, invalid, or unsupported option or level was specified in a getsockopt or setsockopt call."}
+		a[10043] := {"enum": "WSAEPROTONOSUPPORT", "msg": "The requested protocol has not been configured into the system, or no implementation for it exists."}
+		a[10044] := {"enum": "WSAESOCKTNOSUPPORT", "msg": "The support for the specified socket type does not exist in this address family."}
+		a[10045] := {"enum": "WSAEOPNOTSUPP", "msg": "The attempted operation is not supported for the type of object referenced."}
+		a[10046] := {"enum": "WSAEPFNOSUPPORT", "msg": "The protocol family has not been configured into the system or no implementation for it exists."}
+		a[10047] := {"enum": "WSAEAFNOSUPPORT", "msg": "An address incompatible with the requested protocol was used."}
+		a[10048] := {"enum": "WSAEADDRINUSE", "msg": "Only one usage of each socket address (protocol/network address/port) is normally permitted."}
+		a[10049] := {"enum": "WSAEADDRNOTAVAIL", "msg": "The requested address is not valid in its context."}
+		a[10050] := {"enum": "WSAENETDOWN", "msg": "A socket operation encountered a dead network."}
+		a[10051] := {"enum": "WSAENETUNREACH", "msg": "A socket operation was attempted to an unreachable network."}
+		a[10052] := {"enum": "WSAENETRESET", "msg": "The connection has been broken due to keep-alive activity detecting a failure while the operation was in progress."}
+		a[10053] := {"enum": "WSAECONNABORTED", "msg": "An established connection was aborted by the software in your host machine."}
+		a[10054] := {"enum": "WSAECONNRESET", "msg": "An existing connection was forcibly closed by the remote host."}
+		a[10055] := {"enum": "WSAENOBUFS", "msg": "An operation on a socket could not be performed because the system lacked sufficient buffer space or because a queue was full."}
+		a[10056] := {"enum": "WSAEISCONN", "msg": "A connect request was made on an already connected socket."}
+		a[10057] := {"enum": "WSAENOTCONN", "msg": "A request to send or receive data was disallowed because the socket is not connected and (when sending on a datagram socket using a sendto call) no address was supplied."}
+		a[10058] := {"enum": "WSAESHUTDOWN", "msg": "A request to send or receive data was disallowed because the socket had already been shut down in that direction with a previous shutdown call."}
+		a[10059] := {"enum": "WSAETOOMANYREFS", "msg": "Too many references to some kernel object."}
+		a[10060] := {"enum": "WSAETIMEDOUT", "msg": "A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond."}
+		a[10061] := {"enum": "WSAECONNREFUSED", "msg": "No connection could be made because the target machine actively refused it."}
+		a[10062] := {"enum": "WSAELOOP", "msg": "Cannot translate name."}
+		a[10063] := {"enum": "WSAENAMETOOLONG", "msg": "Name component or name was too long."}
+		a[10064] := {"enum": "WSAEHOSTDOWN", "msg": "A socket operation failed because the destination host was down."}
+		a[10065] := {"enum": "WSAEHOSTUNREACH", "msg": "A socket operation was attempted to an unreachable host."}
+		a[10066] := {"enum": "WSAENOTEMPTY", "msg": "Cannot remove a directory that is not empty."}
+		a[10067] := {"enum": "WSAEPROCLIM", "msg": "A Windows Sockets implementation may have a limit on the number of applications that may use it simultaneously."}
+		a[10068] := {"enum": "WSAEUSERS", "msg": "Ran out of quota."}
+		a[10069] := {"enum": "WSAEDQUOT", "msg": "Ran out of disk quota."}
+		a[10070] := {"enum": "WSAESTALE", "msg": "File handle reference is no longer available."}
+		a[10071] := {"enum": "WSAEREMOTE", "msg": "Item is not available locally."}
+		a[10091] := {"enum": "WSASYSNOTREADY", "msg": "WSAStartup cannot function at this time because the underlying system it uses to provide network services is currently unavailable."}
+		a[10092] := {"enum": "WSAVERNOTSUPPORTED", "msg": "The Windows Sockets version requested is not supported."}
+		a[10093] := {"enum": "WSANOTINITIALISED", "msg": "Either the application has not called WSAStartup, or WSAStartup failed."}
+		a[10101] := {"enum": "WSAEDISCON", "msg": "Returned by WSARecv or WSARecvFrom to indicate the remote party has initiated a graceful shutdown sequence."}
+		a[10102] := {"enum": "WSAENOMORE", "msg": "No more results can be returned by WSALookupServiceNext."}
+		a[10103] := {"enum": "WSAECANCELLED", "msg": "A call to WSALookupServiceEnd was made while this call was still processing. The call has been canceled."}
+		a[10104] := {"enum": "WSAEINVALIDPROCTABLE", "msg": "The procedure call table is invalid."}
+		a[10105] := {"enum": "WSAEINVALIDPROVIDER", "msg": "The requested service provider is invalid."}
+		a[10106] := {"enum": "WSAEPROVIDERFAILEDINIT", "msg": "The requested service provider could not be loaded or initialized."}
+		a[10107] := {"enum": "WSASYSCALLFAILURE", "msg": "A system call has failed."}
+		a[10108] := {"enum": "WSASERVICE_NOT_FOUND", "msg": "No such service is known. The service cannot be found in the specified name space."}
+		a[10109] := {"enum": "WSATYPE_NOT_FOUND", "msg": "The specified class was not found."}
+		a[10110] := {"enum": "WSA_E_NO_MORE", "msg": "No more results can be returned by WSALookupServiceNext."}
+		a[10111] := {"enum": "WSA_E_CANCELLED", "msg": "A call to WSALookupServiceEnd was made while this call was still processing. The call has been canceled."}
+		a[10112] := {"enum": "WSAEREFUSED", "msg": "A database query failed because it was actively refused."}
+		a[11001] := {"enum": "WSAHOST_NOT_FOUND", "msg": "No such host is known."}
+		a[11002] := {"enum": "WSATRY_AGAIN", "msg": "This is usually a temporary error during hostname resolution and means that the local server did not receive a response from an authoritative server."}
+		a[11003] := {"enum": "WSANO_RECOVERY", "msg": "A non-recoverable error occurred during a database lookup."}
+		a[11004] := {"enum": "WSANO_DATA", "msg": "The requested name is valid, but no data of the requested type was found."}
+		a[11005] := {"enum": "WSA_QOS_RECEIVERS", "msg": "At least one reserve has arrived."}
+		a[11006] := {"enum": "WSA_QOS_SENDERS", "msg": "At least one path has arrived."}
+		a[11007] := {"enum": "WSA_QOS_NO_SENDERS", "msg": "There are no senders."}
+		a[11008] := {"enum": "WSA_QOS_NO_RECEIVERS", "msg": "There are no receivers."}
+		a[11009] := {"enum": "WSA_QOS_REQUEST_CONFIRMED", "msg": "Reserve has been confirmed."}
+		a[11010] := {"enum": "WSA_QOS_ADMISSION_FAILURE", "msg": "Error due to lack of resources."}
+		a[11011] := {"enum": "WSA_QOS_POLICY_FAILURE", "msg": "Rejected for administrative reasons - bad credentials."}
+		a[11012] := {"enum": "WSA_QOS_BAD_STYLE", "msg": "Unknown or conflicting style."}
+		a[11013] := {"enum": "WSA_QOS_BAD_OBJECT", "msg": "Problem with some part of the filterspec or providerspecific buffer in general."}
+		a[11014] := {"enum": "WSA_QOS_TRAFFIC_CTRL_ERROR", "msg": "Problem with some part of the flowspec."}
+		a[11015] := {"enum": "WSA_QOS_GENERIC_ERROR", "msg": "General QOS error."}
+		a[11016] := {"enum": "WSA_QOS_ESERVICETYPE", "msg": "An invalid or unrecognized service type was found in the flowspec."}
+		a[11017] := {"enum": "WSA_QOS_EFLOWSPEC", "msg": "An invalid or inconsistent flowspec was found in the QOS structure."}
+		a[11018] := {"enum": "WSA_QOS_EPROVSPECBUF", "msg": "Invalid QOS provider-specific buffer."}
+		a[11019] := {"enum": "WSA_QOS_EFILTERSTYLE", "msg": "An invalid QOS filter style was used."}
+		a[11020] := {"enum": "WSA_QOS_EFILTERTYPE", "msg": "An invalid QOS filter type was used."}
+		a[11021] := {"enum": "WSA_QOS_EFILTERCOUNT", "msg": "An incorrect number of QOS FILTERSPECs were specified in the FLOWDESCRIPTOR."}
+		a[11022] := {"enum": "WSA_QOS_EOBJLENGTH", "msg": "An object with an invalid ObjectLength field was specified in the QOS provider-specific buffer."}
+		a[11023] := {"enum": "WSA_QOS_EFLOWCOUNT", "msg": "An incorrect number of flow descriptors was specified in the QOS structure."}
+		a[11024] := {"enum": "WSA_QOS_EUNKOWNPSOBJ", "msg": "An unrecognized object was found in the QOS provider-specific buffer."}
+		a[11025] := {"enum": "WSA_QOS_EPOLICYOBJ", "msg": "An invalid policy object was found in the QOS provider-specific buffer."}
+		a[11026] := {"enum": "WSA_QOS_EFLOWDESC", "msg": "An invalid QOS flow descriptor was found in the flow descriptor list."}
+		a[11027] := {"enum": "WSA_QOS_EPSFLOWSPEC", "msg": "An invalid or inconsistent flowspec was found in the QOS provider specific buffer."}
+		a[11028] := {"enum": "WSA_QOS_EPSFILTERSPEC", "msg": "An invalid FILTERSPEC was found in the QOS provider-specific buffer."}
+		a[11029] := {"enum": "WSA_QOS_ESDMODEOBJ", "msg": "An invalid shape discard mode object was found in the QOS provider specific buffer."}
+		a[11030] := {"enum": "WSA_QOS_ESHAPERATEOBJ", "msg": "An invalid shaping rate object was found in the QOS provider-specific buffer."}
+		a[11031] := {"enum": "WSA_QOS_RESERVED_PETYPE", "msg": "A reserved policy element was found in the QOS provider-specific buffer."}
+		a[11032] := {"enum": "WSA_SECURE_HOST_NOT_FOUND", "msg": "No such host is known securely."}
+		a[11033] := {"enum": "WSA_IPSEC_NAME_POLICY_ERROR", "msg": "Name based IPSEC policy could not be added"}
+		a[12111] := {"enum": "ERROR_FTP_DROPPED", "msg": "The FTP operation was not completed because the session was aborted."}
+		a[12112] := {"enum": "ERROR_FTP_NO_PASSIVE_MODE", "msg": "Passive mode is not available on the server."}
+		a[12110] := {"enum": "ERROR_FTP_TRANSFER_IN_PROGRESS", "msg": "The requested operation cannot be made on the FTP session handle because an operation is already in progress."}
+		a[12137] := {"enum": "ERROR_GOPHER_ATTRIBUTE_NOT_FOUND", "msg": "The requested attribute could not be located.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12132] := {"enum": "ERROR_GOPHER_DATA_ERROR", "msg": "An error was detected while receiving data from the Gopher server.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12133] := {"enum": "ERROR_GOPHER_END_OF_DATA", "msg": "The end of the data has been reached.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12135] := {"enum": "ERROR_GOPHER_INCORRECT_LOCATOR_TYPE", "msg": "The type of the locator is not correct for this operation.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12134] := {"enum": "ERROR_GOPHER_INVALID_LOCATOR", "msg": "The supplied locator is not valid.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12131] := {"enum": "ERROR_GOPHER_NOT_FILE", "msg": "The request must be made for a file locator.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12136] := {"enum": "ERROR_GOPHER_NOT_GOPHER_PLUS", "msg": "The requested operation can be made only against a Gopher+ server, or with a locator that specifies a Gopher+ operation.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12130] := {"enum": "ERROR_GOPHER_PROTOCOL_ERROR", "msg": "An error was detected while parsing data returned from the Gopher server.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12138] := {"enum": "ERROR_GOPHER_UNKNOWN_LOCATOR", "msg": "The locator type is unknown.`nWindows XP and Windows Server 2003 R2 and earlier only."}
+		a[12162] := {"enum": "ERROR_HTTP_COOKIE_DECLINED", "msg": "The HTTP cookie was declined by the server."}
+		a[12161] := {"enum": "ERROR_HTTP_COOKIE_NEEDS_CONFIRMATION", "msg": "The HTTP cookie requires confirmation.`nWindows Vista and Windows Server 2008 and earlier only."}
+		a[12151] := {"enum": "ERROR_HTTP_DOWNLEVEL_SERVER", "msg": "The server did not return any headers."}
+		a[12155] := {"enum": "ERROR_HTTP_HEADER_ALREADY_EXISTS", "msg": "The header could not be added because it already exists."}
+		a[12150] := {"enum": "ERROR_HTTP_HEADER_NOT_FOUND", "msg": "The requested header could not be located."}
+		a[12153] := {"enum": "ERROR_HTTP_INVALID_HEADER", "msg": "The supplied header is invalid."}
+		a[12154] := {"enum": "ERROR_HTTP_INVALID_QUERY_REQUEST", "msg": "The request made to HttpQueryInfo is invalid."}
+		a[12152] := {"enum": "ERROR_HTTP_INVALID_SERVER_RESPONSE", "msg": "The server response could not be parsed."}
+		a[12160] := {"enum": "ERROR_HTTP_NOT_REDIRECTED", "msg": "The HTTP request was not redirected."}
+		a[12156] := {"enum": "ERROR_HTTP_REDIRECT_FAILED", "msg": "The redirection failed because either the scheme changed (for example, HTTP to FTP) or all attempts made to redirect failed (default is five attempts)."}
+		a[12168] := {"enum": "ERROR_HTTP_REDIRECT_NEEDS_CONFIRMATION", "msg": "The redirection requires user confirmation."}
+		a[12047] := {"enum": "ERROR_INTERNET_ASYNC_THREAD_FAILED", "msg": "The application could not start an asynchronous thread."}
+		a[12166] := {"enum": "ERROR_INTERNET_BAD_AUTO_PROXY_SCRIPT", "msg": "There was an error in the automatic proxy configuration script."}
+		a[12010] := {"enum": "ERROR_INTERNET_BAD_OPTION_LENGTH", "msg": "The length of an option supplied to InternetQueryOption or InternetSetOption is incorrect for the type of option specified."}
+		a[12022] := {"enum": "ERROR_INTERNET_BAD_REGISTRY_PARAMETER", "msg": "A required registry value was located but is an incorrect type or has an invalid value."}
+		a[12029] := {"enum": "ERROR_INTERNET_CANNOT_CONNECT", "msg": "The attempt to connect to the server failed."}
+		a[12042] := {"enum": "ERROR_INTERNET_CHG_POST_IS_NON_SECURE", "msg": "The application is posting and attempting to change multiple lines of text on a server that is not secure."}
+		a[12044] := {"enum": "ERROR_INTERNET_CLIENT_AUTH_CERT_NEEDED", "msg": "The server is requesting client authentication."}
+		a[12046] := {"enum": "ERROR_INTERNET_CLIENT_AUTH_NOT_SETUP", "msg": "Client authorization is not set up on this computer."}
+		a[12030] := {"enum": "ERROR_INTERNET_CONNECTION_ABORTED", "msg": "The connection with the server has been terminated."}
+		a[12031] := {"enum": "ERROR_INTERNET_CONNECTION_RESET", "msg": "The connection with the server has been reset."}
+		a[12175] := {"enum": "ERROR_INTERNET_DECODING_FAILED", "msg": "WinINet failed to perform content decoding on the response. For more information, see the Content Encoding topic."}
+		a[12049] := {"enum": "ERROR_INTERNET_DIALOG_PENDING", "msg": "Another thread has a password dialog box in progress."}
+		a[12163] := {"enum": "ERROR_INTERNET_DISCONNECTED", "msg": "The Internet connection has been lost."}
+		a[12003] := {"enum": "ERROR_INTERNET_EXTENDED_ERROR", "msg": "An extended error was returned from the server. This is typically a string or buffer containing a verbose error message. Call InternetGetLastResponseInfo to retrieve the error text."}
+		a[12171] := {"enum": "ERROR_INTERNET_FAILED_DUETOSECURITYCHECK", "msg": "The function failed due to a security check."}
+		a[12032] := {"enum": "ERROR_INTERNET_FORCE_RETRY", "msg": "The function needs to redo the request."}
+		a[12054] := {"enum": "ERROR_INTERNET_FORTEZZA_LOGIN_NEEDED", "msg": "The requested resource requires Fortezza authentication."}
+		a[12036] := {"enum": "ERROR_INTERNET_HANDLE_EXISTS", "msg": "The request failed because the handle already exists."}
+		a[12039] := {"enum": "ERROR_INTERNET_HTTP_TO_HTTPS_ON_REDIR", "msg": "The application is moving from a non-SSL to an SSL connection because of a redirect."}
+		a[12052] := {"enum": "ERROR_INTERNET_HTTPS_HTTP_SUBMIT_REDIR", "msg": "The data being submitted to an SSL connection is being redirected to a non-SSL connection."}
+		a[12040] := {"enum": "ERROR_INTERNET_HTTPS_TO_HTTP_ON_REDIR", "msg": "The application is moving from an SSL to an non-SSL connection because of a redirect."}
+		a[12027] := {"enum": "ERROR_INTERNET_INCORRECT_FORMAT", "msg": "The format of the request is invalid."}
+		a[12019] := {"enum": "ERROR_INTERNET_INCORRECT_HANDLE_STATE", "msg": "The requested operation cannot be carried out because the handle supplied is not in the correct state."}
+		a[12018] := {"enum": "ERROR_INTERNET_INCORRECT_HANDLE_TYPE", "msg": "The type of handle supplied is incorrect for this operation."}
+		a[12014] := {"enum": "ERROR_INTERNET_INCORRECT_PASSWORD", "msg": "The request to connect and log on to an FTP server could not be completed because the supplied password is incorrect."}
+		a[12013] := {"enum": "ERROR_INTERNET_INCORRECT_USER_NAME", "msg": "The request to connect and log on to an FTP server could not be completed because the supplied user name is incorrect."}
+		a[12053] := {"enum": "ERROR_INTERNET_INSERT_CDROM", "msg": "The request requires a CD-ROM to be inserted in the CD-ROM drive to locate the resource requested.`nWindows Vista and Windows Server 2008 and earlier only."}
+		a[12004] := {"enum": "ERROR_INTERNET_INTERNAL_ERROR", "msg": "An internal error has occurred."}
+		a[12045] := {"enum": "ERROR_INTERNET_INVALID_CA", "msg": "The function is unfamiliar with the Certificate Authority that generated the server's certificate."}
+		a[12016] := {"enum": "ERROR_INTERNET_INVALID_OPERATION", "msg": "The requested operation is invalid."}
+		a[12009] := {"enum": "ERROR_INTERNET_INVALID_OPTION", "msg": "A request to InternetQueryOption or InternetSetOption specified an invalid option value."}
+		a[12033] := {"enum": "ERROR_INTERNET_INVALID_PROXY_REQUEST", "msg": "The request to the proxy was invalid."}
+		a[12005] := {"enum": "ERROR_INTERNET_INVALID_URL", "msg": "The URL is invalid."}
+		a[12028] := {"enum": "ERROR_INTERNET_ITEM_NOT_FOUND", "msg": "The requested item could not be located."}
+		a[12015] := {"enum": "ERROR_INTERNET_LOGIN_FAILURE", "msg": "The request to connect and log on to an FTP server failed."}
+		a[12174] := {"enum": "ERROR_INTERNET_LOGIN_FAILURE_DISPLAY_ENTITY_BODY", "msg": "The MS-Logoff digest header has been returned from the website. This header specifically instructs the digest package to purge credentials for the associated realm. This error will only be returned if INTERNET_ERROR_MASK_LOGIN_FAILURE_DISPLAY_ENTITY_BODY option has been set; otherwise, ERROR_INTERNET_LOGIN_FAILURE is returned."}
+		a[12041] := {"enum": "ERROR_INTERNET_MIXED_SECURITY", "msg": "The content is not entirely secure. Some of the content being viewed may have come from unsecured servers."}
+		a[12007] := {"enum": "ERROR_INTERNET_NAME_NOT_RESOLVED", "msg": "The server name could not be resolved."}
+		a[12173] := {"enum": "ERROR_INTERNET_NEED_MSN_SSPI_PKG", "msg": "Not currently implemented."}
+		a[12034] := {"enum": "ERROR_INTERNET_NEED_UI", "msg": "A user interface or other blocking operation has been requested.`nWindows Vista and Windows Server 2008 and earlier only."}
+		a[12025] := {"enum": "ERROR_INTERNET_NO_CALLBACK", "msg": "An asynchronous request could not be made because a callback function has not been set."}
+		a[12024] := {"enum": "ERROR_INTERNET_NO_CONTEXT", "msg": "An asynchronous request could not be made because a zero context value was supplied."}
+		a[12023] := {"enum": "ERROR_INTERNET_NO_DIRECT_ACCESS", "msg": "Direct network access cannot be made at this time."}
+		a[12172] := {"enum": "ERROR_INTERNET_NOT_INITIALIZED", "msg": "Initialization of the WinINet API has not occurred. Indicates that a higher-level function, such as InternetOpen, has not been called yet."}
+		a[12020] := {"enum": "ERROR_INTERNET_NOT_PROXY_REQUEST", "msg": "The request cannot be made via a proxy."}
+		a[12017] := {"enum": "ERROR_INTERNET_OPERATION_CANCELLED", "msg": "The operation was canceled, usually because the handle on which the request was operating was closed before the operation completed."}
+		a[12011] := {"enum": "ERROR_INTERNET_OPTION_NOT_SETTABLE", "msg": "The requested option cannot be set, only queried."}
+		a[12001] := {"enum": "ERROR_INTERNET_OUT_OF_HANDLES", "msg": "No more handles could be generated at this time."}
+		a[12043] := {"enum": "ERROR_INTERNET_POST_IS_NON_SECURE", "msg": "The application is posting data to a server that is not secure."}
+		a[12008] := {"enum": "ERROR_INTERNET_PROTOCOL_NOT_FOUND", "msg": "The requested protocol could not be located."}
+		a[12165] := {"enum": "ERROR_INTERNET_PROXY_SERVER_UNREACHABLE", "msg": "The designated proxy server cannot be reached."}
+		a[12048] := {"enum": "ERROR_INTERNET_REDIRECT_SCHEME_CHANGE", "msg": "The function could not handle the redirection, because the scheme changed (for example, HTTP to FTP)."}
+		a[12021] := {"enum": "ERROR_INTERNET_REGISTRY_VALUE_NOT_FOUND", "msg": "A required registry value could not be located."}
+		a[12026] := {"enum": "ERROR_INTERNET_REQUEST_PENDING", "msg": "The required operation could not be completed because one or more requests are pending."}
+		a[12050] := {"enum": "ERROR_INTERNET_RETRY_DIALOG", "msg": "The dialog box should be retried."}
+		a[12038] := {"enum": "ERROR_INTERNET_SEC_CERT_CN_INVALID", "msg": "SSL certificate common name (host name field) is incorrect for example, if you entered www.server.com and the common name on the certificate says www.different.com."}
+		a[12037] := {"enum": "ERROR_INTERNET_SEC_CERT_DATE_INVALID", "msg": "SSL certificate date that was received from the server is bad. The certificate is expired."}
+		a[12055] := {"enum": "ERROR_INTERNET_SEC_CERT_ERRORS", "msg": "The SSL certificate contains errors."}
+		a[12056] := {"enum": "ERROR_INTERNET_SEC_CERT_NO_REV", "msg": "The SSL certificate was not revoked."}
+		a[12057] := {"enum": "ERROR_INTERNET_SEC_CERT_REV_FAILED", "msg": "Revocation of the SSL certificate failed."}
+		a[12170] := {"enum": "ERROR_INTERNET_SEC_CERT_REVOKED", "msg": "The SSL certificate was revoked."}
+		a[12169] := {"enum": "ERROR_INTERNET_SEC_INVALID_CERT", "msg": "The SSL certificate is invalid."}
+		a[12157] := {"enum": "ERROR_INTERNET_SECURITY_CHANNEL_ERROR", "msg": "The application experienced an internal error loading the SSL libraries."}
+		a[12164] := {"enum": "ERROR_INTERNET_SERVER_UNREACHABLE", "msg": "The website or server indicated is unreachable."}
+		a[12012] := {"enum": "ERROR_INTERNET_SHUTDOWN", "msg": "WinINet support is being shut down or unloaded."}
+		a[12159] := {"enum": "ERROR_INTERNET_TCPIP_NOT_INSTALLED", "msg": "The required protocol stack is not loaded and the application cannot start WinSock."}
+		a[12002] := {"enum": "ERROR_INTERNET_TIMEOUT", "msg": "The request has timed out."}
+		a[12158] := {"enum": "ERROR_INTERNET_UNABLE_TO_CACHE_FILE", "msg": "The function was unable to cache the file."}
+		a[12167] := {"enum": "ERROR_INTERNET_UNABLE_TO_DOWNLOAD_SCRIPT", "msg": "The automatic proxy configuration script could not be downloaded. The INTERNET_FLAG_MUST_CACHE_REQUEST flag was set."}
+		a[12006] := {"enum": "ERROR_INTERNET_UNRECOGNIZED_SCHEME", "msg": "The URL scheme could not be recognized, or is not supported."}
+		a[13000] := {"enum": "ERROR_IPSEC_QM_POLICY_EXISTS", "msg": "The specified quick mode policy already exists."}
+		a[13001] := {"enum": "ERROR_IPSEC_QM_POLICY_NOT_FOUND", "msg": "The specified quick mode policy was not found."}
+		a[13002] := {"enum": "ERROR_IPSEC_QM_POLICY_IN_USE", "msg": "The specified quick mode policy is being used."}
+		a[13003] := {"enum": "ERROR_IPSEC_MM_POLICY_EXISTS", "msg": "The specified main mode policy already exists."}
+		a[13004] := {"enum": "ERROR_IPSEC_MM_POLICY_NOT_FOUND", "msg": "The specified main mode policy was not found."}
+		a[13005] := {"enum": "ERROR_IPSEC_MM_POLICY_IN_USE", "msg": "The specified main mode policy is being used."}
+		a[13006] := {"enum": "ERROR_IPSEC_MM_FILTER_EXISTS", "msg": "The specified main mode filter already exists."}
+		a[13007] := {"enum": "ERROR_IPSEC_MM_FILTER_NOT_FOUND", "msg": "The specified main mode filter was not found."}
+		a[13008] := {"enum": "ERROR_IPSEC_TRANSPORT_FILTER_EXISTS", "msg": "The specified transport mode filter already exists."}
+		a[13009] := {"enum": "ERROR_IPSEC_TRANSPORT_FILTER_NOT_FOUND", "msg": "The specified transport mode filter does not exist."}
+		a[13010] := {"enum": "ERROR_IPSEC_MM_AUTH_EXISTS", "msg": "The specified main mode authentication list exists."}
+		a[13011] := {"enum": "ERROR_IPSEC_MM_AUTH_NOT_FOUND", "msg": "The specified main mode authentication list was not found."}
+		a[13012] := {"enum": "ERROR_IPSEC_MM_AUTH_IN_USE", "msg": "The specified main mode authentication list is being used."}
+		a[13013] := {"enum": "ERROR_IPSEC_DEFAULT_MM_POLICY_NOT_FOUND", "msg": "The specified default main mode policy was not found."}
+		a[13014] := {"enum": "ERROR_IPSEC_DEFAULT_MM_AUTH_NOT_FOUND", "msg": "The specified default main mode authentication list was not found."}
+		a[13015] := {"enum": "ERROR_IPSEC_DEFAULT_QM_POLICY_NOT_FOUND", "msg": "The specified default quick mode policy was not found."}
+		a[13016] := {"enum": "ERROR_IPSEC_TUNNEL_FILTER_EXISTS", "msg": "The specified tunnel mode filter exists."}
+		a[13017] := {"enum": "ERROR_IPSEC_TUNNEL_FILTER_NOT_FOUND", "msg": "The specified tunnel mode filter was not found."}
+		a[13018] := {"enum": "ERROR_IPSEC_MM_FILTER_PENDING_DELETION", "msg": "The Main Mode filter is pending deletion."}
+		a[13019] := {"enum": "ERROR_IPSEC_TRANSPORT_FILTER_PENDING_DELETION", "msg": "The transport filter is pending deletion."}
+		a[13020] := {"enum": "ERROR_IPSEC_TUNNEL_FILTER_PENDING_DELETION", "msg": "The tunnel filter is pending deletion."}
+		a[13021] := {"enum": "ERROR_IPSEC_MM_POLICY_PENDING_DELETION", "msg": "The Main Mode policy is pending deletion."}
+		a[13022] := {"enum": "ERROR_IPSEC_MM_AUTH_PENDING_DELETION", "msg": "The Main Mode authentication bundle is pending deletion."}
+		a[13023] := {"enum": "ERROR_IPSEC_QM_POLICY_PENDING_DELETION", "msg": "The Quick Mode policy is pending deletion."}
+		a[13024] := {"enum": "WARNING_IPSEC_MM_POLICY_PRUNED", "msg": "The Main Mode policy was successfully added, but some of the requested offers are not supported."}
+		a[13025] := {"enum": "WARNING_IPSEC_QM_POLICY_PRUNED", "msg": "The Quick Mode policy was successfully added, but some of the requested offers are not supported."}
+		a[13800] := {"enum": "ERROR_IPSEC_IKE_NEG_STATUS_BEGIN", "msg": "ERROR_IPSEC_IKE_NEG_STATUS_BEGIN"}
+		a[13801] := {"enum": "ERROR_IPSEC_IKE_AUTH_FAIL", "msg": "IKE authentication credentials are unacceptable."}
+		a[13802] := {"enum": "ERROR_IPSEC_IKE_ATTRIB_FAIL", "msg": "IKE security attributes are unacceptable."}
+		a[13803] := {"enum": "ERROR_IPSEC_IKE_NEGOTIATION_PENDING", "msg": "IKE Negotiation in progress."}
+		a[13804] := {"enum": "ERROR_IPSEC_IKE_GENERAL_PROCESSING_ERROR", "msg": "General processing error."}
+		a[13805] := {"enum": "ERROR_IPSEC_IKE_TIMED_OUT", "msg": "Negotiation timed out."}
+		a[13806] := {"enum": "ERROR_IPSEC_IKE_NO_CERT", "msg": "IKE failed to find valid machine certificate. Contact your Network Security Administrator about installing a valid certificate in the appropriate Certificate Store."}
+		a[13807] := {"enum": "ERROR_IPSEC_IKE_SA_DELETED", "msg": "IKE SA deleted by peer before establishment completed."}
+		a[13808] := {"enum": "ERROR_IPSEC_IKE_SA_REAPED", "msg": "IKE SA deleted before establishment completed."}
+		a[13809] := {"enum": "ERROR_IPSEC_IKE_MM_ACQUIRE_DROP", "msg": "Negotiation request sat in Queue too long."}
+		a[13810] := {"enum": "ERROR_IPSEC_IKE_QM_ACQUIRE_DROP", "msg": "Negotiation request sat in Queue too long."}
+		a[13811] := {"enum": "ERROR_IPSEC_IKE_QUEUE_DROP_MM", "msg": "Negotiation request sat in Queue too long."}
+		a[13812] := {"enum": "ERROR_IPSEC_IKE_QUEUE_DROP_NO_MM", "msg": "Negotiation request sat in Queue too long."}
+		a[13813] := {"enum": "ERROR_IPSEC_IKE_DROP_NO_RESPONSE", "msg": "No response from peer."}
+		a[13814] := {"enum": "ERROR_IPSEC_IKE_MM_DELAY_DROP", "msg": "Negotiation took too long."}
+		a[13815] := {"enum": "ERROR_IPSEC_IKE_QM_DELAY_DROP", "msg": "Negotiation took too long."}
+		a[13816] := {"enum": "ERROR_IPSEC_IKE_ERROR", "msg": "Unknown error occurred."}
+		a[13817] := {"enum": "ERROR_IPSEC_IKE_CRL_FAILED", "msg": "Certificate Revocation Check failed."}
+		a[13818] := {"enum": "ERROR_IPSEC_IKE_INVALID_KEY_USAGE", "msg": "Invalid certificate key usage."}
+		a[13819] := {"enum": "ERROR_IPSEC_IKE_INVALID_CERT_TYPE", "msg": "Invalid certificate type."}
+		a[13820] := {"enum": "ERROR_IPSEC_IKE_NO_PRIVATE_KEY", "msg": "IKE negotiation failed because the machine certificate used does not have a private key. IPsec certificates require a private key. Contact your Network Security administrator about replacing with a certificate that has a private key."}
+		a[13821] := {"enum": "ERROR_IPSEC_IKE_SIMULTANEOUS_REKEY", "msg": "Simultaneous rekeys were detected."}
+		a[13822] := {"enum": "ERROR_IPSEC_IKE_DH_FAIL", "msg": "Failure in Diffie-Hellman computation."}
+		a[13823] := {"enum": "ERROR_IPSEC_IKE_CRITICAL_PAYLOAD_NOT_RECOGNIZED", "msg": "Don't know how to process critical payload."}
+		a[13824] := {"enum": "ERROR_IPSEC_IKE_INVALID_HEADER", "msg": "Invalid header."}
+		a[13825] := {"enum": "ERROR_IPSEC_IKE_NO_POLICY", "msg": "No policy configured."}
+		a[13826] := {"enum": "ERROR_IPSEC_IKE_INVALID_SIGNATURE", "msg": "Failed to verify signature."}
+		a[13827] := {"enum": "ERROR_IPSEC_IKE_KERBEROS_ERROR", "msg": "Failed to authenticate using Kerberos."}
+		a[13828] := {"enum": "ERROR_IPSEC_IKE_NO_PUBLIC_KEY", "msg": "Peer's certificate did not have a public key."}
+		a[13829] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR", "msg": "Error processing error payload."}
+		a[13830] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_SA", "msg": "Error processing SA payload."}
+		a[13831] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_PROP", "msg": "Error processing Proposal payload."}
+		a[13832] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_TRANS", "msg": "Error processing Transform payload."}
+		a[13833] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_KE", "msg": "Error processing KE payload."}
+		a[13834] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_ID", "msg": "Error processing ID payload."}
+		a[13835] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_CERT", "msg": "Error processing Cert payload."}
+		a[13836] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_CERT_REQ", "msg": "Error processing Certificate Request payload."}
+		a[13837] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_HASH", "msg": "Error processing Hash payload."}
+		a[13838] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_SIG", "msg": "Error processing Signature payload."}
+		a[13839] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_NONCE", "msg": "Error processing Nonce payload."}
+		a[13840] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_NOTIFY", "msg": "Error processing Notify payload."}
+		a[13841] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_DELETE", "msg": "Error processing Delete Payload."}
+		a[13842] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_VENDOR", "msg": "Error processing VendorId payload."}
+		a[13843] := {"enum": "ERROR_IPSEC_IKE_INVALID_PAYLOAD", "msg": "Invalid payload received."}
+		a[13844] := {"enum": "ERROR_IPSEC_IKE_LOAD_SOFT_SA", "msg": "Soft SA loaded."}
+		a[13845] := {"enum": "ERROR_IPSEC_IKE_SOFT_SA_TORN_DOWN", "msg": "Soft SA torn down."}
+		a[13846] := {"enum": "ERROR_IPSEC_IKE_INVALID_COOKIE", "msg": "Invalid cookie received."}
+		a[13847] := {"enum": "ERROR_IPSEC_IKE_NO_PEER_CERT", "msg": "Peer failed to send valid machine certificate."}
+		a[13848] := {"enum": "ERROR_IPSEC_IKE_PEER_CRL_FAILED", "msg": "Certification Revocation check of peer's certificate failed."}
+		a[13849] := {"enum": "ERROR_IPSEC_IKE_POLICY_CHANGE", "msg": "New policy invalidated SAs formed with old policy."}
+		a[13850] := {"enum": "ERROR_IPSEC_IKE_NO_MM_POLICY", "msg": "There is no available Main Mode IKE policy."}
+		a[13851] := {"enum": "ERROR_IPSEC_IKE_NOTCBPRIV", "msg": "Failed to enabled TCB privilege."}
+		a[13852] := {"enum": "ERROR_IPSEC_IKE_SECLOADFAIL", "msg": "Failed to load SECURITY.DLL."}
+		a[13853] := {"enum": "ERROR_IPSEC_IKE_FAILSSPINIT", "msg": "Failed to obtain security function table dispatch address from SSPI."}
+		a[13854] := {"enum": "ERROR_IPSEC_IKE_FAILQUERYSSP", "msg": "Failed to query Kerberos package to obtain max token size."}
+		a[13855] := {"enum": "ERROR_IPSEC_IKE_SRVACQFAIL", "msg": "Failed to obtain Kerberos server credentials for ISAKMP/ERROR_IPSEC_IKE service. Kerberos authentication will not function. The most likely reason for this is lack of domain membership. This is normal if your computer is a member of a workgroup."}
+		a[13856] := {"enum": "ERROR_IPSEC_IKE_SRVQUERYCRED", "msg": "Failed to determine SSPI principal name for ISAKMP/ERROR_IPSEC_IKE service (`nQueryCredentialsAttributes)."}
+		a[13857] := {"enum": "ERROR_IPSEC_IKE_GETSPIFAIL", "msg": "Failed to obtain new SPI for the inbound SA from IPsec driver. The most common cause for this is that the driver does not have the correct filter. Check your policy to verify the filters."}
+		a[13858] := {"enum": "ERROR_IPSEC_IKE_INVALID_FILTER", "msg": "Given filter is invalid."}
+		a[13859] := {"enum": "ERROR_IPSEC_IKE_OUT_OF_MEMORY", "msg": "Memory allocation failed."}
+		a[13860] := {"enum": "ERROR_IPSEC_IKE_ADD_UPDATE_KEY_FAILED", "msg": "Failed to add Security Association to IPsec Driver. The most common cause for this is if the IKE negotiation took too long to complete. If the problem persists, reduce the load on the faulting machine."}
+		a[13861] := {"enum": "ERROR_IPSEC_IKE_INVALID_POLICY", "msg": "Invalid policy."}
+		a[13862] := {"enum": "ERROR_IPSEC_IKE_UNKNOWN_DOI", "msg": "Invalid DOI."}
+		a[13863] := {"enum": "ERROR_IPSEC_IKE_INVALID_SITUATION", "msg": "Invalid situation."}
+		a[13864] := {"enum": "ERROR_IPSEC_IKE_DH_FAILURE", "msg": "Diffie-Hellman failure."}
+		a[13865] := {"enum": "ERROR_IPSEC_IKE_INVALID_GROUP", "msg": "Invalid Diffie-Hellman group."}
+		a[13866] := {"enum": "ERROR_IPSEC_IKE_ENCRYPT", "msg": "Error encrypting payload."}
+		a[13867] := {"enum": "ERROR_IPSEC_IKE_DECRYPT", "msg": "Error decrypting payload."}
+		a[13868] := {"enum": "ERROR_IPSEC_IKE_POLICY_MATCH", "msg": "Policy match error."}
+		a[13869] := {"enum": "ERROR_IPSEC_IKE_UNSUPPORTED_ID", "msg": "Unsupported ID."}
+		a[13870] := {"enum": "ERROR_IPSEC_IKE_INVALID_HASH", "msg": "Hash verification failed."}
+		a[13871] := {"enum": "ERROR_IPSEC_IKE_INVALID_HASH_ALG", "msg": "Invalid hash algorithm."}
+		a[13872] := {"enum": "ERROR_IPSEC_IKE_INVALID_HASH_SIZE", "msg": "Invalid hash size."}
+		a[13873] := {"enum": "ERROR_IPSEC_IKE_INVALID_ENCRYPT_ALG", "msg": "Invalid encryption algorithm."}
+		a[13874] := {"enum": "ERROR_IPSEC_IKE_INVALID_AUTH_ALG", "msg": "Invalid authentication algorithm."}
+		a[13875] := {"enum": "ERROR_IPSEC_IKE_INVALID_SIG", "msg": "Invalid certificate signature."}
+		a[13876] := {"enum": "ERROR_IPSEC_IKE_LOAD_FAILED", "msg": "Load failed."}
+		a[13877] := {"enum": "ERROR_IPSEC_IKE_RPC_DELETE", "msg": "Deleted via RPC call."}
+		a[13878] := {"enum": "ERROR_IPSEC_IKE_BENIGN_REINIT", "msg": "Temporary state created to perform reinitialization. This is not a real failure."}
+		a[13879] := {"enum": "ERROR_IPSEC_IKE_INVALID_RESPONDER_LIFETIME_NOTIFY", "msg": "The lifetime value received in the Responder Lifetime Notify is below the Windows 2000 configured minimum value. Please fix the policy on the peer machine."}
+		a[13880] := {"enum": "ERROR_IPSEC_IKE_INVALID_MAJOR_VERSION", "msg": "The recipient cannot handle version of IKE specified in the header."}
+		a[13881] := {"enum": "ERROR_IPSEC_IKE_INVALID_CERT_KEYLEN", "msg": "Key length in certificate is too small for configured security requirements."}
+		a[13882] := {"enum": "ERROR_IPSEC_IKE_MM_LIMIT", "msg": "Max number of established MM SAs to peer exceeded."}
+		a[13883] := {"enum": "ERROR_IPSEC_IKE_NEGOTIATION_DISABLED", "msg": "IKE received a policy that disables negotiation."}
+		a[13884] := {"enum": "ERROR_IPSEC_IKE_QM_LIMIT", "msg": "Reached maximum quick mode limit for the main mode. New main mode will be started."}
+		a[13885] := {"enum": "ERROR_IPSEC_IKE_MM_EXPIRED", "msg": "Main mode SA lifetime expired or peer sent a main mode delete."}
+		a[13886] := {"enum": "ERROR_IPSEC_IKE_PEER_MM_ASSUMED_INVALID", "msg": "Main mode SA assumed to be invalid because peer stopped responding."}
+		a[13887] := {"enum": "ERROR_IPSEC_IKE_CERT_CHAIN_POLICY_MISMATCH", "msg": "Certificate doesn't chain to a trusted root in IPsec policy."}
+		a[13888] := {"enum": "ERROR_IPSEC_IKE_UNEXPECTED_MESSAGE_ID", "msg": "Received unexpected message ID."}
+		a[13889] := {"enum": "ERROR_IPSEC_IKE_INVALID_AUTH_PAYLOAD", "msg": "Received invalid authentication offers."}
+		a[13890] := {"enum": "ERROR_IPSEC_IKE_DOS_COOKIE_SENT", "msg": "Sent DoS cookie notify to initiator."}
+		a[13891] := {"enum": "ERROR_IPSEC_IKE_SHUTTING_DOWN", "msg": "IKE service is shutting down."}
+		a[13892] := {"enum": "ERROR_IPSEC_IKE_CGA_AUTH_FAILED", "msg": "Could not verify binding between CGA address and certificate."}
+		a[13893] := {"enum": "ERROR_IPSEC_IKE_PROCESS_ERR_NATOA", "msg": "Error processing NatOA payload."}
+		a[13894] := {"enum": "ERROR_IPSEC_IKE_INVALID_MM_FOR_QM", "msg": "Parameters of the main mode are invalid for this quick mode."}
+		a[13895] := {"enum": "ERROR_IPSEC_IKE_QM_EXPIRED", "msg": "Quick mode SA was expired by IPsec driver."}
+		a[13896] := {"enum": "ERROR_IPSEC_IKE_TOO_MANY_FILTERS", "msg": "Too many dynamically added IKEEXT filters were detected."}
+		a[13897] := {"enum": "ERROR_IPSEC_IKE_NEG_STATUS_END", "msg": "ERROR_IPSEC_IKE_NEG_STATUS_END"}
+		a[13898] := {"enum": "ERROR_IPSEC_IKE_KILL_DUMMY_NAP_TUNNEL", "msg": "NAP reauth succeeded and must delete the dummy NAP IKEv2 tunnel."}
+		a[13899] := {"enum": "ERROR_IPSEC_IKE_INNER_IP_ASSIGNMENT_FAILURE", "msg": "Error in assigning inner IP address to initiator in tunnel mode."}
+		a[13900] := {"enum": "ERROR_IPSEC_IKE_REQUIRE_CP_PAYLOAD_MISSING", "msg": "Require configuration payload missing."}
+		a[13901] := {"enum": "ERROR_IPSEC_KEY_MODULE_IMPERSONATION_NEGOTIATION_PENDING", "msg": "A negotiation running as the security principle who issued the connection is in progress."}
+		a[13902] := {"enum": "ERROR_IPSEC_IKE_COEXISTENCE_SUPPRESS", "msg": "SA was deleted due to IKEv1/AuthIP co-existence suppress check."}
+		a[13903] := {"enum": "ERROR_IPSEC_IKE_RATELIMIT_DROP", "msg": "Incoming SA request was dropped due to peer IP address rate limiting."}
+		a[13904] := {"enum": "ERROR_IPSEC_IKE_PEER_DOESNT_SUPPORT_MOBIKE", "msg": "Peer does not support MOBIKE."}
+		a[13905] := {"enum": "ERROR_IPSEC_IKE_AUTHORIZATION_FAILURE", "msg": "SA establishment is not authorized."}
+		a[13906] := {"enum": "ERROR_IPSEC_IKE_STRONG_CRED_AUTHORIZATION_FAILURE", "msg": "SA establishment is not authorized because there is not a sufficiently strong PKINIT-based credential."}
+		a[13907] := {"enum": "ERROR_IPSEC_IKE_AUTHORIZATION_FAILURE_WITH_OPTIONAL_RETRY", "msg": "SA establishment is not authorized. You may need to enter updated or different credentials such as a smartcard."}
+		a[13908] := {"enum": "ERROR_IPSEC_IKE_STRONG_CRED_AUTHORIZATION_AND_CERTMAP_FAILURE", "msg": "SA establishment is not authorized because there is not a sufficiently strong PKINIT-based credential. This might be related to certificate-to-account mapping failure for the SA."}
+		a[13909] := {"enum": "ERROR_IPSEC_IKE_NEG_STATUS_EXTENDED_END", "msg": "ERROR_IPSEC_IKE_NEG_STATUS_EXTENDED_END"}
+		a[13910] := {"enum": "ERROR_IPSEC_BAD_SPI", "msg": "The SPI in the packet does not match a valid IPsec SA."}
+		a[13911] := {"enum": "ERROR_IPSEC_SA_LIFETIME_EXPIRED", "msg": "Packet was received on an IPsec SA whose lifetime has expired."}
+		a[13912] := {"enum": "ERROR_IPSEC_WRONG_SA", "msg": "Packet was received on an IPsec SA that does not match the packet characteristics."}
+		a[13913] := {"enum": "ERROR_IPSEC_REPLAY_CHECK_FAILED", "msg": "Packet sequence number replay check failed."}
+		a[13914] := {"enum": "ERROR_IPSEC_INVALID_PACKET", "msg": "IPsec header and/or trailer in the packet is invalid."}
+		a[13915] := {"enum": "ERROR_IPSEC_INTEGRITY_CHECK_FAILED", "msg": "IPsec integrity check failed."}
+		a[13916] := {"enum": "ERROR_IPSEC_CLEAR_TEXT_DROP", "msg": "IPsec dropped a clear text packet."}
+		a[13917] := {"enum": "ERROR_IPSEC_AUTH_FIREWALL_DROP", "msg": "IPsec dropped an incoming ESP packet in authenticated firewall mode. This drop is benign."}
+		a[13918] := {"enum": "ERROR_IPSEC_THROTTLE_DROP", "msg": "IPsec dropped a packet due to DoS throttling."}
+		a[13925] := {"enum": "ERROR_IPSEC_DOSP_BLOCK", "msg": "IPsec DoS Protection matched an explicit block rule."}
+		a[13926] := {"enum": "ERROR_IPSEC_DOSP_RECEIVED_MULTICAST", "msg": "IPsec DoS Protection received an IPsec specific multicast packet which is not allowed."}
+		a[13927] := {"enum": "ERROR_IPSEC_DOSP_INVALID_PACKET", "msg": "IPsec DoS Protection received an incorrectly formatted packet."}
+		a[13928] := {"enum": "ERROR_IPSEC_DOSP_STATE_LOOKUP_FAILED", "msg": "IPsec DoS Protection failed to look up state."}
+		a[13929] := {"enum": "ERROR_IPSEC_DOSP_MAX_ENTRIES", "msg": "IPsec DoS Protection failed to create state because the maximum number of entries allowed by policy has been reached."}
+		a[13930] := {"enum": "ERROR_IPSEC_DOSP_KEYMOD_NOT_ALLOWED", "msg": "IPsec DoS Protection received an IPsec negotiation packet for a keying module which is not allowed by policy."}
+		a[13931] := {"enum": "ERROR_IPSEC_DOSP_NOT_INSTALLED", "msg": "IPsec DoS Protection has not been enabled."}
+		a[13932] := {"enum": "ERROR_IPSEC_DOSP_MAX_PER_IP_RATELIMIT_QUEUES", "msg": "IPsec DoS Protection failed to create a per internal IP rate limit queue because the maximum number of queues allowed by policy has been reached."}
+		a[14000] := {"enum": "ERROR_SXS_SECTION_NOT_FOUND", "msg": "The requested section was not present in the activation context."}
+		a[14001] := {"enum": "ERROR_SXS_CANT_GEN_ACTCTX", "msg": "The application has failed to start because its side-by-side configuration is incorrect. Please see the application event log or use the command-line sxstrace.exe tool for more detail."}
+		a[14002] := {"enum": "ERROR_SXS_INVALID_ACTCTXDATA_FORMAT", "msg": "The application binding data format is invalid."}
+		a[14003] := {"enum": "ERROR_SXS_ASSEMBLY_NOT_FOUND", "msg": "The referenced assembly is not installed on your system."}
+		a[14004] := {"enum": "ERROR_SXS_MANIFEST_FORMAT_ERROR", "msg": "The manifest file does not begin with the required tag and format information."}
+		a[14005] := {"enum": "ERROR_SXS_MANIFEST_PARSE_ERROR", "msg": "The manifest file contains one or more syntax errors."}
+		a[14006] := {"enum": "ERROR_SXS_ACTIVATION_CONTEXT_DISABLED", "msg": "The application attempted to activate a disabled activation context."}
+		a[14007] := {"enum": "ERROR_SXS_KEY_NOT_FOUND", "msg": "The requested lookup key was not found in any active activation context."}
+		a[14008] := {"enum": "ERROR_SXS_VERSION_CONFLICT", "msg": "A component version required by the application conflicts with another component version already active."}
+		a[14009] := {"enum": "ERROR_SXS_WRONG_SECTION_TYPE", "msg": "The type requested activation context section does not match the query API used."}
+		a[14010] := {"enum": "ERROR_SXS_THREAD_QUERIES_DISABLED", "msg": "Lack of system resources has required isolated activation to be disabled for the current thread of execution."}
+		a[14011] := {"enum": "ERROR_SXS_PROCESS_DEFAULT_ALREADY_SET", "msg": "An attempt to set the process default activation context failed because the process default activation context was already set."}
+		a[14012] := {"enum": "ERROR_SXS_UNKNOWN_ENCODING_GROUP", "msg": "The encoding group identifier specified is not recognized."}
+		a[14013] := {"enum": "ERROR_SXS_UNKNOWN_ENCODING", "msg": "The encoding requested is not recognized."}
+		a[14014] := {"enum": "ERROR_SXS_INVALID_XML_NAMESPACE_URI", "msg": "The manifest contains a reference to an invalid URI."}
+		a[14015] := {"enum": "ERROR_SXS_ROOT_MANIFEST_DEPENDENCY_NOT_INSTALLED", "msg": "The application manifest contains a reference to a dependent assembly which is not installed."}
+		a[14016] := {"enum": "ERROR_SXS_LEAF_MANIFEST_DEPENDENCY_NOT_INSTALLED", "msg": "The manifest for an assembly used by the application has a reference to a dependent assembly which is not installed."}
+		a[14017] := {"enum": "ERROR_SXS_INVALID_ASSEMBLY_IDENTITY_ATTRIBUTE", "msg": "The manifest contains an attribute for the assembly identity which is not valid."}
+		a[14018] := {"enum": "ERROR_SXS_MANIFEST_MISSING_REQUIRED_DEFAULT_NAMESPACE", "msg": "The manifest is missing the required default namespace specification on the assembly element."}
+		a[14019] := {"enum": "ERROR_SXS_MANIFEST_INVALID_REQUIRED_DEFAULT_NAMESPACE", "msg": "The manifest has a default namespace specified on the assembly element but its value is not &quot;urn:schemas-microsoft-com:asm.v1&quot;."}
+		a[14020] := {"enum": "ERROR_SXS_PRIVATE_MANIFEST_CROSS_PATH_WITH_REPARSE_POINT", "msg": "The private manifest probed has crossed a path with an unsupported reparse point."}
+		a[14021] := {"enum": "ERROR_SXS_DUPLICATE_DLL_NAME", "msg": "Two or more components referenced directly or indirectly by the application manifest have files by the same name."}
+		a[14022] := {"enum": "ERROR_SXS_DUPLICATE_WINDOWCLASS_NAME", "msg": "Two or more components referenced directly or indirectly by the application manifest have window classes with the same name."}
+		a[14023] := {"enum": "ERROR_SXS_DUPLICATE_CLSID", "msg": "Two or more components referenced directly or indirectly by the application manifest have the same COM server CLSIDs."}
+		a[14024] := {"enum": "ERROR_SXS_DUPLICATE_IID", "msg": "Two or more components referenced directly or indirectly by the application manifest have proxies for the same COM interface IIDs."}
+		a[14025] := {"enum": "ERROR_SXS_DUPLICATE_TLBID", "msg": "Two or more components referenced directly or indirectly by the application manifest have the same COM type library TLBIDs."}
+		a[14026] := {"enum": "ERROR_SXS_DUPLICATE_PROGID", "msg": "Two or more components referenced directly or indirectly by the application manifest have the same COM ProgIDs."}
+		a[14027] := {"enum": "ERROR_SXS_DUPLICATE_ASSEMBLY_NAME", "msg": "Two or more components referenced directly or indirectly by the application manifest are different versions of the same component which is not permitted."}
+		a[14028] := {"enum": "ERROR_SXS_FILE_HASH_MISMATCH", "msg": "A component's file does not match the verification information present in the component manifest."}
+		a[14029] := {"enum": "ERROR_SXS_POLICY_PARSE_ERROR", "msg": "The policy manifest contains one or more syntax errors."}
+		a[14030] := {"enum": "ERROR_SXS_XML_E_MISSINGQUOTE", "msg": "Manifest Parse Error : A string literal was expected, but no opening quote character was found."}
+		a[14031] := {"enum": "ERROR_SXS_XML_E_COMMENTSYNTAX", "msg": "Manifest Parse Error : Incorrect syntax was used in a comment."}
+		a[14032] := {"enum": "ERROR_SXS_XML_E_BADSTARTNAMECHAR", "msg": "Manifest Parse Error : A name was started with an invalid character."}
+		a[14033] := {"enum": "ERROR_SXS_XML_E_BADNAMECHAR", "msg": "Manifest Parse Error : A name contained an invalid character."}
+		a[14034] := {"enum": "ERROR_SXS_XML_E_BADCHARINSTRING", "msg": "Manifest Parse Error : A string literal contained an invalid character."}
+		a[14035] := {"enum": "ERROR_SXS_XML_E_XMLDECLSYNTAX", "msg": "Manifest Parse Error : Invalid syntax for an xml declaration."}
+		a[14036] := {"enum": "ERROR_SXS_XML_E_BADCHARDATA", "msg": "Manifest Parse Error : An Invalid character was found in text content."}
+		a[14037] := {"enum": "ERROR_SXS_XML_E_MISSINGWHITESPACE", "msg": "Manifest Parse Error : Required white space was missing."}
+		a[14038] := {"enum": "ERROR_SXS_XML_E_EXPECTINGTAGEND", "msg": "Manifest Parse Error : The character '&gt;' was expected."}
+		a[14039] := {"enum": "ERROR_SXS_XML_E_MISSINGSEMICOLON", "msg": "Manifest Parse Error : A semi colon character was expected."}
+		a[14040] := {"enum": "ERROR_SXS_XML_E_UNBALANCEDPAREN", "msg": "Manifest Parse Error : Unbalanced parentheses."}
+		a[14041] := {"enum": "ERROR_SXS_XML_E_INTERNALERROR", "msg": "Manifest Parse Error : Internal error."}
+		a[14042] := {"enum": "ERROR_SXS_XML_E_UNEXPECTED_WHITESPACE", "msg": "Manifest Parse Error : Whitespace is not allowed at this location."}
+		a[14043] := {"enum": "ERROR_SXS_XML_E_INCOMPLETE_ENCODING", "msg": "Manifest Parse Error : End of file reached in invalid state for current encoding."}
+		a[14044] := {"enum": "ERROR_SXS_XML_E_MISSING_PAREN", "msg": "Manifest Parse Error : Missing parenthesis."}
+		a[14045] := {"enum": "ERROR_SXS_XML_E_EXPECTINGCLOSEQUOTE", "msg": "Manifest Parse Error : A single or double closing quote character (\' or \&quot;) is missing."}
+		a[14046] := {"enum": "ERROR_SXS_XML_E_MULTIPLE_COLONS", "msg": "Manifest Parse Error : Multiple colons are not allowed in a name."}
+		a[14047] := {"enum": "ERROR_SXS_XML_E_INVALID_DECIMAL", "msg": "Manifest Parse Error : Invalid character for decimal digit."}
+		a[14048] := {"enum": "ERROR_SXS_XML_E_INVALID_HEXIDECIMAL", "msg": "Manifest Parse Error : Invalid character for hexadecimal digit."}
+		a[14049] := {"enum": "ERROR_SXS_XML_E_INVALID_UNICODE", "msg": "Manifest Parse Error : Invalid unicode character value for this platform."}
+		a[14050] := {"enum": "ERROR_SXS_XML_E_WHITESPACEORQUESTIONMARK", "msg": "Manifest Parse Error : Expecting whitespace or '?'."}
+		a[14051] := {"enum": "ERROR_SXS_XML_E_UNEXPECTEDENDTAG", "msg": "Manifest Parse Error : End tag was not expected at this location."}
+		a[14052] := {"enum": "ERROR_SXS_XML_E_UNCLOSEDTAG", "msg": "Manifest Parse Error : The following tags were not closed: `%1."}
+		a[14053] := {"enum": "ERROR_SXS_XML_E_DUPLICATEATTRIBUTE", "msg": "Manifest Parse Error : Duplicate attribute."}
+		a[14054] := {"enum": "ERROR_SXS_XML_E_MULTIPLEROOTS", "msg": "Manifest Parse Error : Only one top level element is allowed in an XML document."}
+		a[14055] := {"enum": "ERROR_SXS_XML_E_INVALIDATROOTLEVEL", "msg": "Manifest Parse Error : Invalid at the top level of the document."}
+		a[14056] := {"enum": "ERROR_SXS_XML_E_BADXMLDECL", "msg": "Manifest Parse Error : Invalid xml declaration."}
+		a[14057] := {"enum": "ERROR_SXS_XML_E_MISSINGROOT", "msg": "Manifest Parse Error : XML document must have a top level element."}
+		a[14058] := {"enum": "ERROR_SXS_XML_E_UNEXPECTEDEOF", "msg": "Manifest Parse Error : Unexpected end of file."}
+		a[14059] := {"enum": "ERROR_SXS_XML_E_BADPEREFINSUBSET", "msg": "Manifest Parse Error : Parameter entities cannot be used inside markup declarations in an internal subset."}
+		a[14060] := {"enum": "ERROR_SXS_XML_E_UNCLOSEDSTARTTAG", "msg": "Manifest Parse Error : Element was not closed."}
+		a[14061] := {"enum": "ERROR_SXS_XML_E_UNCLOSEDENDTAG", "msg": "Manifest Parse Error : End element was missing the character '&gt;'."}
+		a[14062] := {"enum": "ERROR_SXS_XML_E_UNCLOSEDSTRING", "msg": "Manifest Parse Error : A string literal was not closed."}
+		a[14063] := {"enum": "ERROR_SXS_XML_E_UNCLOSEDCOMMENT", "msg": "Manifest Parse Error : A comment was not closed."}
+		a[14064] := {"enum": "ERROR_SXS_XML_E_UNCLOSEDDECL", "msg": "Manifest Parse Error : A declaration was not closed."}
+		a[14065] := {"enum": "ERROR_SXS_XML_E_UNCLOSEDCDATA", "msg": "Manifest Parse Error : A CDATA section was not closed."}
+		a[14066] := {"enum": "ERROR_SXS_XML_E_RESERVEDNAMESPACE", "msg": "Manifest Parse Error : The namespace prefix is not allowed to start with the reserved string &quot;xml&quot;."}
+		a[14067] := {"enum": "ERROR_SXS_XML_E_INVALIDENCODING", "msg": "Manifest Parse Error : System does not support the specified encoding."}
+		a[14068] := {"enum": "ERROR_SXS_XML_E_INVALIDSWITCH", "msg": "Manifest Parse Error : Switch from current encoding to specified encoding not supported."}
+		a[14069] := {"enum": "ERROR_SXS_XML_E_BADXMLCASE", "msg": "Manifest Parse Error : The name 'xml' is reserved and must be lower case."}
+		a[14070] := {"enum": "ERROR_SXS_XML_E_INVALID_STANDALONE", "msg": "Manifest Parse Error : The standalone attribute must have the value 'yes' or 'no'."}
+		a[14071] := {"enum": "ERROR_SXS_XML_E_UNEXPECTED_STANDALONE", "msg": "Manifest Parse Error : The standalone attribute cannot be used in external entities."}
+		a[14072] := {"enum": "ERROR_SXS_XML_E_INVALID_VERSION", "msg": "Manifest Parse Error : Invalid version number."}
+		a[14073] := {"enum": "ERROR_SXS_XML_E_MISSINGEQUALS", "msg": "Manifest Parse Error : Missing equals sign between attribute and attribute value."}
+		a[14074] := {"enum": "ERROR_SXS_PROTECTION_RECOVERY_FAILED", "msg": "Assembly Protection Error : Unable to recover the specified assembly."}
+		a[14075] := {"enum": "ERROR_SXS_PROTECTION_PUBLIC_KEY_TOO_SHORT", "msg": "Assembly Protection Error : The public key for an assembly was too short to be allowed."}
+		a[14076] := {"enum": "ERROR_SXS_PROTECTION_CATALOG_NOT_VALID", "msg": "Assembly Protection Error : The catalog for an assembly is not valid, or does not match the assembly's manifest."}
+		a[14077] := {"enum": "ERROR_SXS_UNTRANSLATABLE_HRESULT", "msg": "An HRESULT could not be translated to a corresponding Win32 error code."}
+		a[14078] := {"enum": "ERROR_SXS_PROTECTION_CATALOG_FILE_MISSING", "msg": "Assembly Protection Error : The catalog for an assembly is missing."}
+		a[14079] := {"enum": "ERROR_SXS_MISSING_ASSEMBLY_IDENTITY_ATTRIBUTE", "msg": "The supplied assembly identity is missing one or more attributes which must be present in this context."}
+		a[14080] := {"enum": "ERROR_SXS_INVALID_ASSEMBLY_IDENTITY_ATTRIBUTE_NAME", "msg": "The supplied assembly identity has one or more attribute names that contain characters not permitted in XML names."}
+		a[14081] := {"enum": "ERROR_SXS_ASSEMBLY_MISSING", "msg": "The referenced assembly could not be found."}
+		a[14082] := {"enum": "ERROR_SXS_CORRUPT_ACTIVATION_STACK", "msg": "The activation context activation stack for the running thread of execution is corrupt."}
+		a[14083] := {"enum": "ERROR_SXS_CORRUPTION", "msg": "The application isolation metadata for this process or thread has become corrupt."}
+		a[14084] := {"enum": "ERROR_SXS_EARLY_DEACTIVATION", "msg": "The activation context being deactivated is not the most recently activated one."}
+		a[14085] := {"enum": "ERROR_SXS_INVALID_DEACTIVATION", "msg": "The activation context being deactivated is not active for the current thread of execution."}
+		a[14086] := {"enum": "ERROR_SXS_MULTIPLE_DEACTIVATION", "msg": "The activation context being deactivated has already been deactivated."}
+		a[14087] := {"enum": "ERROR_SXS_PROCESS_TERMINATION_REQUESTED", "msg": "A component used by the isolation facility has requested to terminate the process."}
+		a[14088] := {"enum": "ERROR_SXS_RELEASE_ACTIVATION_CONTEXT", "msg": "A kernel mode component is releasing a reference on an activation context."}
+		a[14089] := {"enum": "ERROR_SXS_SYSTEM_DEFAULT_ACTIVATION_CONTEXT_EMPTY", "msg": "The activation context of system default assembly could not be generated."}
+		a[14090] := {"enum": "ERROR_SXS_INVALID_IDENTITY_ATTRIBUTE_VALUE", "msg": "The value of an attribute in an identity is not within the legal range."}
+		a[14091] := {"enum": "ERROR_SXS_INVALID_IDENTITY_ATTRIBUTE_NAME", "msg": "The name of an attribute in an identity is not within the legal range."}
+		a[14092] := {"enum": "ERROR_SXS_IDENTITY_DUPLICATE_ATTRIBUTE", "msg": "An identity contains two definitions for the same attribute."}
+		a[14093] := {"enum": "ERROR_SXS_IDENTITY_PARSE_ERROR", "msg": "The identity string is malformed. This may be due to a trailing comma, more than two unnamed attributes, missing attribute name or missing attribute value."}
+		a[14094] := {"enum": "ERROR_MALFORMED_SUBSTITUTION_STRING", "msg": "A string containing localized substitutable content was malformed. Either a dollar sign ($) was followed by something other than a left parenthesis or another dollar sign or an substitution's right parenthesis was not found."}
+		a[14095] := {"enum": "ERROR_SXS_INCORRECT_PUBLIC_KEY_TOKEN", "msg": "The public key token does not correspond to the public key specified."}
+		a[14096] := {"enum": "ERROR_UNMAPPED_SUBSTITUTION_STRING", "msg": "A substitution string had no mapping."}
+		a[14097] := {"enum": "ERROR_SXS_ASSEMBLY_NOT_LOCKED", "msg": "The component must be locked before making the request."}
+		a[14098] := {"enum": "ERROR_SXS_COMPONENT_STORE_CORRUPT", "msg": "The component store has been corrupted."}
+		a[14099] := {"enum": "ERROR_ADVANCED_INSTALLER_FAILED", "msg": "An advanced installer failed during setup or servicing."}
+		a[14100] := {"enum": "ERROR_XML_ENCODING_MISMATCH", "msg": "The character encoding in the XML declaration did not match the encoding used in the document."}
+		a[14101] := {"enum": "ERROR_SXS_MANIFEST_IDENTITY_SAME_BUT_CONTENTS_DIFFERENT", "msg": "The identities of the manifests are identical but their contents are different."}
+		a[14102] := {"enum": "ERROR_SXS_IDENTITIES_DIFFERENT", "msg": "The component identities are different."}
+		a[14103] := {"enum": "ERROR_SXS_ASSEMBLY_IS_NOT_A_DEPLOYMENT", "msg": "The assembly is not a deployment."}
+		a[14104] := {"enum": "ERROR_SXS_FILE_NOT_PART_OF_ASSEMBLY", "msg": "The file is not a part of the assembly."}
+		a[14105] := {"enum": "ERROR_SXS_MANIFEST_TOO_BIG", "msg": "The size of the manifest exceeds the maximum allowed."}
+		a[14106] := {"enum": "ERROR_SXS_SETTING_NOT_REGISTERED", "msg": "The setting is not registered."}
+		a[14107] := {"enum": "ERROR_SXS_TRANSACTION_CLOSURE_INCOMPLETE", "msg": "One or more required members of the transaction are not present."}
+		a[14108] := {"enum": "ERROR_SMI_PRIMITIVE_INSTALLER_FAILED", "msg": "The SMI primitive installer failed during setup or servicing."}
+		a[14109] := {"enum": "ERROR_GENERIC_COMMAND_FAILED", "msg": "A generic command executable returned a result that indicates failure."}
+		a[14110] := {"enum": "ERROR_SXS_FILE_HASH_MISSING", "msg": "A component is missing file verification information in its manifest."}
+		a[15000] := {"enum": "ERROR_EVT_INVALID_CHANNEL_PATH", "msg": "The specified channel path is invalid."}
+		a[15001] := {"enum": "ERROR_EVT_INVALID_QUERY", "msg": "The specified query is invalid."}
+		a[15002] := {"enum": "ERROR_EVT_PUBLISHER_METADATA_NOT_FOUND", "msg": "The publisher metadata cannot be found in the resource."}
+		a[15003] := {"enum": "ERROR_EVT_EVENT_TEMPLATE_NOT_FOUND", "msg": "The template for an event definition cannot be found in the resource (error = `%1)."}
+		a[15004] := {"enum": "ERROR_EVT_INVALID_PUBLISHER_NAME", "msg": "The specified publisher name is invalid."}
+		a[15005] := {"enum": "ERROR_EVT_INVALID_EVENT_DATA", "msg": "The event data raised by the publisher is not compatible with the event template definition in the publisher's manifest."}
+		a[15007] := {"enum": "ERROR_EVT_CHANNEL_NOT_FOUND", "msg": "The specified channel could not be found. Check channel configuration."}
+		a[15008] := {"enum": "ERROR_EVT_MALFORMED_XML_TEXT", "msg": "The specified xml text was not well-formed. See Extended Error for more details."}
+		a[15009] := {"enum": "ERROR_EVT_SUBSCRIPTION_TO_DIRECT_CHANNEL", "msg": "The caller is trying to subscribe to a direct channel which is not allowed. The events for a direct channel go directly to a logfile and cannot be subscribed to."}
+		a[15010] := {"enum": "ERROR_EVT_CONFIGURATION_ERROR", "msg": "Configuration error."}
+		a[15011] := {"enum": "ERROR_EVT_QUERY_RESULT_STALE", "msg": "The query result is stale / invalid. This may be due to the log being cleared or rolling over after the query result was created. Users should handle this code by releasing the query result object and reissuing the query."}
+		a[15012] := {"enum": "ERROR_EVT_QUERY_RESULT_INVALID_POSITION", "msg": "Query result is currently at an invalid position."}
+		a[15013] := {"enum": "ERROR_EVT_NON_VALIDATING_MSXML", "msg": "Registered MSXML doesn't support validation."}
+		a[15014] := {"enum": "ERROR_EVT_FILTER_ALREADYSCOPED", "msg": "An expression can only be followed by a change of scope operation if it itself evaluates to a node set and is not already part of some other change of scope operation."}
+		a[15015] := {"enum": "ERROR_EVT_FILTER_NOTELTSET", "msg": "Can't perform a step operation from a term that does not represent an element set."}
+		a[15016] := {"enum": "ERROR_EVT_FILTER_INVARG", "msg": "Left hand side arguments to binary operators must be either attributes, nodes or variables and right hand side arguments must be constants."}
+		a[15017] := {"enum": "ERROR_EVT_FILTER_INVTEST", "msg": "A step operation must involve either a node test or, in the case of a predicate, an algebraic expression against which to test each node in the node set identified by the preceeding node set can be evaluated."}
+		a[15018] := {"enum": "ERROR_EVT_FILTER_INVTYPE", "msg": "This data type is currently unsupported."}
+		a[15019] := {"enum": "ERROR_EVT_FILTER_PARSEERR", "msg": "A syntax error occurred at position `%1!d!."}
+		a[15020] := {"enum": "ERROR_EVT_FILTER_UNSUPPORTEDOP", "msg": "This operator is unsupported by this implementation of the filter."}
+		a[15021] := {"enum": "ERROR_EVT_FILTER_UNEXPECTEDTOKEN", "msg": "The token encountered was unexpected."}
+		a[15022] := {"enum": "ERROR_EVT_INVALID_OPERATION_OVER_ENABLED_DIRECT_CHANNEL", "msg": "The requested operation cannot be performed over an enabled direct channel. The channel must first be disabled before performing the requested operation."}
+		a[15023] := {"enum": "ERROR_EVT_INVALID_CHANNEL_PROPERTY_VALUE", "msg": "Channel property `%1!s! contains invalid value. The value has invalid type, is outside of valid range, can't be updated or is not supported by this type of channel."}
+		a[15024] := {"enum": "ERROR_EVT_INVALID_PUBLISHER_PROPERTY_VALUE", "msg": "Publisher property `%1!s! contains invalid value. The value has invalid type, is outside of valid range, can't be updated or is not supported by this type of publisher."}
+		a[15025] := {"enum": "ERROR_EVT_CHANNEL_CANNOT_ACTIVATE", "msg": "The channel fails to activate."}
+		a[15026] := {"enum": "ERROR_EVT_FILTER_TOO_COMPLEX", "msg": "The xpath expression exceeded supported complexity. Please symplify it or split it into two or more simple expressions."}
+		a[15027] := {"enum": "ERROR_EVT_MESSAGE_NOT_FOUND", "msg": "the message resource is present but the message is not found in the string/message table."}
+		a[15028] := {"enum": "ERROR_EVT_MESSAGE_ID_NOT_FOUND", "msg": "The message id for the desired message could not be found."}
+		a[15029] := {"enum": "ERROR_EVT_UNRESOLVED_VALUE_INSERT", "msg": "The substitution string for insert index (`%1) could not be found."}
+		a[15030] := {"enum": "ERROR_EVT_UNRESOLVED_PARAMETER_INSERT", "msg": "The description string for parameter reference (`%1) could not be found."}
+		a[15031] := {"enum": "ERROR_EVT_MAX_INSERTS_REACHED", "msg": "The maximum number of replacements has been reached."}
+		a[15032] := {"enum": "ERROR_EVT_EVENT_DEFINITION_NOT_FOUND", "msg": "The event definition could not be found for event id (`%1)."}
+		a[15033] := {"enum": "ERROR_EVT_MESSAGE_LOCALE_NOT_FOUND", "msg": "The locale specific resource for the desired message is not present."}
+		a[15034] := {"enum": "ERROR_EVT_VERSION_TOO_OLD", "msg": "The resource is too old to be compatible."}
+		a[15035] := {"enum": "ERROR_EVT_VERSION_TOO_NEW", "msg": "The resource is too new to be compatible."}
+		a[15036] := {"enum": "ERROR_EVT_CANNOT_OPEN_CHANNEL_OF_QUERY", "msg": "The channel at index `%1!d! of the query can't be opened."}
+		a[15037] := {"enum": "ERROR_EVT_PUBLISHER_DISABLED", "msg": "The publisher has been disabled and its resource is not available. This usually occurs when the publisher is in the process of being uninstalled or upgraded."}
+		a[15038] := {"enum": "ERROR_EVT_FILTER_OUT_OF_RANGE", "msg": "Attempted to create a numeric type that is outside of its valid range."}
+		a[15080] := {"enum": "ERROR_EC_SUBSCRIPTION_CANNOT_ACTIVATE", "msg": "The subscription fails to activate."}
+		a[15081] := {"enum": "ERROR_EC_LOG_DISABLED", "msg": "The log of the subscription is in disabled state, and can not be used to forward events to. The log must first be enabled before the subscription can be activated."}
+		a[15082] := {"enum": "ERROR_EC_CIRCULAR_FORWARDING", "msg": "When forwarding events from local machine to itself, the query of the subscription can't contain target log of the subscription."}
+		a[15083] := {"enum": "ERROR_EC_CREDSTORE_FULL", "msg": "The credential store that is used to save credentials is full."}
+		a[15084] := {"enum": "ERROR_EC_CRED_NOT_FOUND", "msg": "The credential used by this subscription can't be found in credential store."}
+		a[15085] := {"enum": "ERROR_EC_NO_ACTIVE_CHANNEL", "msg": "No active channel is found for the query."}
+		a[15100] := {"enum": "ERROR_MUI_FILE_NOT_FOUND", "msg": "The resource loader failed to find MUI file."}
+		a[15101] := {"enum": "ERROR_MUI_INVALID_FILE", "msg": "The resource loader failed to load MUI file because the file fail to pass validation."}
+		a[15102] := {"enum": "ERROR_MUI_INVALID_RC_CONFIG", "msg": "The RC Manifest is corrupted with garbage data or unsupported version or missing required item."}
+		a[15103] := {"enum": "ERROR_MUI_INVALID_LOCALE_NAME", "msg": "The RC Manifest has invalid culture name."}
+		a[15104] := {"enum": "ERROR_MUI_INVALID_ULTIMATEFALLBACK_NAME", "msg": "The RC Manifest has invalid ultimatefallback name."}
+		a[15105] := {"enum": "ERROR_MUI_FILE_NOT_LOADED", "msg": "The resource loader cache doesn't have loaded MUI entry."}
+		a[15106] := {"enum": "ERROR_RESOURCE_ENUM_USER_STOP", "msg": "User stopped resource enumeration."}
+		a[15107] := {"enum": "ERROR_MUI_INTLSETTINGS_UILANG_NOT_INSTALLED", "msg": "UI language installation failed."}
+		a[15108] := {"enum": "ERROR_MUI_INTLSETTINGS_INVALID_LOCALE_NAME", "msg": "Locale installation failed."}
+		a[15110] := {"enum": "ERROR_MRM_RUNTIME_NO_DEFAULT_OR_NEUTRAL_RESOURCE", "msg": "A resource does not have default or neutral value."}
+		a[15111] := {"enum": "ERROR_MRM_INVALID_PRICONFIG", "msg": "Invalid PRI config file."}
+		a[15112] := {"enum": "ERROR_MRM_INVALID_FILE_TYPE", "msg": "Invalid file type."}
+		a[15113] := {"enum": "ERROR_MRM_UNKNOWN_QUALIFIER", "msg": "Unknown qualifier."}
+		a[15114] := {"enum": "ERROR_MRM_INVALID_QUALIFIER_VALUE", "msg": "Invalid qualifier value."}
+		a[15115] := {"enum": "ERROR_MRM_NO_CANDIDATE", "msg": "No Candidate found."}
+		a[15116] := {"enum": "ERROR_MRM_NO_MATCH_OR_DEFAULT_CANDIDATE", "msg": "The ResourceMap or NamedResource has an item that does not have default or neutral resource.."}
+		a[15117] := {"enum": "ERROR_MRM_RESOURCE_TYPE_MISMATCH", "msg": "Invalid ResourceCandidate type."}
+		a[15118] := {"enum": "ERROR_MRM_DUPLICATE_MAP_NAME", "msg": "Duplicate Resource Map."}
+		a[15119] := {"enum": "ERROR_MRM_DUPLICATE_ENTRY", "msg": "Duplicate Entry."}
+		a[15120] := {"enum": "ERROR_MRM_INVALID_RESOURCE_IDENTIFIER", "msg": "Invalid Resource Identifier."}
+		a[15121] := {"enum": "ERROR_MRM_FILEPATH_TOO_LONG", "msg": "Filepath too long."}
+		a[15122] := {"enum": "ERROR_MRM_UNSUPPORTED_DIRECTORY_TYPE", "msg": "Unsupported directory type."}
+		a[15126] := {"enum": "ERROR_MRM_INVALID_PRI_FILE", "msg": "Invalid PRI File."}
+		a[15127] := {"enum": "ERROR_MRM_NAMED_RESOURCE_NOT_FOUND", "msg": "NamedResource Not Found."}
+		a[15135] := {"enum": "ERROR_MRM_MAP_NOT_FOUND", "msg": "ResourceMap Not Found."}
+		a[15136] := {"enum": "ERROR_MRM_UNSUPPORTED_PROFILE_TYPE", "msg": "Unsupported MRT profile type."}
+		a[15137] := {"enum": "ERROR_MRM_INVALID_QUALIFIER_OPERATOR", "msg": "Invalid qualifier operator."}
+		a[15138] := {"enum": "ERROR_MRM_INDETERMINATE_QUALIFIER_VALUE", "msg": "Unable to determine qualifier value or qualifier value has not been set."}
+		a[15139] := {"enum": "ERROR_MRM_AUTOMERGE_ENABLED", "msg": "Automerge is enabled in the PRI file."}
+		a[15140] := {"enum": "ERROR_MRM_TOO_MANY_RESOURCES", "msg": "Too many resources defined for package."}
+		a[15200] := {"enum": "ERROR_MCA_INVALID_CAPABILITIES_STRING", "msg": "The monitor returned a DDC/CI capabilities string that did not comply with the ACCESS.bus 3.0, DDC/CI 1.1 or MCCS 2 Revision 1 specification."}
+		a[15201] := {"enum": "ERROR_MCA_INVALID_VCP_VERSION", "msg": "The monitor's VCP Version (0xDF) VCP code returned an invalid version value."}
+		a[15202] := {"enum": "ERROR_MCA_MONITOR_VIOLATES_MCCS_SPECIFICATION", "msg": "The monitor does not comply with the MCCS specification it claims to support."}
+		a[15203] := {"enum": "ERROR_MCA_MCCS_VERSION_MISMATCH", "msg": "The MCCS version in a monitor's mccs_ver capability does not match the MCCS version the monitor reports when the VCP Version (0xDF) VCP code returned an invalid version value."}
+		a[15204] := {"enum": "ERROR_MCA_UNSUPPORTED_MCCS_VERSION", "msg": "The Monitor Configuration API only works with monitors that support the MCCS 1.0 specification, MCCS 2.0 specification or the MCCS 2.0 Revision 1 specification."}
+		a[15205] := {"enum": "ERROR_MCA_INTERNAL_ERROR", "msg": "An internal Monitor Configuration API error occurred."}
+		a[15206] := {"enum": "ERROR_MCA_INVALID_TECHNOLOGY_TYPE_RETURNED", "msg": "The monitor returned an invalid monitor technology type. CRT, Plasma and LCD (TFT) are examples of monitor technology types. This error implies that the monitor violated the MCCS 2.0 or MCCS 2.0 Revision 1 specification."}
+		a[15207] := {"enum": "ERROR_MCA_UNSUPPORTED_COLOR_TEMPERATURE", "msg": "The caller of SetMonitorColorTemperature specified a color temperature that the current monitor did not support. This error implies that the monitor violated the MCCS 2.0 or MCCS 2.0 Revision 1 specification."}
+		a[15250] := {"enum": "ERROR_AMBIGUOUS_SYSTEM_DEVICE", "msg": "The requested system device cannot be identified due to multiple indistinguishable devices potentially matching the identification criteria."}
+		a[15299] := {"enum": "ERROR_SYSTEM_DEVICE_NOT_FOUND", "msg": "The requested system device cannot be found."}
+		a[15300] := {"enum": "ERROR_HASH_NOT_SUPPORTED", "msg": "Hash generation for the specified hash version and hash type is not enabled on the server."}
+		a[15301] := {"enum": "ERROR_HASH_NOT_PRESENT", "msg": "The hash requested from the server is not available or no longer valid."}
+		a[15321] := {"enum": "ERROR_SECONDARY_IC_PROVIDER_NOT_REGISTERED", "msg": "The secondary interrupt controller instance that manages the specified interrupt is not registered."}
+		a[15322] := {"enum": "ERROR_GPIO_CLIENT_INFORMATION_INVALID", "msg": "The information supplied by the GPIO client driver is invalid."}
+		a[15323] := {"enum": "ERROR_GPIO_VERSION_NOT_SUPPORTED", "msg": "The version specified by the GPIO client driver is not supported."}
+		a[15324] := {"enum": "ERROR_GPIO_INVALID_REGISTRATION_PACKET", "msg": "The registration packet supplied by the GPIO client driver is not valid."}
+		a[15325] := {"enum": "ERROR_GPIO_OPERATION_DENIED", "msg": "The requested operation is not suppported for the specified handle."}
+		a[15326] := {"enum": "ERROR_GPIO_INCOMPATIBLE_CONNECT_MODE", "msg": "The requested connect mode conflicts with an existing mode on one or more of the specified pins."}
+		a[15327] := {"enum": "ERROR_GPIO_INTERRUPT_ALREADY_UNMASKED", "msg": "The interrupt requested to be unmasked is not masked."}
+		a[15400] := {"enum": "ERROR_CANNOT_SWITCH_RUNLEVEL", "msg": "The requested run level switch cannot be completed successfully."}
+		a[15401] := {"enum": "ERROR_INVALID_RUNLEVEL_SETTING", "msg": "The service has an invalid run level setting. The run level for a service must not be higher than the run level of its dependent services."}
+		a[15402] := {"enum": "ERROR_RUNLEVEL_SWITCH_TIMEOUT", "msg": "The requested run level switch cannot be completed successfully since one or more services will not stop or restart within the specified timeout."}
+		a[15403] := {"enum": "ERROR_RUNLEVEL_SWITCH_AGENT_TIMEOUT", "msg": "A run level switch agent did not respond within the specified timeout."}
+		a[15404] := {"enum": "ERROR_RUNLEVEL_SWITCH_IN_PROGRESS", "msg": "A run level switch is currently in progress."}
+		a[15405] := {"enum": "ERROR_SERVICES_FAILED_AUTOSTART", "msg": "One or more services failed to start during the service startup phase of a run level switch."}
+		a[15501] := {"enum": "ERROR_COM_TASK_STOP_PENDING", "msg": "The task stop request cannot be completed immediately since task needs more time to shutdown."}
+		a[15600] := {"enum": "ERROR_INSTALL_OPEN_PACKAGE_FAILED", "msg": "Package could not be opened."}
+		a[15601] := {"enum": "ERROR_INSTALL_PACKAGE_NOT_FOUND", "msg": "Package was not found."}
+		a[15602] := {"enum": "ERROR_INSTALL_INVALID_PACKAGE", "msg": "Package data is invalid."}
+		a[15603] := {"enum": "ERROR_INSTALL_RESOLVE_DEPENDENCY_FAILED", "msg": "Package failed updates, dependency or conflict validation."}
+		a[15604] := {"enum": "ERROR_INSTALL_OUT_OF_DISK_SPACE", "msg": "There is not enough disk space on your computer. Please free up some space and try again."}
+		a[15605] := {"enum": "ERROR_INSTALL_NETWORK_FAILURE", "msg": "There was a problem downloading your product."}
+		a[15606] := {"enum": "ERROR_INSTALL_REGISTRATION_FAILURE", "msg": "Package could not be registered."}
+		a[15607] := {"enum": "ERROR_INSTALL_DEREGISTRATION_FAILURE", "msg": "Package could not be unregistered."}
+		a[15608] := {"enum": "ERROR_INSTALL_CANCEL", "msg": "User cancelled the install request."}
+		a[15609] := {"enum": "ERROR_INSTALL_FAILED", "msg": "Install failed. Please contact your software vendor."}
+		a[15610] := {"enum": "ERROR_REMOVE_FAILED", "msg": "Removal failed. Please contact your software vendor."}
+		a[15611] := {"enum": "ERROR_PACKAGE_ALREADY_EXISTS", "msg": "The provided package is already installed, and reinstallation of the package was blocked. Check the AppXDeployment-Server event log for details."}
+		a[15612] := {"enum": "ERROR_NEEDS_REMEDIATION", "msg": "The application cannot be started. Try reinstalling the application to fix the problem."}
+		a[15613] := {"enum": "ERROR_INSTALL_PREREQUISITE_FAILED", "msg": "A Prerequisite for an install could not be satisfied."}
+		a[15614] := {"enum": "ERROR_PACKAGE_REPOSITORY_CORRUPTED", "msg": "The package repository is corrupted."}
+		a[15615] := {"enum": "ERROR_INSTALL_POLICY_FAILURE", "msg": "To install this application you need either a Windows developer license or a sideloading-enabled system."}
+		a[15616] := {"enum": "ERROR_PACKAGE_UPDATING", "msg": "The application cannot be started because it is currently updating."}
+		a[15617] := {"enum": "ERROR_DEPLOYMENT_BLOCKED_BY_POLICY", "msg": "The package deployment operation is blocked by policy. Please contact your system administrator."}
+		a[15618] := {"enum": "ERROR_PACKAGES_IN_USE", "msg": "The package could not be installed because resources it modifies are currently in use."}
+		a[15619] := {"enum": "ERROR_RECOVERY_FILE_CORRUPT", "msg": "The package could not be recovered because necessary data for recovery have been corrupted."}
+		a[15620] := {"enum": "ERROR_INVALID_STAGED_SIGNATURE", "msg": "The signature is invalid. To register in developer mode, AppxSignature.p7x and AppxBlockMap.xml must be valid or should not be present."}
+		a[15621] := {"enum": "ERROR_DELETING_EXISTING_APPLICATIONDATA_STORE_FAILED", "msg": "An error occurred while deleting the package's previously existing application data."}
+		a[15622] := {"enum": "ERROR_INSTALL_PACKAGE_DOWNGRADE", "msg": "The package could not be installed because a higher version of this package is already installed."}
+		a[15623] := {"enum": "ERROR_SYSTEM_NEEDS_REMEDIATION", "msg": "An error in a system binary was detected. Try refreshing the PC to fix the problem."}
+		a[15624] := {"enum": "ERROR_APPX_INTEGRITY_FAILURE_CLR_NGEN", "msg": "A corrupted CLR NGEN binary was detected on the system."}
+		a[15625] := {"enum": "ERROR_RESILIENCY_FILE_CORRUPT", "msg": "The operation could not be resumed because necessary data for recovery have been corrupted."}
+		a[15626] := {"enum": "ERROR_INSTALL_FIREWALL_SERVICE_NOT_RUNNING", "msg": "The package could not be installed because the Windows Firewall service is not running. Enable the Windows Firewall service and try again."}
+		a[15700] := {"enum": "APPMODEL_ERROR_NO_PACKAGE", "msg": "The process has no package identity."}
+		a[15701] := {"enum": "APPMODEL_ERROR_PACKAGE_RUNTIME_CORRUPT", "msg": "The package runtime information is corrupted."}
+		a[15702] := {"enum": "APPMODEL_ERROR_PACKAGE_IDENTITY_CORRUPT", "msg": "The package identity is corrupted."}
+		a[15703] := {"enum": "APPMODEL_ERROR_NO_APPLICATION", "msg": "The process has no application identity."}
+		a[15800] := {"enum": "ERROR_STATE_LOAD_STORE_FAILED", "msg": "Loading the state store failed."}
+		a[15801] := {"enum": "ERROR_STATE_GET_VERSION_FAILED", "msg": "Retrieving the state version for the application failed."}
+		a[15802] := {"enum": "ERROR_STATE_SET_VERSION_FAILED", "msg": "Setting the state version for the application failed."}
+		a[15803] := {"enum": "ERROR_STATE_STRUCTURED_RESET_FAILED", "msg": "Resetting the structured state of the application failed."}
+		a[15804] := {"enum": "ERROR_STATE_OPEN_CONTAINER_FAILED", "msg": "State Manager failed to open the container."}
+		a[15805] := {"enum": "ERROR_STATE_CREATE_CONTAINER_FAILED", "msg": "State Manager failed to create the container."}
+		a[15806] := {"enum": "ERROR_STATE_DELETE_CONTAINER_FAILED", "msg": "State Manager failed to delete the container."}
+		a[15807] := {"enum": "ERROR_STATE_READ_SETTING_FAILED", "msg": "State Manager failed to read the setting."}
+		a[15808] := {"enum": "ERROR_STATE_WRITE_SETTING_FAILED", "msg": "State Manager failed to write the setting."}
+		a[15809] := {"enum": "ERROR_STATE_DELETE_SETTING_FAILED", "msg": "State Manager failed to delete the setting."}
+		a[15810] := {"enum": "ERROR_STATE_QUERY_SETTING_FAILED", "msg": "State Manager failed to query the setting."}
+		a[15811] := {"enum": "ERROR_STATE_READ_COMPOSITE_SETTING_FAILED", "msg": "State Manager failed to read the composite setting."}
+		a[15812] := {"enum": "ERROR_STATE_WRITE_COMPOSITE_SETTING_FAILED", "msg": "State Manager failed to write the composite setting."}
+		a[15813] := {"enum": "ERROR_STATE_ENUMERATE_CONTAINER_FAILED", "msg": "State Manager failed to enumerate the containers."}
+		a[15814] := {"enum": "ERROR_STATE_ENUMERATE_SETTINGS_FAILED", "msg": "State Manager failed to enumerate the settings."}
+		a[15815] := {"enum": "ERROR_STATE_COMPOSITE_SETTING_VALUE_SIZE_LIMIT_EXCEEDED", "msg": "The size of the state manager composite setting value has exceeded the limit."}
+		a[15816] := {"enum": "ERROR_STATE_SETTING_VALUE_SIZE_LIMIT_EXCEEDED", "msg": "The size of the state manager setting value has exceeded the limit."}
+		a[15817] := {"enum": "ERROR_STATE_SETTING_NAME_SIZE_LIMIT_EXCEEDED", "msg": "The length of the state manager setting name has exceeded the limit."}
+		a[15818] := {"enum": "ERROR_STATE_CONTAINER_NAME_SIZE_LIMIT_EXCEEDED", "msg": "The length of the state manager container name has exceeded the limit."}
+		a[15841] := {"enum": "ERROR_API_UNAVAILABLE", "msg": "This API cannot be used in the context of the caller's application type."}
+
+		return a
+	}
+}
